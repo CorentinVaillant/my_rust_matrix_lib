@@ -21,8 +21,10 @@ mod tests {
         let expect_m: Matrix<f32,2,3> = Matrix::from(expect_tab);
 
         println!("expect_m :{}",expect_m);
+        println!("{}",_m1+_m2);
 
         assert_eq!(_m1 + _m2, expect_m);
+        assert_eq!(_m2 + _m1, expect_m);
         
     }
 }
@@ -32,17 +34,14 @@ pub mod matrix {
 
 
     //definition of Matrix
-    #[derive(PartialEq,Debug)]
-    pub struct Matrix<T :Default, const N: usize, const M: usize>
-    {
+    #[derive(PartialEq,Debug,Clone)]
+    pub struct Matrix<T :Default, const N: usize, const M: usize>{
         inner: [[T; M]; N],
     }
 
     //definition of a default 
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Default
-        for Matrix<T, N, M>
-    
-    {
+        for Matrix<T, N, M>{
         fn default() -> Self {
             Self {
                 inner: [[T::default(); M]; N],
@@ -52,8 +51,7 @@ pub mod matrix {
 
     //definition using a vec
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize>
-        From<Vec<Vec<T>>> for Matrix<T, N, M>
-    {
+        From<Vec<Vec<T>>> for Matrix<T, N, M>{
         fn from(tab: Vec<Vec<T>>) -> Self {
             if cfg!(debug_assertion) {
                 assert_eq!(tab.len(), N);
@@ -75,8 +73,7 @@ pub mod matrix {
 
     //definition using an array
     impl<T: std::default::Default, const N: usize, const M: usize> From<[[T; M]; N]>
-        for Matrix<T, N, M>
-    {
+        for Matrix<T, N, M>{
         fn from(arr: [[T; M]; N]) -> Self {
             Self { inner: arr }
         }
@@ -107,7 +104,11 @@ pub mod matrix {
         }
         
     }
-    
+
+
+    //implementation of Copy
+    impl<T :std::default::Default + std::marker::Copy, const N :usize, const M:usize> Copy for Matrix<T,N,M>{}
+
     //definition for the operation with f32 as T
     pub mod matrix_operation_f32{
         use crate::matrix::Matrix;
@@ -127,6 +128,28 @@ pub mod matrix {
             }
             
     
+        }
+
+        /* //TODO 
+         implement a zeroed and a id trait to get a null matrix<f32> and an id matrix<f32>
+        TODO */  
+            
+
+
+        impl <const N :usize, const M:usize> Mul<Matrix<f32,M,N>> for Matrix<f32,N,M> {
+            type Output = Matrix<f32,M,M>;
+            fn mul(self, rhs: Matrix<f32,M,N>) -> Self::Output {
+                let mut result = Matrix::<f32,M,M>::default() ;
+                for i in 0..N{
+                    for j in 0..M{
+
+                    }
+                }
+
+                
+
+                result
+            }
         }
     }
 }
