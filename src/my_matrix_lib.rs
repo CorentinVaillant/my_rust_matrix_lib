@@ -3,9 +3,23 @@ pub mod matrix {
     use std::ops::*;
 
     //definition of Matrix
-    #[derive(PartialEq, Debug, Clone)]
+    #[derive(Debug, Clone)]
     pub struct Matrix<T: Default, const N: usize, const M: usize> {
         inner: [[T; M]; N],
+    }
+
+
+    impl<T: std::default::Default + PartialEq, const N: usize, const M: usize> PartialEq for Matrix<T,N,M>{
+        fn eq(&self, other: &Self) -> bool {
+            for i in 0..N{
+                for j in 0..M{
+                    if self.inner[i][j] != other.inner[i][j]{
+                        return  false;
+                    }
+                }
+            }
+            true
+        }
     }
 
     //definition of a default
@@ -78,6 +92,8 @@ pub mod matrix {
         fn addition(self, rhs: RHS) -> Self;
         fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
         fn scale(self, rhs: f32) -> Self;
+        // fn pow(self, rhs: i16) -> Self;
+        
 
         fn zeroed() -> Self;
         fn identity() -> Self;
