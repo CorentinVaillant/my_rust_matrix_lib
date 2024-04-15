@@ -68,9 +68,7 @@ pub mod matrix {
 
     //implementation of Copy
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Copy
-        for Matrix<T, N, M>
-    {
-    }
+        for Matrix<T, N, M>{}
 
     //Algebra
     pub trait Algebra<RHS = Self> {
