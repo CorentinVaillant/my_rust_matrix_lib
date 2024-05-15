@@ -1,11 +1,12 @@
 pub mod matrix {
     use core::fmt;
-    use std::ops::*;
+    use std::{ops::*};
 
     //definition of Matrix
     #[derive(Debug, Clone)]
     pub struct Matrix<T: Default, const N: usize, const M: usize> {
         inner: [[T; M]; N],
+        determinant :Option<f32>,
     }
 
 
@@ -29,6 +30,7 @@ pub mod matrix {
         fn default() -> Self {
             Self {
                 inner: [[T::default(); M]; N],
+                determinant: None
             }
         }
     }
@@ -51,7 +53,7 @@ pub mod matrix {
                     arr[i][j] = val;
                 }
             }
-            Self { inner: arr }
+            Self { inner: arr, determinant: None }
         }
     }
 
@@ -60,7 +62,7 @@ pub mod matrix {
         for Matrix<T, N, M>
     {
         fn from(arr: [[T; M]; N]) -> Self {
-            Self { inner: arr }
+            Self { inner: arr, determinant: None }
         }
     }
 
@@ -88,11 +90,15 @@ pub mod matrix {
     pub trait Algebra<RHS = Self> {
         type MultOuput;
         type MultIn;
+        type MinorOut;
 
         fn addition(self, rhs: RHS) -> Self;
         fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
         fn scale(self, rhs: f32) -> Self;
         // fn pow(self, rhs: i16) -> Self;
+
+        fn get_det(self) -> f32;
+        fn get_minor(self,i:usize,j:usize) -> Self::MinorOut;
         
 
         fn zeroed() -> Self;
@@ -127,10 +133,16 @@ pub mod matrix {
         }
     }
 
+
+    
+
     //implementation for f32
     impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
         type MultOuput = Matrix<f32, M, M>;
         type MultIn = Matrix<f32, M, N>;
+        type MinorOut = Matrix::<f32, {N - 1}, {M - 1}>;
+        
+        
 
         fn scale(self, rhs: f32) -> Self {
             let mut result = Self::default();
@@ -158,6 +170,37 @@ pub mod matrix {
                 for j in 0..M {
                     for k in 0..M {
                         result.inner[i][j] += self.inner[i][k] * rhs.inner[k][j];
+                    }
+                }
+            }
+            result
+        }
+
+
+        fn get_det(self) -> f32 {
+            match self.determinant {
+                Some(det) => {return det;},
+                None => {
+                    if N!=M{
+                        return 0.0;
+                    }
+                    if N == 2{
+                        return self.inner[0][0] * self.inner[1][1] - self.inner[1][0] * self.inner[0][1];
+                    }
+                    
+                    return  0.0;
+                } 
+            }
+        }
+
+
+        ///!TODO
+        fn get_minor(self,n:usize,m:usize) -> Self::MinorOut {
+            let mut result = Matrix::<f32, {N - 1}, {M - 1}>::default();
+            for (i,row) in self.inner.into_iter().enumerate(){
+                for (j,value) in row.into_iter().enumerate(){
+                    if i!= n && j!=m{
+                        
                     }
                 }
             }
