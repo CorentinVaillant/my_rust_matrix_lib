@@ -103,15 +103,18 @@ pub mod matrix {
         
         ///Addition of the matrix with a Self type matrix
         fn addition(self, rhs: RHS) -> Self;
-        ///Multiplication of the matrix with a `MultIn` matrix
+        ///Multiplication of the matrix with a [MultIn] matrix
         fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
         ///Scale by a value (f32)
         fn scale(self, rhs: f32) -> Self;
         // fn pow(self, rhs: i16) -> Self; //TODO
 
         //fn get_comatrix(self) -> Option<Self> where Self: Sized; //TODO
-        ///return the determinant of the matrix (❗️**expensive computing do once**)
+        ///return the determinant of the matrix (❗️**expensive computing do once**) (//!WIP)
         fn get_det(self) -> f32;
+
+        ///return the PLU decomposition of a matrix ([P,L,U])
+        fn get_plu_decomposition(self)->[Self;3] where Self: Sized;
 
         ///return a matrix with only zero innit
         fn zeroed() -> Self;
@@ -126,6 +129,14 @@ pub mod matrix {
         fn add(self, rhs: Self) -> Self::Output {
             self.addition(rhs)
         }
+        
+        
+    }
+
+    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M>   {
+     fn add_assign(&mut self, rhs: Self) {
+        *self = self.addition(rhs);
+     }   
     }
 
     impl<const N: usize, const M: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, N, M> {
@@ -142,12 +153,19 @@ pub mod matrix {
         }
     }
 
+    impl<const N: usize, const M: usize> MulAssign<f32> for Matrix<f32, N, M> {
+        fn mul_assign(&mut self, rhs: f32) {
+            *self = self.scale(rhs);
+        }
+    }
+
     impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
         type Output = Matrix<f32, N, M>;
         fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
             rhs.scale(self)
         }
     }
+
 
     ///implementation for f32
     impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
@@ -232,6 +250,36 @@ pub mod matrix {
                 }
             }
         }
+
+//TODO tout refaire 🥲
+        fn get_plu_decomposition(self)->[Self;3] where Self: Sized {
+            let mut s = self.clone();
+            let mut l = Matrix::zeroed();
+            let mut u = Matrix::zeroed();
+            for k in 0..N-1{
+                // Pivot
+                let pivot = s.inner[k][k];
+                // Colonne de L
+                l.inner[k][k] = 1.0;
+                for i in k+1..N-1{
+                    l.inner[i][k] = s.inner[i][k] / pivot;
+                    // Ligne de U
+                    u.inner[k][k] = s.inner[k][k];
+                }
+                for j in k+1..N-1{
+                    u.inner[k][j] = s.inner[k][j];
+                }
+                // Complément de Schur
+                for i in k+1..N-1{
+                    for j in k+1..N-1{
+                        s.inner[i][j] = s.inner[i][j] - l.inner[i][k]*u.inner[k][j];
+                    }
+                }
+            }
+            [s,l,u]
+
+        }
+
 
         fn zeroed() -> Self {
             let mut result = Self::default();

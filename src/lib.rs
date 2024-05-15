@@ -35,6 +35,14 @@ mod tests {
         assert_ne!(_m1, expect_m1);
         assert_eq!(id3 * _m3, _m3);
         assert_eq!(id3*p,expect_m2);
+        let mut temp_mat = Matrix::identity();
+        for m in _m3.get_plu_decomposition(){
+            temp_mat = temp_mat*m;
+            println!("m :{m}");
+        }
+    
+        println!("p*l*u = {temp_mat}");
+        assert_eq!(temp_mat,_m3);
 
         assert_eq!(id2.get_det(), 1.0);
         println!("TODO : get_det()");//assert_eq!(id3.get_det(), 1.0);
