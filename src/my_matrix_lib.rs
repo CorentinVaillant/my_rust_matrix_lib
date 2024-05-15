@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::{ops::*, thread::JoinHandle};
+    use std::ops::*;
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -96,19 +96,29 @@ pub mod matrix {
 
     //Algebra
     pub trait Algebra<RHS = Self> {
+        ///Type of the result matrix after a multiplication with another one
         type MultOuput;
+        ///Type of the matrix with wich Self can be multiply
         type MultIn;
-
+        
+        ///Addition of the matrix with a Self type matrix
         fn addition(self, rhs: RHS) -> Self;
+        ///Multiplication of the matrix with a `MultIn` matrix
         fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
+        ///Scale by a value (f32)
         fn scale(self, rhs: f32) -> Self;
-        // fn pow(self, rhs: i16) -> Self;
+        // fn pow(self, rhs: i16) -> Self; //TODO
 
-        fn get_comatrix(self) -> Option<Self> where Self: Sized;
+        //fn get_comatrix(self) -> Option<Self> where Self: Sized; //TODO
+        ///return the determinant of the matrix (❗️**expensive computing do once**)
         fn get_det(self) -> f32;
 
+        ///return a matrix with only zero innit
         fn zeroed() -> Self;
+        ///return the identity matrix
         fn identity() -> Self;
+        ///return a permutation matrix
+        fn permutation(i:usize,j:usize)->Self;
     }
 
     impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
@@ -139,11 +149,14 @@ pub mod matrix {
         }
     }
 
-    //implementation for f32
+    ///implementation for f32
     impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
+        
         type MultOuput = Matrix<f32, M, M>;
+        
         type MultIn = Matrix<f32, M, N>;
 
+        
         fn scale(self, rhs: f32) -> Self {
             let mut result = Self::default();
             for i in 0..N {
@@ -153,7 +166,7 @@ pub mod matrix {
             }
             result
         }
-
+        
         fn addition(self, rhs: Self) -> Self {
             let mut result = Self::default();
             for (i, (row1, row2)) in self.inner.into_iter().zip(rhs.inner).enumerate() {
@@ -175,38 +188,6 @@ pub mod matrix {
             }
             result
         }
-
-        fn get_comatrix(self) -> Option<Self> {
-            if N!=M{
-                return None;
-            }
-            self.inner;
-            fn get_minor_tab<const N: usize, const M: usize>(i:usize,j:usize,inner: &[[f32; M]; N])->Vec<Vec<f32>>{
-                let mut co_vec = vec![];
-                let mut co_tab = [[0.0; M-1]; N-1];
-                for i_co in 0..N {
-                    if i_co != i {
-                        co_vec.push(vec![]);
-                        for j_co in 0..N {
-                            if j_co != j {
-                                (co_vec.last_mut()).unwrap().push(inner[i][j]);
-                            }
-                        }
-                    }
-                }
-                co_vec
-            }
-
-            let result:[[f32; M]; N] = [[0.0; M]; N];
-            for i in 0..N{
-                for j in 0..M{
-                    let minor:Matrix<f32, N, N> = Matrix::from(get_minor_tab(i, j, &self.inner));
-                }
-            }
-            todo!()
-            
-        }
-
 
         fn get_det(self) -> f32 {
             println!("--------getdet !!");
@@ -274,6 +255,25 @@ pub mod matrix {
                 }
             }
             result
+        }
+
+        fn permutation(l1:usize,l2:usize)->Self {
+            let mut result = Self::default();
+            let mut col_index ;
+            for i in 0..N {
+                if i == l1 {col_index = l2;}
+                else if i == l2 {col_index = l1;}
+                else {col_index = i }
+                for j in 0..M {
+                    if j == col_index {
+                        result.inner[i][j] = 1.0;
+                    } else {
+                        result.inner[i][j] = 0.0;
+                    }
+                }
+            }
+            result
+            
         }
     }
 }
