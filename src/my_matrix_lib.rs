@@ -1,21 +1,22 @@
 pub mod matrix {
     use core::fmt;
-    use std::{ops::*};
+    use std::{ops::*, thread::JoinHandle};
 
     //definition of Matrix
     #[derive(Debug, Clone)]
     pub struct Matrix<T: Default, const N: usize, const M: usize> {
         inner: [[T; M]; N],
-        determinant :Option<f32>,
+        determinant: Option<f32>,
     }
 
-
-    impl<T: std::default::Default + PartialEq, const N: usize, const M: usize> PartialEq for Matrix<T,N,M>{
+    impl<T: std::default::Default + PartialEq, const N: usize, const M: usize> PartialEq
+        for Matrix<T, N, M>
+    {
         fn eq(&self, other: &Self) -> bool {
-            for i in 0..N{
-                for j in 0..M{
-                    if self.inner[i][j] != other.inner[i][j]{
-                        return  false;
+            for i in 0..N {
+                for j in 0..M {
+                    if self.inner[i][j] != other.inner[i][j] {
+                        return false;
                     }
                 }
             }
@@ -30,7 +31,7 @@ pub mod matrix {
         fn default() -> Self {
             Self {
                 inner: [[T::default(); M]; N],
-                determinant: None
+                determinant: None,
             }
         }
     }
@@ -53,7 +54,10 @@ pub mod matrix {
                     arr[i][j] = val;
                 }
             }
-            Self { inner: arr, determinant: None }
+            Self {
+                inner: arr,
+                ..Default::default()
+            }
         }
     }
 
@@ -62,10 +66,12 @@ pub mod matrix {
         for Matrix<T, N, M>
     {
         fn from(arr: [[T; M]; N]) -> Self {
-            Self { inner: arr, determinant: None }
+            Self {
+                inner: arr,
+                determinant: None,
+            }
         }
     }
-
 
     /*implementation to format*/
     impl<T: std::default::Default + std::fmt::Display, const N: usize, const M: usize>
@@ -75,7 +81,7 @@ pub mod matrix {
             for i in 0..N {
                 writeln!(f)?;
                 for j in 0..M {
-                    write!(f, "{}", self.inner[i][j])?;
+                    write!(f, "{} ", self.inner[i][j])?;
                 }
             }
             Ok(())
@@ -84,22 +90,22 @@ pub mod matrix {
 
     //implementation of Copy
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Copy
-        for Matrix<T, N, M>{}
+        for Matrix<T, N, M>
+    {
+    }
 
     //Algebra
     pub trait Algebra<RHS = Self> {
         type MultOuput;
         type MultIn;
-        type MinorOut;
 
         fn addition(self, rhs: RHS) -> Self;
         fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
         fn scale(self, rhs: f32) -> Self;
         // fn pow(self, rhs: i16) -> Self;
 
+        fn get_comatrix(self) -> Option<Self> where Self: Sized;
         fn get_det(self) -> f32;
-        fn get_minor(self,i:usize,j:usize) -> Self::MinorOut;
-        
 
         fn zeroed() -> Self;
         fn identity() -> Self;
@@ -133,16 +139,10 @@ pub mod matrix {
         }
     }
 
-
-    
-
     //implementation for f32
     impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
         type MultOuput = Matrix<f32, M, M>;
         type MultIn = Matrix<f32, M, N>;
-        type MinorOut = Matrix::<f32, {N - 1}, {M - 1}>;
-        
-        
 
         fn scale(self, rhs: f32) -> Self {
             let mut result = Self::default();
@@ -176,35 +176,80 @@ pub mod matrix {
             result
         }
 
-
-        fn get_det(self) -> f32 {
-            match self.determinant {
-                Some(det) => {return det;},
-                None => {
-                    if N!=M{
-                        return 0.0;
-                    }
-                    if N == 2{
-                        return self.inner[0][0] * self.inner[1][1] - self.inner[1][0] * self.inner[0][1];
-                    }
-                    
-                    return  0.0;
-                } 
+        fn get_comatrix(self) -> Option<Self> {
+            if N!=M{
+                return None;
             }
+            self.inner;
+            fn get_minor_tab<const N: usize, const M: usize>(i:usize,j:usize,inner: &[[f32; M]; N])->Vec<Vec<f32>>{
+                let mut co_vec = vec![];
+                let mut co_tab = [[0.0; M-1]; N-1];
+                for i_co in 0..N {
+                    if i_co != i {
+                        co_vec.push(vec![]);
+                        for j_co in 0..N {
+                            if j_co != j {
+                                (co_vec.last_mut()).unwrap().push(inner[i][j]);
+                            }
+                        }
+                    }
+                }
+                co_vec
+            }
+
+            let result:[[f32; M]; N] = [[0.0; M]; N];
+            for i in 0..N{
+                for j in 0..M{
+                    let minor:Matrix<f32, N, N> = Matrix::from(get_minor_tab(i, j, &self.inner));
+                }
+            }
+            todo!()
+            
         }
 
 
-        ///!TODO
-        fn get_minor(self,n:usize,m:usize) -> Self::MinorOut {
-            let mut result = Matrix::<f32, {N - 1}, {M - 1}>::default();
-            for (i,row) in self.inner.into_iter().enumerate(){
-                for (j,value) in row.into_iter().enumerate(){
-                    if i!= n && j!=m{
-                        
+        fn get_det(self) -> f32 {
+            println!("--------getdet !!");
+            match self.determinant {
+                Some(det) => det,
+                None => {
+                    if N != M {
+                        return 0.0;
+                    }
+                    if N == 0 {
+                        return 0.0;
+                    }
+                    if N == 1 {
+                        return self.inner[0][0];
+                    }
+                    if N == 2 {
+                        self.inner[0][0] * self.inner[1][1] - self.inner[1][0] * self.inner[0][1]
+                    } else {
+                        /*
+                        let mut result: f32 = 0.0;
+                        const I: usize = 0;
+                        for j in 0..N {
+                            let mut co_vec: Vec<Vec<f32>> = vec![];
+                            //(1-((i+j)%2)*2) = pow(-1,i+j)
+                            let product = ((1 - ((I + j) % 2) * 2) as f32) * self.inner[I][j];
+                            for i_co in 0..N {
+                                if i_co != I {
+                                    co_vec.push(vec![]);
+                                    for j_co in 0..N {
+                                        if j_co != j {
+                                            (co_vec.last_mut()).unwrap().push(self.inner[I][j]);
+                                        }
+                                    }
+                                }
+                            }
+                            let co_mat_det = <crate::my_matrix_lib::matrix::Matrix<f32, N, M> as crate::my_matrix_lib::matrix::Algebra<crate::my_matrix_lib::matrix::Matrix<f32, N, M>>>::get_det(Matrix::from(co_vec));
+                            result += product * co_mat_det;
+                        }
+                        result
+                        */1.0
                     }
                 }
             }
-            result
         }
 
         fn zeroed() -> Self {
