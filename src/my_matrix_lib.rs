@@ -4,18 +4,33 @@ pub mod matrix {
 
     //definition of Matrix
     #[derive(Debug, Clone)]
-    pub struct Matrix<T: Default, const N: usize, const M: usize> {
+    pub struct Matrix<T, const N: usize, const M: usize> {
         inner: [[T; M]; N],
         determinant: Option<f32>,
     }
 
-    impl<T: std::default::Default + PartialEq, const N: usize, const M: usize> PartialEq
-        for Matrix<T, N, M>
-    {
+    //definition de index
+    impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {
+        type Output = [T; M];
+        fn index(&self, index: usize) -> &Self::Output {
+            &self.inner[index]
+        }
+    }
+
+    //definition de index mut
+    impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
+        fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+            self.determinant = None;
+            &mut self.inner[index]
+        }
+    }
+
+    //definition de l'egalite
+    impl<T: PartialEq, const N: usize, const M: usize> PartialEq for Matrix<T, N, M> {
         fn eq(&self, other: &Self) -> bool {
             for i in 0..N {
                 for j in 0..M {
-                    if self.inner[i][j] != other.inner[i][j] {
+                    if self[i][j] != other[i][j] {
                         return false;
                     }
                 }
@@ -62,9 +77,7 @@ pub mod matrix {
     }
 
     //definition using an array
-    impl<T: std::default::Default, const N: usize, const M: usize> From<[[T; M]; N]>
-        for Matrix<T, N, M>
-    {
+    impl<T, const N: usize, const M: usize> From<[[T; M]; N]> for Matrix<T, N, M> {
         fn from(arr: [[T; M]; N]) -> Self {
             Self {
                 inner: arr,
@@ -73,15 +86,23 @@ pub mod matrix {
         }
     }
 
+    impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
+        type Item = [T; M];
+
+        type IntoIter = std::array::IntoIter<Self::Item, N>;
+
+        fn into_iter(self) -> Self::IntoIter {
+            return self.inner.into_iter();
+        }
+    }
+
     /*implementation to format*/
-    impl<T: std::default::Default + std::fmt::Display, const N: usize, const M: usize>
-        std::fmt::Display for Matrix<T, N, M>
-    {
+    impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             for i in 0..N {
                 writeln!(f)?;
                 for j in 0..M {
-                    write!(f, "{} ", self.inner[i][j])?;
+                    write!(f, "{} ", self[i][j])?;
                 }
             }
             Ok(())
@@ -89,9 +110,16 @@ pub mod matrix {
     }
 
     //implementation of Copy
-    impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Copy
-        for Matrix<T, N, M>
-    {
+    impl<T: std::marker::Copy, const N: usize, const M: usize> Copy for Matrix<T, N, M> {}
+
+
+    impl<T: std::marker::Copy, const N: usize, const M: usize> Matrix<T,N,M>  {
+        ///permute row i and j
+        pub fn permute_row(&mut self,i:usize,j:usize){
+            let row_i = self.inner[i];
+            self.inner[i] = self.inner[j];
+            self.inner[j] = row_i;
+        }
     }
 
     //Algebra
@@ -100,7 +128,7 @@ pub mod matrix {
         type MultOuput;
         ///Type of the matrix with wich Self can be multiply
         type MultIn;
-        
+
         ///Addition of the matrix with a Self type matrix
         fn addition(self, rhs: RHS) -> Self;
         ///Multiplication of the matrix with a [MultIn] matrix
@@ -114,14 +142,16 @@ pub mod matrix {
         fn get_det(self) -> f32;
 
         ///return the PLU decomposition of a matrix ([P,L,U])
-        fn get_plu_decomposition(self)->[Self;3] where Self: Sized;
+        fn get_plu_decomposition(self) -> [Self; 3]
+        where
+            Self: Sized;
 
         ///return a matrix with only zero innit
         fn zeroed() -> Self;
         ///return the identity matrix
         fn identity() -> Self;
         ///return a permutation matrix
-        fn permutation(i:usize,j:usize)->Self;
+        fn permutation(i: usize, j: usize) -> Self;
     }
 
     impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
@@ -129,14 +159,12 @@ pub mod matrix {
         fn add(self, rhs: Self) -> Self::Output {
             self.addition(rhs)
         }
-        
-        
     }
 
-    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M>   {
-     fn add_assign(&mut self, rhs: Self) {
-        *self = self.addition(rhs);
-     }   
+    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M> {
+        fn add_assign(&mut self, rhs: Self) {
+            *self = self.addition(rhs);
+        }
     }
 
     impl<const N: usize, const M: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, N, M> {
@@ -166,25 +194,28 @@ pub mod matrix {
         }
     }
 
+    impl<const N: usize> MulAssign<Matrix<f32, N, N>> for Matrix<f32, N, N> {
+        fn mul_assign(&mut self, rhs: Matrix<f32, N, N>) {
+            *self = self.multiply(rhs)
+        }
+    }
 
     ///implementation for f32
     impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
-        
         type MultOuput = Matrix<f32, M, M>;
-        
+
         type MultIn = Matrix<f32, M, N>;
 
-        
         fn scale(self, rhs: f32) -> Self {
             let mut result = Self::default();
             for i in 0..N {
                 for j in 0..M {
-                    result.inner[i][j] = rhs * self.inner[i][j];
+                    result.inner[i][j] = rhs * self[i][j];
                 }
             }
             result
         }
-        
+
         fn addition(self, rhs: Self) -> Self {
             let mut result = Self::default();
             for (i, (row1, row2)) in self.inner.into_iter().zip(rhs.inner).enumerate() {
@@ -200,7 +231,7 @@ pub mod matrix {
             for i in 0..N {
                 for j in 0..M {
                     for k in 0..M {
-                        result.inner[i][j] += self.inner[i][k] * rhs.inner[k][j];
+                        result.inner[i][j] += self[i][k] * rhs[k][j];
                     }
                 }
             }
@@ -219,10 +250,10 @@ pub mod matrix {
                         return 0.0;
                     }
                     if N == 1 {
-                        return self.inner[0][0];
+                        return self[0][0];
                     }
                     if N == 2 {
-                        self.inner[0][0] * self.inner[1][1] - self.inner[1][0] * self.inner[0][1]
+                        self[0][0] * self[1][1] - self[1][0] * self[0][1]
                     } else {
                         /*
                         let mut result: f32 = 0.0;
@@ -230,13 +261,13 @@ pub mod matrix {
                         for j in 0..N {
                             let mut co_vec: Vec<Vec<f32>> = vec![];
                             //(1-((i+j)%2)*2) = pow(-1,i+j)
-                            let product = ((1 - ((I + j) % 2) * 2) as f32) * self.inner[I][j];
+                            let product = ((1 - ((I + j) % 2) * 2) as f32) * self[I][j];
                             for i_co in 0..N {
                                 if i_co != I {
                                     co_vec.push(vec![]);
                                     for j_co in 0..N {
                                         if j_co != j {
-                                            (co_vec.last_mut()).unwrap().push(self.inner[I][j]);
+                                            (co_vec.last_mut()).unwrap().push(self[I][j]);
                                         }
                                     }
                                 }
@@ -245,41 +276,36 @@ pub mod matrix {
                             result += product * co_mat_det;
                         }
                         result
-                        */1.0
+                        */
+                        1.0
                     }
                 }
             }
         }
 
-//TODO tout refaire 🥲
-        fn get_plu_decomposition(self)->[Self;3] where Self: Sized {
-            let mut s = self.clone();
+        //TODO tout refaire 🥲
+        fn get_plu_decomposition(self) -> [Self; 3]
+        where
+            Self: Sized,
+        {
+            let mut p = Matrix::identity();
             let mut l = Matrix::zeroed();
-            let mut u = Matrix::zeroed();
-            for k in 0..N-1{
-                // Pivot
-                let pivot = s.inner[k][k];
-                // Colonne de L
-                l.inner[k][k] = 1.0;
-                for i in k+1..N-1{
-                    l.inner[i][k] = s.inner[i][k] / pivot;
-                    // Ligne de U
-                    u.inner[k][k] = s.inner[k][k];
-                }
-                for j in k+1..N-1{
-                    u.inner[k][j] = s.inner[k][j];
-                }
-                // Complément de Schur
-                for i in k+1..N-1{
-                    for j in k+1..N-1{
-                        s.inner[i][j] = s.inner[i][j] - l.inner[i][k]*u.inner[k][j];
+            let mut u = self.clone();
+
+            for j in 0..N {
+                //pivot
+                let mut row = 0;
+                for (n, k) in u[j].iter().enumerate() {
+                    if k.abs() > u[j][row].abs() {
+                        row = n;
                     }
+                    //TODO
+                    todo!()
                 }
             }
-            [s,l,u]
 
+            [p, l, u]
         }
-
 
         fn zeroed() -> Self {
             let mut result = Self::default();
@@ -305,13 +331,17 @@ pub mod matrix {
             result
         }
 
-        fn permutation(l1:usize,l2:usize)->Self {
+        fn permutation(l1: usize, l2: usize) -> Self {
             let mut result = Self::default();
-            let mut col_index ;
+            let mut col_index;
             for i in 0..N {
-                if i == l1 {col_index = l2;}
-                else if i == l2 {col_index = l1;}
-                else {col_index = i }
+                if i == l1 {
+                    col_index = l2;
+                } else if i == l2 {
+                    col_index = l1;
+                } else {
+                    col_index = i
+                }
                 for j in 0..M {
                     if j == col_index {
                         result.inner[i][j] = 1.0;
@@ -321,7 +351,6 @@ pub mod matrix {
                 }
             }
             result
-            
         }
     }
 }
