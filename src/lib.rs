@@ -7,49 +7,63 @@ mod tests {
     fn it_works() {
         let now = std::time::Instant::now();
 
-        let tab = vec![vec![4., 5., 2.], vec![2., 8., 3.]];
-        let expect_tab1 = vec![vec![8., 10., 4.], vec![4., 16., 6.]];
-        let expect_tab2 = vec![vec![0., 1., 0.], vec![1., 0., 0.], vec![0., 0., 1.]];
-
-        let _m1: Matrix<f32, 2, 3> = Matrix::from(tab.clone());
-        let _m2: Matrix<f32, 2, 3> = Matrix::from(tab.clone());
-        let _m3: Matrix<f32, 3, 3> = Matrix::from([[1., 12., 1.], [1., 1., 1.], [1., 1., 1.]]);
-        let _m4: Matrix<f32, 3, 3> = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
-        let _m5: Matrix<f32, 3, 3> = Matrix::from([[2., 2., 2.], [2., 2., 2.], [2., 2., 2.]]);
-
-        let expect_m1 = Matrix::from(expect_tab1);
-        let expect_m2 = Matrix::from(expect_tab2);
-        let id3: Matrix<f32, 3, 3> = Matrix::identity();
-        let id2: Matrix<f32, 2, 2> = Matrix::identity();
-
-        let p = Matrix::permutation(0, 1);
-
-        let //todo test m.permute 
-
-        println!("expect_m :{}", expect_m1);
-        println!("{}", _m1 + _m2);
-        println!("{}", _m1[1][1]);
-
-        assert_eq!(_m1, _m2);
-
-        assert_ne!(_m1, expect_m1);
-        assert_eq!(id3 * _m3, _m3);
-        assert_eq!(id3 * p, expect_m2);
-        let mut temp_mat = Matrix::identity();
-        for m in _m3.get_plu_decomposition() {
-            temp_mat = temp_mat * m;
-            println!("m :{m}");
+        //test adition
+        {
+            let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
+            let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
+            let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
+            assert_eq!(m1 + m2, expected_result);
+            assert_eq!(m1.addition(m2), expected_result);
+            assert_eq!(m2.addition(m1), expected_result);
         }
 
-        println!("p*l*u = {temp_mat}");
-        assert_eq!(temp_mat, _m3);
+        //test multiplication
+        {
+            let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
+            let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
+            let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
+            let expected_result_m2_time_m1 =
+                Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
+            assert_eq!(m1 * m2, expected_result_m1_time_m2);
+            assert_eq!(m1.multiply(m2), expected_result_m1_time_m2);
+            assert_eq!(m2 * m1, expected_result_m2_time_m1);
+            assert_eq!(m2.multiply(m1), expected_result_m2_time_m1);
+            /*
+             */
+        }
 
-        assert_eq!(id2.get_det(), 1.0);
-        println!("TODO : get_det()"); //assert_eq!(id3.get_det(), 1.0);
-        assert_eq!(2.0 * _m4, _m5);
-        assert_eq!(2.0 * _m4, _m4 * 2.0);
-        assert_eq!(_m1 + _m2, expect_m1);
-        assert_eq!(_m2 + _m1, expect_m1);
+        //test scaling
+        {
+            let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
+            let scale_factor = 0.5;
+            let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
+            assert_eq!(scale_factor * m, expected_result);
+            assert_eq!(m * scale_factor, expected_result);
+            assert_eq!(m.scale(scale_factor), expected_result);
+        }
+
+        //test zeroed
+        {
+            let m = Matrix::zeroed();
+            let expected_m = Matrix::from([[0., 0., 0., 0.]]);
+            assert_eq!(m, expected_m);
+
+            let m = Matrix::zeroed();
+            let expected_m = Matrix::from([
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+            ]);
+            assert_eq!(m, expected_m)
+        }
+
+        //test identity
+        {
+            let i = Matrix::identity();
+            let expected_m = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
+            assert_eq!(i, expected_m);
+        }
 
         let elapsed_time = now.elapsed();
         println!("test ✅, took {}", elapsed_time.as_secs_f64());

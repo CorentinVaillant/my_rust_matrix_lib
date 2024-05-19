@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::ops::*;
+    use std::{ops::*, usize};
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -112,43 +112,115 @@ pub mod matrix {
     //implementation of Copy
     impl<T: std::marker::Copy, const N: usize, const M: usize> Copy for Matrix<T, N, M> {}
 
+    impl<T: std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+        ///Permute row i and j
+        ///Performe the permutation of the row i and j in a Matrix
+        pub fn permute_row(&mut self, i: usize, j: usize) {
+            if cfg!(debug_assertion){
+                assert!(i < N);
+                assert!(j < N);
+            } 
 
-    impl<T: std::marker::Copy, const N: usize, const M: usize> Matrix<T,N,M>  {
-        ///permute row i and j
-        pub fn permute_row(&mut self,i:usize,j:usize){
             let row_i = self.inner[i];
             self.inner[i] = self.inner[j];
             self.inner[j] = row_i;
+
+            match self.determinant {
+                Some(det) => self.determinant = Some(det * -1.0),
+                None => (),
+            }
+        }
+
+        pub fn permute_column(&mut self, i: usize, j: usize) {
+            if cfg!(debug_assertion){
+                assert!(i < M);
+                assert!(j < M);
+            } 
+            for mut row in self.into_iter() {
+                let tmp = row[i];
+                row[i] = row[j];
+                row[j] = tmp
+            }
         }
     }
 
     //Algebra
-    pub trait Algebra<RHS = Self> {
-        ///Type of the result matrix after a multiplication with another one
-        type MultOuput;
-        ///Type of the matrix with wich Self can be multiply
-        type MultIn;
+    pub trait LinearAlgebra {
+        type Scalar;
+        type AddOutput;
+        type MultIn<const P: usize>;
+        type MultOutput<const P: usize>;
 
-        ///Addition of the matrix with a Self type matrix
-        fn addition(self, rhs: RHS) -> Self;
-        ///Multiplication of the matrix with a [MultIn] matrix
-        fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput;
-        ///Scale by a value (f32)
-        fn scale(self, rhs: f32) -> Self;
+        ///Addition of the matrix with a Self type matrix <br />
+        ///Perform the adition of a matrice with another one     
+        /// ## Example :
+        /// ```
+        /// let m1 = Matrix::from([[1.0,0.0,0.0],[0.,1.,0.],[0.,0.,1.]]);
+        /// let m2 = Matrix::from([[0.,0.,1.],[0.,1.,0.],[1.0,0.0,0.0]]);
+        /// let expected_result = Matrix::from([[1.,0.,1.],[0.,2.,0.],[1.0,0.0,1.0]]);
+        /// assert_eq!(m1+m2,expected_result);
+        /// ```
+        fn addition(&self, rhs: Self) -> Self::AddOutput;
+        ///Multiplication of two matrices
+        ///Perform the multiplication of a matrix with another one<br />
+        /// ## Example :
+        ///```
+        ///let m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.]]);
+        ///let m2 = Matrix::from([[1.,2.],[3.,4.],[5.,6.]]);
+        ///let expected_result_m1_time_m2 = Matrix::from([[22.,28.],[49.,64.]]);
+        ///let expected_result_m2_time_m1 = Matrix::from([[9.,12.,15.],[19.,26.,33.],[29.,40.,51.]]);
+        ///assert_eq!(m1*m2,expected_result_m1_time_m2);
+        ///assert_eq!(m1.multiply(m2),expected_result_m1_time_m2);
+        ///assert_eq!(m2*m1,expected_result_m2_time_m1);
+        ///assert_eq!(m2.multiply(m1),expected_result_m2_time_m1);
+        /// ```
+        fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P>;
+        ///Scale a matrix by a value
+        ///Perform a scale operation on a matrix
+        /// # Example :
+        /// ```
+        ///let m =  Matrix::from([[2.,4.,0.],[0.,2.,4.],[4.,0.,2.]] );
+        ///let scale_factor = 0.5;
+        ///let expected_result = Matrix::from([[1.,2.,0.],[0.,1.,2.],[2.,0.,1.]]);
+        ///assert_eq!(scale_factor*m,expected_result);
+        ///assert_eq!(m*scale_factor,expected_result);
+        ///assert_eq!(m.scale(scale_factor),expected_result);
+        /// ```
+        fn scale(&self, rhs: Self::Scalar) -> Self;
         // fn pow(self, rhs: i16) -> Self; //TODO
 
         //fn get_comatrix(self) -> Option<Self> where Self: Sized; //TODO
         ///return the determinant of the matrix (❗️**expensive computing do once**) (//!WIP)
-        fn get_det(self) -> f32;
+        /// # Example :
+        /// ```
+        /// todo!();
+        /// ```
+        fn get_det(&self) -> f32;
 
         ///return the PLU decomposition of a matrix ([P,L,U])
-        fn get_plu_decomposition(self) -> [Self; 3]
+        fn get_plu_decomposition(&self) -> [Self; 3]
         where
             Self: Sized;
 
         ///return a matrix with only zero innit
+        /// # Example :
+        /// ```
+        ///let m = Matrix::zeroed();
+        ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
+        ///assert_eq!(m,expected_m);
+        ///
+        ///let m = Matrix::zeroed();
+        ///let expected_m = Matrix::from([[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.]]);
+        ///assert_eq!(m,expected_m)
+        /// ```
         fn zeroed() -> Self;
         ///return the identity matrix
+        ///# Example :
+        /// ```
+        ///let i = Matrix::identity();
+        ///let expected_m = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]);
+        ///assert_eq!(i,expected_m);
+        /// ```
         fn identity() -> Self;
         ///return a permutation matrix
         fn permutation(i: usize, j: usize) -> Self;
@@ -167,8 +239,8 @@ pub mod matrix {
         }
     }
 
-    impl<const N: usize, const M: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, N, M> {
-        type Output = Matrix<f32, M, M>;
+    impl<const N: usize, const M: usize, const P: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, P, M> {
+        type Output = Matrix<f32, P, N>;
         fn mul(self, rhs: Matrix<f32, M, N>) -> Self::Output {
             self.multiply(rhs)
         }
@@ -201,12 +273,13 @@ pub mod matrix {
     }
 
     ///implementation for f32
-    impl<const N: usize, const M: usize> Algebra for Matrix<f32, N, M> {
-        type MultOuput = Matrix<f32, M, M>;
+    impl<const N: usize, const M: usize> LinearAlgebra for Matrix<f32, N, M> {
+        type Scalar = f32;
+        type AddOutput = Self;
+        type MultIn<const P: usize> = Matrix<f32, M, P>;
+        type MultOutput<const P: usize> = Matrix<f32, N, P>;
 
-        type MultIn = Matrix<f32, M, N>;
-
-        fn scale(self, rhs: f32) -> Self {
+        fn scale(&self, rhs: Self::Scalar) -> Self {
             let mut result = Self::default();
             for i in 0..N {
                 for j in 0..M {
@@ -216,7 +289,7 @@ pub mod matrix {
             result
         }
 
-        fn addition(self, rhs: Self) -> Self {
+        fn addition(&self, rhs: Self) -> Self {
             let mut result = Self::default();
             for (i, (row1, row2)) in self.inner.into_iter().zip(rhs.inner).enumerate() {
                 for (j, (val1, val2)) in row1.into_iter().zip(row2).enumerate() {
@@ -226,10 +299,10 @@ pub mod matrix {
             result
         }
 
-        fn multiply(self, rhs: Self::MultIn) -> Self::MultOuput {
-            let mut result = Matrix::<f32, M, M>::default();
+        fn multiply<const P: usize>(&self, rhs: Matrix<f32, M, P>) -> Matrix<f32, N, P> {
+            let mut result = Matrix::default();
             for i in 0..N {
-                for j in 0..M {
+                for j in 0..P {
                     for k in 0..M {
                         result.inner[i][j] += self[i][k] * rhs[k][j];
                     }
@@ -238,7 +311,7 @@ pub mod matrix {
             result
         }
 
-        fn get_det(self) -> f32 {
+        fn get_det(&self) -> f32 {
             println!("--------getdet !!");
             match self.determinant {
                 Some(det) => det,
@@ -284,7 +357,7 @@ pub mod matrix {
         }
 
         //TODO tout refaire 🥲
-        fn get_plu_decomposition(self) -> [Self; 3]
+        fn get_plu_decomposition(&self) -> [Self; 3]
         where
             Self: Sized,
         {
@@ -295,12 +368,15 @@ pub mod matrix {
             for j in 0..N {
                 //pivot
                 let mut row = 0;
+                //argmax
                 for (n, k) in u[j].iter().enumerate() {
                     if k.abs() > u[j][row].abs() {
                         row = n;
                     }
-                    //TODO
-                    todo!()
+                }
+                if j != row {
+                    u.permute_row(j, row);
+                    p.permute_row(j, row);
                 }
             }
 
