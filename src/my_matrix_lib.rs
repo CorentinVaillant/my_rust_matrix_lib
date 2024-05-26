@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::{ops::*, usize};
+    use std::ops::*;
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -115,6 +115,16 @@ pub mod matrix {
     impl<T: std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
         ///Permute row i and j
         ///Performe the permutation of the row i and j in a Matrix
+        /// ## Example :
+        /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
+        ///let mut m = Matrix::from([[1,1,1],[2,2,2],[3,3,3]]);
+        ///let expected_m = Matrix::from([[2,2,2],[1,1,1],[3,3,3]]);
+        ///m.permute_row(0, 1);
+        ///
+        ///assert_eq!(m,expected_m)
+        /// ```
         pub fn permute_row(&mut self, i: usize, j: usize) {
             if cfg!(debug_assertion){
                 assert!(i < N);
@@ -130,16 +140,26 @@ pub mod matrix {
                 None => (),
             }
         }
-
+        ///Permute column i and j
+        ///Performe the permutation of the column i and j in a Matrix
+        /// ## Example :
+        /// ```
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
+        ///let mut m = Matrix::from([[1,2,3],[1,2,3],[1,2,3]]);
+        ///let expected_m = Matrix::from([[1,3,2],[1,3,2],[1,3,2]]);
+        ///m.permute_column(1, 2);
+        ///assert_eq!(expected_m,m);
+        /// ```
         pub fn permute_column(&mut self, i: usize, j: usize) {
             if cfg!(debug_assertion){
                 assert!(i < M);
                 assert!(j < M);
             } 
-            for mut row in self.into_iter() {
-                let tmp = row[i];
-                row[i] = row[j];
-                row[j] = tmp
+            for row_index in 0..N{
+                let tmp = self[row_index][i];
+                self[row_index][i] = self[row_index][j];
+                self[row_index][j] = tmp;
             }
         }
     }
@@ -155,6 +175,9 @@ pub mod matrix {
         ///Perform the adition of a matrice with another one     
         /// ## Example :
         /// ```
+        /// 
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
         /// let m1 = Matrix::from([[1.0,0.0,0.0],[0.,1.,0.],[0.,0.,1.]]);
         /// let m2 = Matrix::from([[0.,0.,1.],[0.,1.,0.],[1.0,0.0,0.0]]);
         /// let expected_result = Matrix::from([[1.,0.,1.],[0.,2.,0.],[1.0,0.0,1.0]]);
@@ -165,6 +188,9 @@ pub mod matrix {
         ///Perform the multiplication of a matrix with another one<br />
         /// ## Example :
         ///```
+        /// 
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
         ///let m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.]]);
         ///let m2 = Matrix::from([[1.,2.],[3.,4.],[5.,6.]]);
         ///let expected_result_m1_time_m2 = Matrix::from([[22.,28.],[49.,64.]]);
@@ -179,6 +205,9 @@ pub mod matrix {
         ///Perform a scale operation on a matrix
         /// # Example :
         /// ```
+        /// 
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
         ///let m =  Matrix::from([[2.,4.,0.],[0.,2.,4.],[4.,0.,2.]] );
         ///let scale_factor = 0.5;
         ///let expected_result = Matrix::from([[1.,2.,0.],[0.,1.,2.],[2.,0.,1.]]);
@@ -193,18 +222,26 @@ pub mod matrix {
         ///return the determinant of the matrix (❗️**expensive computing do once**) (//!WIP)
         /// # Example :
         /// ```
-        /// todo!();
+        /// //nothing for the moment TODO
         /// ```
         fn get_det(&self) -> f32;
+
+        ///TODO Doc
+        fn get_row_echelon(&self) -> Self;
 
         ///return the PLU decomposition of a matrix ([P,L,U])
         fn get_plu_decomposition(&self) -> [Self; 3]
         where
             Self: Sized;
 
+        
+
         ///return a matrix with only zero innit
         /// # Example :
         /// ```
+        /// 
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
         ///let m = Matrix::zeroed();
         ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
         ///assert_eq!(m,expected_m);
@@ -214,16 +251,64 @@ pub mod matrix {
         ///assert_eq!(m,expected_m)
         /// ```
         fn zeroed() -> Self;
+
         ///return the identity matrix
-        ///# Example :
+        ///## Example :
         /// ```
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
         ///let i = Matrix::identity();
         ///let expected_m = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]);
         ///assert_eq!(i,expected_m);
         /// ```
         fn identity() -> Self;
+
         ///return a permutation matrix
+        /// that can be use with multiplication to get a row/column permuted matrice 
+        /// 
+        /// ## Example :
+        /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
+        ///let p = Matrix::permutation(0, 1);
+        ///
+        ///let m = Matrix::from([[1.0,1.0,1.0],[2.0,2.0,2.0],[3.0,3.0,3.0]]);
+        ///let expected_m = Matrix::from([[2.0,2.0,2.0],[1.0,1.0,1.0],[3.0,3.0,3.0]]);
+        ///
+        ///assert_eq!(p*m,expected_m);
+        ///
+        ///let m = Matrix::from([[1.,2.,3.],[1.,2.,3.],[1.,2.,3.]]);
+        ///let expected_m = Matrix::from([[2.,1.,3.],[2.,1.,3.],[2.,1.,3.]]);
+        ///
+        ///assert_eq!(m*p,expected_m);
+        /// ```
         fn permutation(i: usize, j: usize) -> Self;
+
+        ///return an inflation matrice
+        /// that can be use to scale a row or a column
+        /// 
+        ///  ## Example :
+        /// 
+        /// ```
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
+        ///let t = Matrix::inflation(2, 5.0);
+        ///let expected_t = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,5.]]);
+        ///
+        ///assert_eq!(t,expected_t);
+        ///
+        ///let m = Matrix::from([[1.,1.,1.],[1.,1.,1.],[1.,1.,1.]]);
+        ///let expected_m = Matrix::from([[1.,1.,1.],[1.,1.,1.],[5.,5.,5.]]);
+        ///
+        ///assert_eq!(t*m,expected_m);
+        ///
+        ///let expected_m = Matrix::from([[1.,1.,5.],[1.,1.,5.],[1.,1.,5.]]);
+        ///
+        ///assert_eq!(m*t,expected_m);
+        ///
+        ///
+        /// ```
+        fn inflation(i:usize,value:f32) -> Self;
     }
 
     impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
@@ -356,29 +441,66 @@ pub mod matrix {
             }
         }
 
+        fn get_row_echelon(&self) -> Self {
+            let mut p = Self::identity();
+            let mut result = self.clone();
+
+            
+            let mut h = 0; //pivot row
+            let mut k = 0; //pivot column
+
+            while h<M && k<N{
+
+                //Find the k-th pivot:
+                
+                //argmax
+                let mut i_max = 0;
+                for i in h..M{
+                    if result[i][k].abs()> result[i_max][k].abs(){
+                        i_max = i;
+                    }
+                }
+
+                if result[i_max][k] == 0.0{
+                    k += 1
+                }
+                else {
+                    //swap rows(h, i_max)
+                    result.permute_row(h, i_max);
+                    p.permute_row(h, i_max);
+
+                    // Do for all rows below pivot:
+                    for i in (h+1)..M{
+                        let f = result[i][k]/ result[h][k];
+                        /* Fill with zeros the lower part of pivot column: */
+                        result[i][k] = 0.0;
+                        /* Do for all remaining elements in current row: */
+                        for j in (k+1)..N{
+                            result[i][j] -= result[h][j]*f;
+                        }
+
+                    }
+                    h += 1;
+                    k += 1;
+
+                }
+            }
+
+            result
+        }
+
+
         //TODO tout refaire 🥲
         fn get_plu_decomposition(&self) -> [Self; 3]
         where
             Self: Sized,
         {
-            let mut p = Matrix::identity();
-            let mut l = Matrix::zeroed();
-            let mut u = self.clone();
+            let p = Matrix::identity();
+            let l = Matrix::zeroed();
+            let u = Matrix::zeroed();
 
-            for j in 0..N {
-                //pivot
-                let mut row = 0;
-                //argmax
-                for (n, k) in u[j].iter().enumerate() {
-                    if k.abs() > u[j][row].abs() {
-                        row = n;
-                    }
-                }
-                if j != row {
-                    u.permute_row(j, row);
-                    p.permute_row(j, row);
-                }
-            }
+
+            
 
             [p, l, u]
         }
@@ -428,5 +550,26 @@ pub mod matrix {
             }
             result
         }
+
+
+        fn inflation(i:usize,value:f32) -> Self {
+            let mut result = Self::default();
+            for row_index in 0..N {
+                for column_inndex in 0..M {
+                    if row_index == column_inndex {
+                        if row_index == i{
+                            result.inner[row_index][column_inndex] = value;
+                        }
+                        else {
+                            result.inner[row_index][column_inndex] = 1.0;
+                        }
+                    } else {
+                        result.inner[row_index][column_inndex] = 0.0;
+                    }
+                }
+            }
+            result
+        }
     }
 }
+
