@@ -146,7 +146,7 @@ mod tests {
             use crate::my_matrix_lib::matrix::*;
 
             let m = Matrix::from([[1.,2.,3.],[4.,5.,6.],[7.,8.,9.]]);
-            println!("{:?}",m.get_row_echelon());
+            m.get_row_echelon();
 
         }
 

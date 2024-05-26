@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::ops::*;
+    use std::{convert::identity, ops::*};
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -441,50 +441,35 @@ pub mod matrix {
             }
         }
 
+
         fn get_row_echelon(&self) -> Self {
-            let mut p = Self::identity();
             let mut result = self.clone();
 
-            
-            let mut h = 0; //pivot row
-            let mut k = 0; //pivot column
+            for i in 0..N{
 
-            while h<M && k<N{
-
-                //Find the k-th pivot:
+                //finding pivot
+                let mut pivot = result[i][0];
+                let j = 1;
                 
-                //argmax
-                let mut i_max = 0;
-                for i in h..M{
-                    if result[i][k].abs()> result[i_max][k].abs(){
-                        i_max = i;
-                    }
+                while pivot == 0.0 && j<M {
+                    pivot = result[i][j];
+                }
+                if pivot == 0.0{
+                    continue;
                 }
 
-                if result[i_max][k] == 0.0{
-                    k += 1
+                for j in 0..M{
+                    result[i][j] /= pivot;
                 }
-                else {
-                    //swap rows(h, i_max)
-                    result.permute_row(h, i_max);
-                    p.permute_row(h, i_max);
 
-                    // Do for all rows below pivot:
-                    for i in (h+1)..M{
-                        let f = result[i][k]/ result[h][k];
-                        /* Fill with zeros the lower part of pivot column: */
-                        result[i][k] = 0.0;
-                        /* Do for all remaining elements in current row: */
-                        for j in (k+1)..N{
-                            result[i][j] -= result[h][j]*f;
-                        }
-
-                    }
-                    h += 1;
-                    k += 1;
-
-                }
+                
+                
+                
+                
+                
+                
             }
+            println!("{}",result);
 
             result
         }
