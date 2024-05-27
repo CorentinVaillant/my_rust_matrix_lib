@@ -460,12 +460,8 @@ pub mod matrix {
 
                 for j in 0..M{
                     result[i][j] /= pivot;
-                }
-
-                
-                
-                
-                
+                }             
+                                              
                 
                 
             }

@@ -1,52 +1,30 @@
-/* INPUT: A - array of pointers to rows of a square matrix having dimension N
- *        Tol - small tolerance number to detect failure when the matrix is near degenerate
- * OUTPUT: Matrix A is changed, it contains a copy of both matrices L-E and U as A=(L-E)+U such that P*A=L*U.
- *        The permutation matrix is not stored as a matrix, but in an integer vector P of size N+1 
- *        containing column indexes where the permutation matrix has "1". The last element P[N]=S+N, 
- *        where S is the number of row exchanges needed for determinant computation, det(P)=(-1)^S    
- */
-int LUPDecompose(double **A, int N, double Tol, int *P) {
+// Implementation of serial GE function
 
-    int i, j, k, imax; 
-    double maxA, *ptr, absA;
+#include <vector>
 
-    for (i = 0; i <= N; i++)
-        P[i] = i; //Unit permutation matrix, P[N] initialized with N
+// Serial implementation
+void serial_ge(std::vector<double> &A, std::size_t N) {
+  // For each row in the matrix
+  for (std::size_t pivot_row = 0; pivot_row < N; pivot_row++) {
+    // Save the pivot value
+    double scale = A[N * pivot_row + pivot_row];
 
-    for (i = 0; i < N; i++) {
-        maxA = 0.0;
-        imax = i;
-
-        for (k = i; k < N; k++)
-            if ((absA = fabs(A[k][i])) > maxA) { 
-                maxA = absA;
-                imax = k;
-            }
-
-        if (maxA < Tol) return 0; //failure, matrix is degenerate
-
-        if (imax != i) {
-            //pivoting P
-            j = P[i];
-            P[i] = P[imax];
-            P[imax] = j;
-
-            //pivoting rows of A
-            ptr = A[i];
-            A[i] = A[imax];
-            A[imax] = ptr;
-
-            //counting pivots starting from N (for determinant)
-            P[N]++;
-        }
-
-        for (j = i + 1; j < N; j++) {
-            A[j][i] /= A[i][i];
-
-            for (k = i + 1; k < N; k++)
-                A[j][k] -= A[j][i] * A[i][k];
-        }
+    // Divide the remaining elements in the vector
+    for (std::size_t col = pivot_row; col < N; col++) {
+      A[N * pivot_row + col] /= scale;
     }
 
-    return 1;  //decomposition done 
+    // Eliminate this column from the rest of the matrix
+    // For each remaining row in the matrix
+    for (std::size_t sub_row = pivot_row + 1; sub_row < N; sub_row++) {
+      // Scale factor for eliminating for elemenating this column
+      double elim_scale = A[sub_row * N + pivot_row];
+
+      // Finish the remainder of the row
+      for (std::size_t col = pivot_row; col < N; col++) {
+        A[N * sub_row + col] -= A[N * pivot_row + col] * elim_scale;
+      }
+      
+    }
+  }
 }
