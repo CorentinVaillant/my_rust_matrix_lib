@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::{convert::identity, ops::*};
+    use std::ops::*;
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -118,7 +118,7 @@ pub mod matrix {
         /// ## Example :
         /// ```
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let mut m = Matrix::from([[1,1,1],[2,2,2],[3,3,3]]);
         ///let expected_m = Matrix::from([[2,2,2],[1,1,1],[3,3,3]]);
         ///m.permute_row(0, 1);
@@ -126,10 +126,10 @@ pub mod matrix {
         ///assert_eq!(m,expected_m)
         /// ```
         pub fn permute_row(&mut self, i: usize, j: usize) {
-            if cfg!(debug_assertion){
+            if cfg!(debug_assertion) {
                 assert!(i < N);
                 assert!(j < N);
-            } 
+            }
 
             let row_i = self.inner[i];
             self.inner[i] = self.inner[j];
@@ -145,18 +145,18 @@ pub mod matrix {
         /// ## Example :
         /// ```
         ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let mut m = Matrix::from([[1,2,3],[1,2,3],[1,2,3]]);
         ///let expected_m = Matrix::from([[1,3,2],[1,3,2],[1,3,2]]);
         ///m.permute_column(1, 2);
         ///assert_eq!(expected_m,m);
         /// ```
         pub fn permute_column(&mut self, i: usize, j: usize) {
-            if cfg!(debug_assertion){
+            if cfg!(debug_assertion) {
                 assert!(i < M);
                 assert!(j < M);
-            } 
-            for row_index in 0..N{
+            }
+            for row_index in 0..N {
                 let tmp = self[row_index][i];
                 self[row_index][i] = self[row_index][j];
                 self[row_index][j] = tmp;
@@ -175,9 +175,9 @@ pub mod matrix {
         ///Perform the adition of a matrice with another one     
         /// ## Example :
         /// ```
-        /// 
+        ///
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         /// let m1 = Matrix::from([[1.0,0.0,0.0],[0.,1.,0.],[0.,0.,1.]]);
         /// let m2 = Matrix::from([[0.,0.,1.],[0.,1.,0.],[1.0,0.0,0.0]]);
         /// let expected_result = Matrix::from([[1.,0.,1.],[0.,2.,0.],[1.0,0.0,1.0]]);
@@ -188,9 +188,9 @@ pub mod matrix {
         ///Perform the multiplication of a matrix with another one<br />
         /// ## Example :
         ///```
-        /// 
+        ///
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.]]);
         ///let m2 = Matrix::from([[1.,2.],[3.,4.],[5.,6.]]);
         ///let expected_result_m1_time_m2 = Matrix::from([[22.,28.],[49.,64.]]);
@@ -205,9 +205,9 @@ pub mod matrix {
         ///Perform a scale operation on a matrix
         /// # Example :
         /// ```
-        /// 
+        ///
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let m =  Matrix::from([[2.,4.,0.],[0.,2.,4.],[4.,0.,2.]] );
         ///let scale_factor = 0.5;
         ///let expected_result = Matrix::from([[1.,2.,0.],[0.,1.,2.],[2.,0.,1.]]);
@@ -234,14 +234,12 @@ pub mod matrix {
         where
             Self: Sized;
 
-        
-
         ///return a matrix with only zero innit
         /// # Example :
         /// ```
-        /// 
+        ///
         ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let m = Matrix::zeroed();
         ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
         ///assert_eq!(m,expected_m);
@@ -256,7 +254,7 @@ pub mod matrix {
         ///## Example :
         /// ```
         ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let i = Matrix::identity();
         ///let expected_m = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]);
         ///assert_eq!(i,expected_m);
@@ -264,34 +262,34 @@ pub mod matrix {
         fn identity() -> Self;
 
         ///return a permutation matrix
-        /// that can be use with multiplication to get a row/column permuted matrice 
-        /// 
+        /// that can be use with multiplication to get a row/column permuted matrice
+        ///
         /// ## Example :
         /// ```
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
-        ///let p = Matrix::permutation(0, 1);
+        ///            
+        ///let m = Matrix::<f32, 3, 3>::identity();
+        ///assert!(m.is_upper_triangular());
         ///
-        ///let m = Matrix::from([[1.0,1.0,1.0],[2.0,2.0,2.0],[3.0,3.0,3.0]]);
-        ///let expected_m = Matrix::from([[2.0,2.0,2.0],[1.0,1.0,1.0],[3.0,3.0,3.0]]);
+        ///let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+        ///assert!(m.is_upper_triangular());
         ///
-        ///assert_eq!(p*m,expected_m);
+        ///let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+        ///assert!(!m.is_upper_triangular());
         ///
-        ///let m = Matrix::from([[1.,2.,3.],[1.,2.,3.],[1.,2.,3.]]);
-        ///let expected_m = Matrix::from([[2.,1.,3.],[2.,1.,3.],[2.,1.,3.]]);
-        ///
-        ///assert_eq!(m*p,expected_m);
+        ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+        ///assert!(!m.is_upper_triangular());
         /// ```
         fn permutation(i: usize, j: usize) -> Self;
 
         ///return an inflation matrice
         /// that can be use to scale a row or a column
-        /// 
+        ///
         ///  ## Example :
-        /// 
+        ///
         /// ```
         ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///let t = Matrix::inflation(2, 5.0);
         ///let expected_t = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,5.]]);
         ///
@@ -308,7 +306,44 @@ pub mod matrix {
         ///
         ///
         /// ```
-        fn inflation(i:usize,value:f32) -> Self;
+        fn inflation(i: usize, value: f32) -> Self;
+
+        ///return if a matrice is upper triangular
+        ///
+        /// ## Example
+        ///
+        /// ```            
+        /// let m = Matrix::<f32, 3, 3>::identity();
+        ///assert!(m.is_upper_triangular());
+        ///
+        ///let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+        ///assert!(m.is_upper_triangular());
+        ///
+        ///let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+        ///assert!(!m.is_upper_triangular());
+        ///
+        ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+        ///assert!(!m.is_upper_triangular());
+        /// ```
+        fn is_upper_triangular(&self) -> bool;
+
+        ///return if a matrice is lower triangle
+        ///
+        ///  ## Example :
+        /// ```
+        ///let m = Matrix::<f32, 3, 3>::identity();
+        ///assert!(m.is_lower_triangular());
+        ///
+        ///let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+        ///assert!(m.is_lower_triangular());
+        ///
+        ///let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+        ///assert!(!m.is_lower_triangular());
+        ///
+        ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+        ///assert!(!m.is_lower_triangular());
+        /// ```
+        fn is_lower_triangular(&self) -> bool;
     }
 
     impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
@@ -441,35 +476,39 @@ pub mod matrix {
             }
         }
 
-
         fn get_row_echelon(&self) -> Self {
-            let mut result = self.clone();
+            let mut tab = self.clone();
 
-            for i in 0..N{
+            let mut row_index = 0;
+            let mut column_index = 0;
 
-                //finding pivot
-                let mut pivot = result[i][0];
-                let j = 1;
-                
-                while pivot == 0.0 && j<M {
-                    pivot = result[i][j];
-                }
-                if pivot == 0.0{
-                    continue;
+            while row_index < N && column_index < M {
+                let mut pivot_index = 0;
+                let j = row_index + 1;
+                while tab[row_index][pivot_index] == 0.0 && j < M {
+                    pivot_index = j;
                 }
 
-                for j in 0..M{
-                    result[i][j] /= pivot;
-                }             
-                                              
-                
-                
+                if tab[row_index][pivot_index] == 0.0 {
+                    column_index += 1;
+                } else if row_index < N && column_index < M {
+                    if pivot_index < N {
+                        tab.permute_row(row_index, pivot_index);
+                    }
+                    for i in (row_index + 1)..N {
+                        for j in 0..M {
+                            tab[i][j] -= (tab[i][column_index] / tab[row_index][column_index])
+                                * tab[row_index][j];
+                        }
+                    }
+
+                    row_index += 1;
+                    column_index += 1;
+                }
             }
-            println!("{}",result);
 
-            result
+            tab
         }
-
 
         //TODO tout refaire 🥲
         fn get_plu_decomposition(&self) -> [Self; 3]
@@ -479,9 +518,6 @@ pub mod matrix {
             let p = Matrix::identity();
             let l = Matrix::zeroed();
             let u = Matrix::zeroed();
-
-
-            
 
             [p, l, u]
         }
@@ -532,16 +568,14 @@ pub mod matrix {
             result
         }
 
-
-        fn inflation(i:usize,value:f32) -> Self {
+        fn inflation(i: usize, value: f32) -> Self {
             let mut result = Self::default();
             for row_index in 0..N {
                 for column_inndex in 0..M {
                     if row_index == column_inndex {
-                        if row_index == i{
+                        if row_index == i {
                             result.inner[row_index][column_inndex] = value;
-                        }
-                        else {
+                        } else {
                             result.inner[row_index][column_inndex] = 1.0;
                         }
                     } else {
@@ -551,6 +585,30 @@ pub mod matrix {
             }
             result
         }
+
+        fn is_upper_triangular(&self) -> bool {
+            for i in 0..N {
+                if i < M {
+                    for j in 0..i {
+                        if self[i][j] != 0.0 {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            true
+        }
+
+        fn is_lower_triangular(&self) -> bool {
+            for i in 0..N {
+                for j in (i + 1)..M {
+                    if self[i][j] != 0.0 {
+                        return false;
+                    }
+                }
+            }
+            true
+        }
     }
 }
-
