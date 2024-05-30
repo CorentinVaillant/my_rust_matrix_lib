@@ -112,7 +112,10 @@ pub mod matrix {
     //implementation of Copy
     impl<T: std::marker::Copy, const N: usize, const M: usize> Copy for Matrix<T, N, M> {}
 
+    //basic implementation
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+        ///### Private
+        ///If the matrix is square return self, if note none
         fn squared_or_none(&self) -> Option<Matrix<T, N, N>> {
             if N != M {
                 None
@@ -128,6 +131,7 @@ pub mod matrix {
             }
         }
 
+        
         ///Permute row i and j
         ///Performe the permutation of the row i and j in a Matrix
         /// ## Example :
@@ -290,7 +294,7 @@ pub mod matrix {
         fn get_reduce_row_echelon_with_transform(&self) -> (Self,Self::Square) where Self: Sized;
 
         ///TODO
-        fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]>;
+        fn get_plu_decomposition(&self) -> Option<(Self::Square,Self::Square,Self::Square)>;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -574,7 +578,7 @@ pub mod matrix {
 
 
         ///TODO (WIP)
-        fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]> {
+        fn get_plu_decomposition(&self) -> Option<(Self::Square,Self::Square,Self::Square)> {
             let self_square = match self.squared_or_none() {
                 Some(m) => m,
                 None => {
@@ -584,53 +588,47 @@ pub mod matrix {
 
             
             let mut p = Matrix::identity();
-            let l = Matrix::identity();
+            let mut l = Matrix::zero();
             let mut u = self_square;
 
-            let mut lead = 0;
-
-            for r in 0..N {
-                if lead >= N {
-                    return Some([p, l, u]);
+            for k in 0..N{
+                //finding th pivot
+                let mut pivot_index = k;
+                let mut pivot_value = u[k][k].abs();
+                for i in (k+1)..N{
+                    if u[i][k].abs() > pivot_value{
+                        pivot_value = u[i][k].abs();
+                        pivot_index = i;
+                    }
                 }
 
-                let mut i = r;
-                while u[i][lead] == 0.0 {
-                    i += 1;
-                    if i == N {
-                        i = r;
-                        lead += 1;
-                        if lead >= M {
-                            return Some([p, l, u]);
+                //row swaping
+                if pivot_index != k{
+                    u.permute_row(k, pivot_index);
+                    p.permute_row(k, pivot_index);
+                    if k > 0{
+                        for j in 0..k{
+                            let tmp = l[k][j];
+                            l[k][j] = l[pivot_index][j];
+                            l[pivot_index][j] = tmp;
                         }
                     }
                 }
-                u.permute_row(i, r);
-                p.permute_row(i, r);
 
-                //Normalization of the leading row
-                let mut lead_value = u[r][lead];
-                for j in 0..M {
-                    u[r][j] /= lead_value;
-                    
-                }
-                
-
-                //Elimination of column entries
-                for i in 0..N {
-                    if i != r {
-                        lead_value = u[i][lead];
-                        for j in 0..M {
-                            u[i][j] -= lead_value * u[r][j];
-                        }
-                        
+                //entries elimination below the pivot
+                for i in (k+1)..N{
+                    l[i][k] /= u[k][k];
+                    for j in k..N{
+                        u[i][j] -=l[i][k]*u[k][j];
                     }
                 }
-                lead += 1;
             }
 
+            for i in 0..N{
+                l[i][i] = 1.0;
+            }
             
-            Some([p, l, u])
+            Some((p, l, u))
         }
 
         fn zero() -> Self {

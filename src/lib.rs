@@ -4,7 +4,7 @@ pub mod my_matrix_lib;
 mod tests {
 
     #[test]
-    fn it_works() {
+    fn test_function() {
         let now = std::time::Instant::now();
 
         //test adition
@@ -167,7 +167,7 @@ mod tests {
             assert!(!m.is_lower_triangular());
         }
 
-        //TODO get_reduce_row_echelon
+        //get_reduce_row_echelon
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -189,18 +189,26 @@ mod tests {
 
             assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
         }
-    //test block
+        //plu decomposition
         {
             use crate::my_matrix_lib::matrix::*;
 
             let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
             
-            let (m_e,p) = m.get_reduce_row_echelon_with_transform();
-            println!("m ->{}",m);
-            println!("m' ->{}",m_e);
-            println!("p  ->{}",p);
+            let (p,l,u) = m.get_plu_decomposition().unwrap();
+            
 
-            println!("p*m_e ->{}",p*m);
+            assert_eq!(p*m,l*u);
+
+            let m: Matrix<f32, 3, 3> = Matrix::from([
+                [-2., 1.,-4.], 
+                [ 3.,-5., 5.], 
+                [ 4., 0.,-1.]
+            ]);
+            
+            let (p,l,u) = m.get_plu_decomposition().unwrap();
+
+            assert_eq!(p*m,l*u);
         }
 
         let elapsed_time = now.elapsed();
