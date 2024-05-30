@@ -193,7 +193,12 @@ mod tests {
         {
             use crate::my_matrix_lib::matrix::*;
 
-            let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            let m = Matrix::from([
+                [1., 2., 1., -1.],
+                [3., 8., 1., 4.],
+                [0., 4., 1., 0.],
+                [22., 7., 3., 4.],
+            ]);
 
             let (p, l, u) = m.get_plu_decomposition().unwrap();
 

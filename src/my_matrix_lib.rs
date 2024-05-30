@@ -297,7 +297,35 @@ pub mod matrix {
         where
             Self: Sized;
 
-        ///TODO
+        ///give you the plu decomposition of a matrix
+        /// return none if the matrix is not squared
+        /// ## Exemple :
+        /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
+        ///
+        ///let m = Matrix::from([
+        ///    [1., 2., 1., -1.],
+        ///    [3., 8., 1., 4.],
+        ///    [0., 4., 1., 0.],
+        ///    [22., 7., 3., 4.],
+        ///]);
+        ///
+        ///let (p, l, u) = m.get_plu_decomposition().unwrap();
+        ///
+        ///assert!(l.is_lower_triangular() && u.is_upper_triangular());
+        ///
+        ///assert_eq!(p * m, l * u);
+        ///
+        ///let m: Matrix<f32, 3, 3> =
+        ///    Matrix::from([[4., 4., 3.], [-3., -3., -3.], [0., -3., -1.]]);
+        ///
+        ///let (p, l, u) = m.get_plu_decomposition().unwrap();
+        ///
+        ///assert!(l.is_lower_triangular() && u.is_upper_triangular());
+        ///
+        ///assert_eq!(p * m, l * u);
+        /// ```
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
 
         ///return a permutation matrix
@@ -579,7 +607,6 @@ pub mod matrix {
             (result, p)
         }
 
-        ///TODO (WIP)
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)> {
             let self_square = match self.squared_or_none() {
                 Some(m) => m,
