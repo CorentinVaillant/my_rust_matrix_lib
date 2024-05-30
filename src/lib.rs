@@ -4,7 +4,7 @@ pub mod my_matrix_lib;
 mod tests {
 
     #[test]
-    fn test_function() {
+    fn it_works() {
         let now = std::time::Instant::now();
 
         //test adition
@@ -167,7 +167,7 @@ mod tests {
             assert!(!m.is_lower_triangular());
         }
 
-        //get_reduce_row_echelon
+        //TODO get_reduce_row_echelon
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -189,26 +189,26 @@ mod tests {
 
             assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
         }
-        //plu decomposition
+        //test block
         {
             use crate::my_matrix_lib::matrix::*;
 
             let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
-            
-            let (p,l,u) = m.get_plu_decomposition().unwrap();
-            
 
-            assert_eq!(p*m,l*u);
+            let (p, l, u) = m.get_plu_decomposition().unwrap();
 
-            let m: Matrix<f32, 3, 3> = Matrix::from([
-                [-2., 1.,-4.], 
-                [ 3.,-5., 5.], 
-                [ 4., 0.,-1.]
-            ]);
-            
-            let (p,l,u) = m.get_plu_decomposition().unwrap();
+            assert!(l.is_lower_triangular() && u.is_upper_triangular());
 
-            assert_eq!(p*m,l*u);
+            assert_eq!(p * m, l * u);
+
+            let m: Matrix<f32, 3, 3> =
+                Matrix::from([[4., 4., 3.], [-3., -3., -3.], [0., -3., -1.]]);
+
+            let (p, l, u) = m.get_plu_decomposition().unwrap();
+
+            assert!(l.is_lower_triangular() && u.is_upper_triangular());
+
+            assert_eq!(p * m, l * u);
         }
 
         let elapsed_time = now.elapsed();

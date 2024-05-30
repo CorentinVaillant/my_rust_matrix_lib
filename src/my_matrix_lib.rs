@@ -131,7 +131,6 @@ pub mod matrix {
             }
         }
 
-        
         ///Permute row i and j
         ///Performe the permutation of the row i and j in a Matrix
         /// ## Example :
@@ -152,8 +151,9 @@ pub mod matrix {
 
             self.inner.swap(i, j);
 
-
-            if let Some(det) = self.determinant { self.determinant = Some(det * -1.0) }
+            if let Some(det) = self.determinant {
+                self.determinant = Some(det * -1.0)
+            }
         }
         ///Permute column i and j
         ///Performe the permutation of the column i and j in a Matrix
@@ -175,7 +175,9 @@ pub mod matrix {
                 self[row_index].swap(i, j);
             }
 
-            if let Some(det) = self.determinant { self.determinant = Some(det * -1.0) }
+            if let Some(det) = self.determinant {
+                self.determinant = Some(det * -1.0)
+            }
         }
     }
 
@@ -291,10 +293,12 @@ pub mod matrix {
         fn get_reduce_row_echelon(&self) -> Self;
 
         ///TODO
-        fn get_reduce_row_echelon_with_transform(&self) -> (Self,Self::Square) where Self: Sized;
+        fn get_reduce_row_echelon_with_transform(&self) -> (Self, Self::Square)
+        where
+            Self: Sized;
 
         ///TODO
-        fn get_plu_decomposition(&self) -> Option<(Self::Square,Self::Square,Self::Square)>;
+        fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -526,8 +530,10 @@ pub mod matrix {
             result
         }
 
-
-        fn get_reduce_row_echelon_with_transform(&self) -> (Self,Self::Square) where Self: Sized {
+        fn get_reduce_row_echelon_with_transform(&self) -> (Self, Self::Square)
+        where
+            Self: Sized,
+        {
             let mut result = *self;
             let mut p = Matrix::identity();
 
@@ -535,7 +541,7 @@ pub mod matrix {
 
             for r in 0..N {
                 if lead >= N {
-                    return (result,p);
+                    return (result, p);
                 }
 
                 let mut i = r;
@@ -545,7 +551,7 @@ pub mod matrix {
                         i = r;
                         lead += 1;
                         if lead >= M {
-                            return (result,p);
+                            return (result, p);
                         }
                     }
                 }
@@ -556,9 +562,7 @@ pub mod matrix {
                 let mut lead_value = result[r][lead];
                 for j in 0..M {
                     result[r][j] /= lead_value;
-                    
                 }
-                
 
                 //Elimination of column entries
                 for i in 0..N {
@@ -567,18 +571,16 @@ pub mod matrix {
                         for j in 0..M {
                             result[i][j] -= lead_value * result[r][j];
                         }
-                        
                     }
                 }
                 lead += 1;
             }
 
-            (result,p)
+            (result, p)
         }
 
-
         ///TODO (WIP)
-        fn get_plu_decomposition(&self) -> Option<(Self::Square,Self::Square,Self::Square)> {
+        fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)> {
             let self_square = match self.squared_or_none() {
                 Some(m) => m,
                 None => {
@@ -586,28 +588,30 @@ pub mod matrix {
                 }
             };
 
-            
             let mut p = Matrix::identity();
             let mut l = Matrix::zero();
             let mut u = self_square;
 
-            for k in 0..N{
+            for k in 0..N {
                 //finding th pivot
                 let mut pivot_index = k;
                 let mut pivot_value = u[k][k].abs();
-                for i in (k+1)..N{
-                    if u[i][k].abs() > pivot_value{
+                for i in (k + 1)..N {
+                    if u[i][k].abs() > pivot_value {
                         pivot_value = u[i][k].abs();
                         pivot_index = i;
                     }
                 }
 
                 //row swaping
-                if pivot_index != k{
+                if pivot_index != k {
                     u.permute_row(k, pivot_index);
                     p.permute_row(k, pivot_index);
-                    if k > 0{
-                        for j in 0..k{
+                    if k > 0 {
+                        /*
+                        l.permute_row(k, pivot_index);
+                        */
+                        for j in 0..k {
                             let tmp = l[k][j];
                             l[k][j] = l[pivot_index][j];
                             l[pivot_index][j] = tmp;
@@ -616,18 +620,18 @@ pub mod matrix {
                 }
 
                 //entries elimination below the pivot
-                for i in (k+1)..N{
-                    l[i][k] /= u[k][k];
-                    for j in k..N{
-                        u[i][j] -=l[i][k]*u[k][j];
+                for i in (k + 1)..N {
+                    l[i][k] = u[i][k] / u[k][k];
+                    for j in k..N {
+                        u[i][j] -= l[i][k] * u[k][j];
                     }
                 }
             }
 
-            for i in 0..N{
+            for i in 0..N {
                 l[i][i] = 1.0;
             }
-            
+
             Some((p, l, u))
         }
 
