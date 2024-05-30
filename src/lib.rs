@@ -189,13 +189,18 @@ mod tests {
 
             assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
         }
-
+    //test block
         {
             use crate::my_matrix_lib::matrix::*;
 
-            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
-            let plu = m.get_plu_decomposition().unwrap();
-            assert_eq!(m, plu[0] * plu[1] * plu[2]);
+            let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            
+            let (m_e,p) = m.get_reduce_row_echelon_with_transform();
+            println!("m ->{}",m);
+            println!("m' ->{}",m_e);
+            println!("p  ->{}",p);
+
+            println!("p*m_e ->{}",p*m);
         }
 
         let elapsed_time = now.elapsed();

@@ -287,6 +287,9 @@ pub mod matrix {
         fn get_reduce_row_echelon(&self) -> Self;
 
         ///TODO
+        fn get_reduce_row_echelon_with_transform(&self) -> (Self,Self::Square) where Self: Sized;
+
+        ///TODO
         fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]>;
 
         ///return a permutation matrix
@@ -318,11 +321,11 @@ pub mod matrix {
         ///
         ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
-        ///let m = Matrix::zeroed();
+        ///let m = Matrix::zero();
         ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
         ///assert_eq!(m,expected_m);
         ///
-        ///let m = Matrix::zeroed();
+        ///let m = Matrix::zero();
         ///let expected_m = Matrix::from([[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.]]);
         ///assert_eq!(m,expected_m)
         /// ```
@@ -519,6 +522,57 @@ pub mod matrix {
             result
         }
 
+
+        fn get_reduce_row_echelon_with_transform(&self) -> (Self,Self::Square) where Self: Sized {
+            let mut result = *self;
+            let mut p = Matrix::identity();
+
+            let mut lead = 0;
+
+            for r in 0..N {
+                if lead >= N {
+                    return (result,p);
+                }
+
+                let mut i = r;
+                while result[i][lead] == 0.0 {
+                    i += 1;
+                    if i == N {
+                        i = r;
+                        lead += 1;
+                        if lead >= M {
+                            return (result,p);
+                        }
+                    }
+                }
+                result.permute_row(i, r);
+                p.permute_row(i, r);
+
+                //Normalization of the leading row
+                let mut lead_value = result[r][lead];
+                for j in 0..M {
+                    result[r][j] /= lead_value;
+                    
+                }
+                
+
+                //Elimination of column entries
+                for i in 0..N {
+                    if i != r {
+                        lead_value = result[i][lead];
+                        for j in 0..M {
+                            result[i][j] -= lead_value * result[r][j];
+                        }
+                        
+                    }
+                }
+                lead += 1;
+            }
+
+            (result,p)
+        }
+
+
         ///TODO (WIP)
         fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]> {
             let self_square = match self.squared_or_none() {
@@ -528,19 +582,54 @@ pub mod matrix {
                 }
             };
 
-            let p = Matrix::identity();
-            let l = Matrix::zero();
-            let u = Matrix::zero();
-            //useless
-            let mut a = self_square;
-            for n in 0..N {
-                let mut ln = Matrix::identity();
-                for i in (n + 1)..N {
-                    ln[i][n] = a[i][n] / a[n][n];
+            
+            let mut p = Matrix::identity();
+            let l = Matrix::identity();
+            let mut u = self_square;
+
+            let mut lead = 0;
+
+            for r in 0..N {
+                if lead >= N {
+                    return Some([p, l, u]);
                 }
-                a = ln * a;
+
+                let mut i = r;
+                while u[i][lead] == 0.0 {
+                    i += 1;
+                    if i == N {
+                        i = r;
+                        lead += 1;
+                        if lead >= M {
+                            return Some([p, l, u]);
+                        }
+                    }
+                }
+                u.permute_row(i, r);
+                p.permute_row(i, r);
+
+                //Normalization of the leading row
+                let mut lead_value = u[r][lead];
+                for j in 0..M {
+                    u[r][j] /= lead_value;
+                    
+                }
+                
+
+                //Elimination of column entries
+                for i in 0..N {
+                    if i != r {
+                        lead_value = u[i][lead];
+                        for j in 0..M {
+                            u[i][j] -= lead_value * u[r][j];
+                        }
+                        
+                    }
+                }
+                lead += 1;
             }
-            //end
+
+            
             Some([p, l, u])
         }
 
