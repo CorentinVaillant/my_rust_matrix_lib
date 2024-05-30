@@ -92,7 +92,7 @@ pub mod matrix {
         type IntoIter = std::array::IntoIter<Self::Item, N>;
 
         fn into_iter(self) -> Self::IntoIter {
-            return self.inner.into_iter();
+            self.inner.into_iter()
         }
     }
 
@@ -112,7 +112,22 @@ pub mod matrix {
     //implementation of Copy
     impl<T: std::marker::Copy, const N: usize, const M: usize> Copy for Matrix<T, N, M> {}
 
-    impl<T: std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+    impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+        fn squared_or_none(&self) -> Option<Matrix<T, N, N>> {
+            if N != M {
+                None
+            } else {
+                let mut result = Matrix::<T, N, N>::default();
+                for i in 0..N {
+                    for j in 0..N {
+                        result[i][j] = self[i][j];
+                    }
+                }
+
+                Some(result)
+            }
+        }
+
         ///Permute row i and j
         ///Performe the permutation of the row i and j in a Matrix
         /// ## Example :
@@ -131,14 +146,10 @@ pub mod matrix {
                 assert!(j < N);
             }
 
-            let row_i = self.inner[i];
-            self.inner[i] = self.inner[j];
-            self.inner[j] = row_i;
+            self.inner.swap(i, j);
 
-            match self.determinant {
-                Some(det) => self.determinant = Some(det * -1.0),
-                None => (),
-            }
+
+            if let Some(det) = self.determinant { self.determinant = Some(det * -1.0) }
         }
         ///Permute column i and j
         ///Performe the permutation of the column i and j in a Matrix
@@ -157,10 +168,25 @@ pub mod matrix {
                 assert!(j < M);
             }
             for row_index in 0..N {
-                let tmp = self[row_index][i];
-                self[row_index][i] = self[row_index][j];
-                self[row_index][j] = tmp;
+                self[row_index].swap(i, j);
             }
+
+            if let Some(det) = self.determinant { self.determinant = Some(det * -1.0) }
+        }
+    }
+
+    //TODO généricité
+    impl<const N: usize, const M: usize> Matrix<f32, N, M> {
+        ///equality with an epsilon, to carry floating point error
+        pub fn float_eq(&self, other: &Self, epsilon: f32) -> bool {
+            for i in 0..N {
+                for j in 0..M {
+                    if -epsilon >= self[i][j] - other[i][j] && self[i][j] - other[i][j] >= epsilon {
+                        return false;
+                    }
+                }
+            }
+            true
         }
     }
 
@@ -170,6 +196,9 @@ pub mod matrix {
         type AddOutput;
         type MultIn<const P: usize>;
         type MultOutput<const P: usize>;
+        type Square;
+
+        //basic operations :
 
         ///Addition of the matrix with a Self type matrix <br />
         ///Perform the adition of a matrice with another one     
@@ -184,6 +213,7 @@ pub mod matrix {
         /// assert_eq!(m1+m2,expected_result);
         /// ```
         fn addition(&self, rhs: Self) -> Self::AddOutput;
+
         ///Multiplication of two matrices
         ///Perform the multiplication of a matrix with another one<br />
         /// ## Example :
@@ -201,6 +231,7 @@ pub mod matrix {
         ///assert_eq!(m2.multiply(m1),expected_result_m2_time_m1);
         /// ```
         fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P>;
+
         ///Scale a matrix by a value
         ///Perform a scale operation on a matrix
         /// # Example :
@@ -216,9 +247,11 @@ pub mod matrix {
         ///assert_eq!(m.scale(scale_factor),expected_result);
         /// ```
         fn scale(&self, rhs: Self::Scalar) -> Self;
+
         // fn pow(self, rhs: i16) -> Self; //TODO
 
-        //fn get_comatrix(self) -> Option<Self> where Self: Sized; //TODO
+        //Matrix operation
+
         ///return the determinant of the matrix (❗️**expensive computing do once**) (//!WIP)
         /// # Example :
         /// ```
@@ -226,40 +259,35 @@ pub mod matrix {
         /// ```
         fn get_det(&self) -> f32;
 
-        ///TODO Doc
-        fn get_row_echelon(&self) -> Self;
-
-        ///return the PLU decomposition of a matrix ([P,L,U])
-        fn get_plu_decomposition(&self) -> [Self; 3]
-        where
-            Self: Sized;
-
-        ///return a matrix with only zero innit
+        ///return a row echelon reduce form of the matrix
+        ///
         /// # Example :
         /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
-        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///const EPSILON :f32 = 10e-40;
         ///
-        ///let m = Matrix::zeroed();
-        ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
-        ///assert_eq!(m,expected_m);
+        ///let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
         ///
-        ///let m = Matrix::zeroed();
-        ///let expected_m = Matrix::from([[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.]]);
-        ///assert_eq!(m,expected_m)
+        ///let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
+        ///
+        ///assert_eq!(m.get_reduce_row_echelon(), expected_m);
+        ///
+        ///let m = Matrix::from([[1., 2., 1., -1.], [3., 8., 1., 4.], [0., 4., 1., 0.]]);
+        ///
+        ///let expected_m = Matrix::from([
+        ///    [1., 0., 0., 2. / 5.],
+        ///    [0., 1., 0., 7. / 10.],
+        ///    [0., 0., 1., -(14. / 5.)],
+        ///]);
+        ///
+        ///
+        ///assert!(m.get_reduce_row_echelon().float_eq(&expected_m,EPSILON));
         /// ```
-        fn zeroed() -> Self;
+        fn get_reduce_row_echelon(&self) -> Self;
 
-        ///return the identity matrix
-        ///## Example :
-        /// ```
-        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        ///
-        ///let i = Matrix::identity();
-        ///let expected_m = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]);
-        ///assert_eq!(i,expected_m);
-        /// ```
-        fn identity() -> Self;
+        ///TODO
+        fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]>;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -281,6 +309,35 @@ pub mod matrix {
         ///assert!(!m.is_upper_triangular());
         /// ```
         fn permutation(i: usize, j: usize) -> Self;
+
+        //Basic Matrices
+
+        ///return a matrix with only zero innit
+        /// # Example :
+        /// ```
+        ///
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
+        ///let m = Matrix::zeroed();
+        ///let expected_m = Matrix::from([[0.,0.,0.,0.]]);
+        ///assert_eq!(m,expected_m);
+        ///
+        ///let m = Matrix::zeroed();
+        ///let expected_m = Matrix::from([[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.],[0.,0.,0.,0.]]);
+        ///assert_eq!(m,expected_m)
+        /// ```
+        fn zero() -> Self;
+
+        ///return the identity matrix
+        ///## Example :
+        /// ```
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
+        ///let i = Matrix::identity();
+        ///let expected_m = Matrix::from([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]);
+        ///assert_eq!(i,expected_m);
+        /// ```
+        fn identity() -> Self;
 
         ///return an inflation matrice
         /// that can be use to scale a row or a column
@@ -313,6 +370,8 @@ pub mod matrix {
         /// ## Example
         ///
         /// ```            
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
         /// let m = Matrix::<f32, 3, 3>::identity();
         ///assert!(m.is_upper_triangular());
         ///
@@ -331,6 +390,8 @@ pub mod matrix {
         ///
         ///  ## Example :
         /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
         ///let m = Matrix::<f32, 3, 3>::identity();
         ///assert!(m.is_lower_triangular());
         ///
@@ -346,58 +407,13 @@ pub mod matrix {
         fn is_lower_triangular(&self) -> bool;
     }
 
-    impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
-        type Output = Self;
-        fn add(self, rhs: Self) -> Self::Output {
-            self.addition(rhs)
-        }
-    }
-
-    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M> {
-        fn add_assign(&mut self, rhs: Self) {
-            *self = self.addition(rhs);
-        }
-    }
-
-    impl<const N: usize, const M: usize, const P: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, P, M> {
-        type Output = Matrix<f32, P, N>;
-        fn mul(self, rhs: Matrix<f32, M, N>) -> Self::Output {
-            self.multiply(rhs)
-        }
-    }
-
-    impl<const N: usize, const M: usize> Mul<f32> for Matrix<f32, N, M> {
-        type Output = Self;
-        fn mul(self, rhs: f32) -> Self::Output {
-            self.scale(rhs)
-        }
-    }
-
-    impl<const N: usize, const M: usize> MulAssign<f32> for Matrix<f32, N, M> {
-        fn mul_assign(&mut self, rhs: f32) {
-            *self = self.scale(rhs);
-        }
-    }
-
-    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
-        type Output = Matrix<f32, N, M>;
-        fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
-            rhs.scale(self)
-        }
-    }
-
-    impl<const N: usize> MulAssign<Matrix<f32, N, N>> for Matrix<f32, N, N> {
-        fn mul_assign(&mut self, rhs: Matrix<f32, N, N>) {
-            *self = self.multiply(rhs)
-        }
-    }
-
     ///implementation for f32
     impl<const N: usize, const M: usize> LinearAlgebra for Matrix<f32, N, M> {
         type Scalar = f32;
         type AddOutput = Self;
         type MultIn<const P: usize> = Matrix<f32, M, P>;
         type MultOutput<const P: usize> = Matrix<f32, N, P>;
+        type Square = Matrix<f32, N, N>;
 
         fn scale(&self, rhs: Self::Scalar) -> Self {
             let mut result = Self::default();
@@ -431,8 +447,8 @@ pub mod matrix {
             result
         }
 
+        ///TODO
         fn get_det(&self) -> f32 {
-            println!("--------getdet !!");
             match self.determinant {
                 Some(det) => det,
                 None => {
@@ -448,81 +464,87 @@ pub mod matrix {
                     if N == 2 {
                         self[0][0] * self[1][1] - self[1][0] * self[0][1]
                     } else {
-                        /*
-                        let mut result: f32 = 0.0;
-                        const I: usize = 0;
-                        for j in 0..N {
-                            let mut co_vec: Vec<Vec<f32>> = vec![];
-                            //(1-((i+j)%2)*2) = pow(-1,i+j)
-                            let product = ((1 - ((I + j) % 2) * 2) as f32) * self[I][j];
-                            for i_co in 0..N {
-                                if i_co != I {
-                                    co_vec.push(vec![]);
-                                    for j_co in 0..N {
-                                        if j_co != j {
-                                            (co_vec.last_mut()).unwrap().push(self[I][j]);
-                                        }
-                                    }
-                                }
-                            }
-                            let co_mat_det = <crate::my_matrix_lib::matrix::Matrix<f32, N, M> as crate::my_matrix_lib::matrix::Algebra<crate::my_matrix_lib::matrix::Matrix<f32, N, M>>>::get_det(Matrix::from(co_vec));
-                            result += product * co_mat_det;
+                        let mut result = 1.0;
+
+                        for i in 0..N {
+                            result *= self[i][i];
                         }
                         result
-                        */
-                        1.0
                     }
                 }
             }
         }
 
-        fn get_row_echelon(&self) -> Self {
-            let mut tab = self.clone();
+        fn get_reduce_row_echelon(&self) -> Self {
+            let mut result = *self;
 
-            let mut row_index = 0;
-            let mut column_index = 0;
+            let mut lead = 0;
 
-            while row_index < N && column_index < M {
-                let mut pivot_index = 0;
-                let j = row_index + 1;
-                while tab[row_index][pivot_index] == 0.0 && j < M {
-                    pivot_index = j;
+            for r in 0..N {
+                if lead >= N {
+                    return result;
                 }
 
-                if tab[row_index][pivot_index] == 0.0 {
-                    column_index += 1;
-                } else if row_index < N && column_index < M {
-                    if pivot_index < N {
-                        tab.permute_row(row_index, pivot_index);
-                    }
-                    for i in (row_index + 1)..N {
-                        for j in 0..M {
-                            tab[i][j] -= (tab[i][column_index] / tab[row_index][column_index])
-                                * tab[row_index][j];
+                let mut i = r;
+                while result[i][lead] == 0.0 {
+                    i += 1;
+                    if i == N {
+                        i = r;
+                        lead += 1;
+                        if lead >= M {
+                            return result;
                         }
                     }
-
-                    row_index += 1;
-                    column_index += 1;
                 }
+                result.permute_row(i, r);
+
+                //Normalization of the leading row
+                let mut lead_value = result[r][lead];
+                for j in 0..M {
+                    result[r][j] /= lead_value;
+                }
+
+                //Elimination of column entries
+                for i in 0..N {
+                    if i != r {
+                        lead_value = result[i][lead];
+                        for j in 0..M {
+                            result[i][j] -= lead_value * result[r][j];
+                        }
+                    }
+                }
+                lead += 1;
             }
 
-            tab
+            result
         }
 
-        //TODO tout refaire 🥲
-        fn get_plu_decomposition(&self) -> [Self; 3]
-        where
-            Self: Sized,
-        {
+        ///TODO (WIP)
+        fn get_plu_decomposition(&self) -> Option<[Self::Square; 3]> {
+            let self_square = match self.squared_or_none() {
+                Some(m) => m,
+                None => {
+                    return None;
+                }
+            };
+
             let p = Matrix::identity();
-            let l = Matrix::zeroed();
-            let u = Matrix::zeroed();
-
-            [p, l, u]
+            let l = Matrix::zero();
+            let u = Matrix::zero();
+            //useless
+            let mut a = self_square;
+            for n in 0..N {
+                let mut ln = Matrix::identity();
+                for i in (n + 1)..N {
+                    ln[i][n] = a[i][n] / a[n][n];
+                }
+                a = ln * a;
+            }
+            //end
+            Some([p, l, u])
         }
 
-        fn zeroed() -> Self {
+        fn zero() -> Self {
             let mut result = Self::default();
             for i in 0..N {
                 for j in 0..M {
@@ -609,6 +631,52 @@ pub mod matrix {
                 }
             }
             true
+        }
+    }
+
+    impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
+        type Output = Self;
+        fn add(self, rhs: Self) -> Self::Output {
+            self.addition(rhs)
+        }
+    }
+
+    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M> {
+        fn add_assign(&mut self, rhs: Self) {
+            *self = self.addition(rhs);
+        }
+    }
+
+    impl<const N: usize, const M: usize, const P: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, P, M> {
+        type Output = Matrix<f32, P, N>;
+        fn mul(self, rhs: Matrix<f32, M, N>) -> Self::Output {
+            self.multiply(rhs)
+        }
+    }
+
+    impl<const N: usize, const M: usize> Mul<f32> for Matrix<f32, N, M> {
+        type Output = Self;
+        fn mul(self, rhs: f32) -> Self::Output {
+            self.scale(rhs)
+        }
+    }
+
+    impl<const N: usize, const M: usize> MulAssign<f32> for Matrix<f32, N, M> {
+        fn mul_assign(&mut self, rhs: f32) {
+            *self = self.scale(rhs);
+        }
+    }
+
+    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
+        type Output = Matrix<f32, N, M>;
+        fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
+            rhs.scale(self)
+        }
+    }
+
+    impl<const N: usize> MulAssign<Matrix<f32, N, N>> for Matrix<f32, N, N> {
+        fn mul_assign(&mut self, rhs: Matrix<f32, N, N>) {
+            *self = self.multiply(rhs)
         }
     }
 }

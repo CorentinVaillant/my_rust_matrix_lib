@@ -52,11 +52,11 @@ mod tests {
         {
             use crate::my_matrix_lib::matrix::*;
 
-            let m = Matrix::zeroed();
+            let m = Matrix::zero();
             let expected_m = Matrix::from([[0., 0., 0., 0.]]);
             assert_eq!(m, expected_m);
 
-            let m = Matrix::zeroed();
+            let m = Matrix::zero();
             let expected_m = Matrix::from([
                 [0., 0., 0., 0.],
                 [0., 0., 0., 0.],
@@ -133,14 +133,6 @@ mod tests {
             assert_eq!(m * t, expected_m);
         }
 
-        //row echelon (WIP)
-        {
-            use crate::my_matrix_lib::matrix::*;
-
-            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.], [10., 11., 13.]]);
-            println!("{}", m.get_row_echelon());
-        }
-
         //is upper
         {
             use crate::my_matrix_lib::matrix::*;
@@ -173,6 +165,37 @@ mod tests {
 
             let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
             assert!(!m.is_lower_triangular());
+        }
+
+        //TODO get_reduce_row_echelon
+        {
+            use crate::my_matrix_lib::matrix::*;
+
+            const EPSILON: f32 = 10e-40;
+
+            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+
+            let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
+
+            assert_eq!(m.get_reduce_row_echelon(), expected_m);
+
+            let m = Matrix::from([[1., 2., 1., -1.], [3., 8., 1., 4.], [0., 4., 1., 0.]]);
+
+            let expected_m = Matrix::from([
+                [1., 0., 0., 2. / 5.],
+                [0., 1., 0., 7. / 10.],
+                [0., 0., 1., -(14. / 5.)],
+            ]);
+
+            assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
+        }
+
+        {
+            use crate::my_matrix_lib::matrix::*;
+
+            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            let plu = m.get_plu_decomposition().unwrap();
+            assert_eq!(m, plu[0] * plu[1] * plu[2]);
         }
 
         let elapsed_time = now.elapsed();
