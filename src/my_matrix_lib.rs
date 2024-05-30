@@ -203,6 +203,7 @@ pub mod matrix {
         type MultIn<const P: usize>;
         type MultOutput<const P: usize>;
         type Square;
+        type Transpose;
 
         //basic operations :
 
@@ -292,11 +293,6 @@ pub mod matrix {
         /// ```
         fn get_reduce_row_echelon(&self) -> Self;
 
-        ///TODO
-        fn get_reduce_row_echelon_with_transform(&self) -> (Self, Self::Square)
-        where
-            Self: Sized;
-
         ///give you the plu decomposition of a matrix
         /// return none if the matrix is not squared
         /// ## Exemple :
@@ -327,6 +323,11 @@ pub mod matrix {
         ///assert_eq!(p * m, l * u);
         /// ```
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
+
+        ///return the transpose of the matrice
+        /// TODO doc
+        /// Mark : Here
+        fn transpose(&self)->Self::Transpose;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -453,6 +454,7 @@ pub mod matrix {
         type MultIn<const P: usize> = Matrix<f32, M, P>;
         type MultOutput<const P: usize> = Matrix<f32, N, P>;
         type Square = Matrix<f32, N, N>;
+        type Transpose = Matrix<f32, M, N>;
 
         fn scale(&self, rhs: Self::Scalar) -> Self {
             let mut result = Self::default();
@@ -504,6 +506,8 @@ pub mod matrix {
                         self[0][0] * self[1][1] - self[1][0] * self[0][1]
                     } else {
                         let mut result = 1.0;
+                        let (p, l, u) = self.get_plu_decomposition().unwrap();
+
 
                         for i in 0..N {
                             result *= self[i][i];
@@ -558,54 +562,6 @@ pub mod matrix {
             result
         }
 
-        fn get_reduce_row_echelon_with_transform(&self) -> (Self, Self::Square)
-        where
-            Self: Sized,
-        {
-            let mut result = *self;
-            let mut p = Matrix::identity();
-
-            let mut lead = 0;
-
-            for r in 0..N {
-                if lead >= N {
-                    return (result, p);
-                }
-
-                let mut i = r;
-                while result[i][lead] == 0.0 {
-                    i += 1;
-                    if i == N {
-                        i = r;
-                        lead += 1;
-                        if lead >= M {
-                            return (result, p);
-                        }
-                    }
-                }
-                result.permute_row(i, r);
-                p.permute_row(i, r);
-
-                //Normalization of the leading row
-                let mut lead_value = result[r][lead];
-                for j in 0..M {
-                    result[r][j] /= lead_value;
-                }
-
-                //Elimination of column entries
-                for i in 0..N {
-                    if i != r {
-                        lead_value = result[i][lead];
-                        for j in 0..M {
-                            result[i][j] -= lead_value * result[r][j];
-                        }
-                    }
-                }
-                lead += 1;
-            }
-
-            (result, p)
-        }
 
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)> {
             let self_square = match self.squared_or_none() {
@@ -660,6 +616,16 @@ pub mod matrix {
             }
 
             Some((p, l, u))
+        }
+
+        fn transpose(&self)->Self::Transpose {
+            let mut result = Self::Transpose::zero();
+            for i in 0..N{
+                for j in 0..M{
+                    result[j][i] = self[i][j]
+                }
+            }
+            result
         }
 
         fn zero() -> Self {

@@ -133,7 +133,7 @@ mod tests {
             assert_eq!(m * t, expected_m);
         }
 
-        //is upper
+        //test is upper
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -150,7 +150,7 @@ mod tests {
             assert!(!m.is_upper_triangular());
         }
 
-        //is lower
+        //test is lower
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -167,7 +167,7 @@ mod tests {
             assert!(!m.is_lower_triangular());
         }
 
-        //TODO get_reduce_row_echelon
+        //test get_reduce_row_echelon
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -189,7 +189,7 @@ mod tests {
 
             assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
         }
-        //test block
+        //test plu decomposition
         {
             use crate::my_matrix_lib::matrix::*;
 
@@ -215,6 +215,8 @@ mod tests {
 
             assert_eq!(p * m, l * u);
         }
+
+        
 
         let elapsed_time = now.elapsed();
         println!("test ✅, took {}", elapsed_time.as_secs_f64());
