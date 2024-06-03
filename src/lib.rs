@@ -256,6 +256,10 @@ mod tests {
 
             assert_eq!(m, m.transpose());
 
+            let m = Matrix::from([[0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]);
+            
+            assert_eq!(m, m.transpose());
+
             let m = Matrix::from([
                 ["I", "am", "a", "Matrix"],
                 ["I", "am", "string", "compose"],

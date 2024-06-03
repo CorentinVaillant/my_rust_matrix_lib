@@ -160,6 +160,35 @@ pub mod matrix {
             }
         }
 
+        ///Give you the transpose Matrix
+        ///
+        /// ## Exemples :
+        /// ```
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///let m: Matrix<f32, 3, 3> = Matrix::identity();
+        ///
+        ///assert_eq!(m, m.transpose());
+        ///
+        ///let m = Matrix::from([
+        ///     ["I", "am", "a", "Matrix"],
+        ///     ["I", "am", "string", "compose"],
+        ///     ["I", "ate", "some", "salade"],
+        ///     ["You", "cant", "multiply", "me"],
+        /// ]);
+        ///
+        ///let m = Matrix::from([[0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]);
+        ///
+        ///assert_eq!(m, m.transpose());
+        ///
+        ///let expected_m = Matrix::from([
+        ///     ["I", "I", "I", "You"],
+        ///     ["am", "am", "ate", "cant"],
+        ///     ["a", "string", "some", "multiply"],
+        ///     ["Matrix", "compose", "salade", "me"],
+        ///]);
+        ///
+        ///assert_eq!(m.transpose(), expected_m);
+        /// ```
         pub fn transpose(&self) -> Matrix<T, M, N> {
             let mut result = Matrix::<T, M, N>::default();
             for i in 0..N {
@@ -178,7 +207,7 @@ pub mod matrix {
         ///Performe the permutation of the row i and j in a Matrix
         /// ## Example :
         /// ```
-        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
         ///let mut m = Matrix::from([[1,1,1],[2,2,2],[3,3,3]]);
         ///let expected_m = Matrix::from([[2,2,2],[1,1,1],[3,3,3]]);
@@ -308,7 +337,7 @@ pub mod matrix {
         ///
         ///## Exemples :
         /// ```
-        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
         ///const EPSILON: f64 = 10e-3;
         ///
