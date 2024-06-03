@@ -224,12 +224,10 @@ mod tests {
 
             let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
-            println!("det -> {}", m.get_det());
             assert_eq!(m.get_det(), 0.0);
 
             let mut m: Matrix<f32, 5, 5> = Matrix::identity();
 
-            println!("det -> {}", m.get_det());
             assert_eq!(m.get_det(), 1.0);
 
             let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
@@ -254,7 +252,11 @@ mod tests {
 
         //transpose
         {
-            
+            use crate::my_matrix_lib::matrix::*;
+
+            let m: Matrix<f32, 3, 3> = Matrix::identity();
+
+            assert_eq!(m, m.transpose());
         }
 
         let elapsed_time = now.elapsed();

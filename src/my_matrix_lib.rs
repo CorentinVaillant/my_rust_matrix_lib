@@ -53,13 +53,17 @@ pub mod matrix {
 
     //definition using a vec
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize>
-        From<Vec<Vec<T>>> for Matrix<T, N, M>
+        TryFrom<Vec<Vec<T>>> for Matrix<T, N, M>
     {
-        fn from(tab: Vec<Vec<T>>) -> Self {
-            if cfg!(debug_assertion) {
-                assert_eq!(tab.len(), N);
-                for row in &tab {
-                    assert_eq!(row.len(), M);
+        type Error = &'static str;
+
+        fn try_from(tab: Vec<Vec<T>>) -> Result<Self, Self::Error> {
+            if tab.len() != N {
+                return Err("matrix height does not match value lenght");
+            }
+            for row in &tab {
+                if row.len() != M {
+                    return Err("matrix width does not match all vectors in values lenght");
                 }
             }
 
@@ -69,10 +73,10 @@ pub mod matrix {
                     arr[i][j] = val;
                 }
             }
-            Self {
+            Ok(Self {
                 inner: arr,
                 ..Default::default()
-            }
+            })
         }
     }
 
@@ -265,22 +269,19 @@ pub mod matrix {
         ///## Exemples :
         /// ```
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
-        /// 
+        ///
         ///const EPSILON: f64 = 10e-3;
         ///
         ///let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
         ///
-        ///println!("det -> {}", m.get_det());
         ///assert_eq!(m.get_det(), 0.0);
         ///
         ///let mut m: Matrix<f32, 5, 5> = Matrix::identity();
         ///
-        ///println!("det -> {}", m.get_det());
         ///assert_eq!(m.get_det(), 1.0);
         ///
         ///let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
         ///
-        ///println!("det -> {}", m.get_det());
         ///assert_eq!(m.get_det(), -1.0);
         ///
         ///let mut m = Matrix::from([
