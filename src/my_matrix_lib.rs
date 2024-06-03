@@ -118,9 +118,11 @@ pub mod matrix {
 
     //basic implementation
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+        
+
         ///### Private
         ///If the matrix is square return self, if note none
-        fn squared_or_none(&self) -> Option<Matrix<T, N, N>> {
+        fn squared_or_none(&self) -> Option<Matrix<T, N, N>>{
             if N != M {
                 None
             } else {
@@ -133,6 +135,24 @@ pub mod matrix {
 
                 Some(result)
             }
+        }
+
+
+        pub fn transpose(&self) ->Matrix<T,M,N>{
+                    
+            let mut result = Matrix::<T,M,N>::default();
+            for i in 0..N {
+                for j in 0..M {
+                    result[j][i] = self[i][j]
+                }
+            }
+
+            if let Some(det) = self.determinant {
+                result.determinant = Some(det)
+            }
+            result
+        
+
         }
 
         ///Permute row i and j
@@ -188,10 +208,12 @@ pub mod matrix {
     //TODO généricité
     impl<const N: usize, const M: usize> Matrix<f32, N, M> {
         ///equality with an epsilon, to carry floating point error
-        pub fn float_eq(&self, other: &Self, epsilon: f32) -> bool {
+        pub fn float_eq(&self, other: &Self) -> bool {
             for i in 0..N {
                 for j in 0..M {
-                    if -epsilon >= self[i][j] - other[i][j] && self[i][j] - other[i][j] >= epsilon {
+                    if -std::f32::EPSILON >= self[i][j] - other[i][j]
+                        && self[i][j] - other[i][j] >= std::f32::EPSILON
+                    {
                         return false;
                     }
                 }
@@ -207,7 +229,6 @@ pub mod matrix {
         type MultIn<const P: usize>;
         type MultOutput<const P: usize>;
         type Square;
-        type Transpose;
 
         //basic operations :
 
@@ -306,7 +327,6 @@ pub mod matrix {
         /// ```
         /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
-        ///const EPSILON :f32 = 10e-40;
         ///
         ///let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
         ///
@@ -323,7 +343,7 @@ pub mod matrix {
         ///]);
         ///
         ///
-        ///assert!(m.get_reduce_row_echelon().float_eq(&expected_m,EPSILON));
+        ///assert!(m.get_reduce_row_echelon().float_eq(&expected_m));
         /// ```
         fn get_reduce_row_echelon(&self) -> Self;
 
@@ -357,10 +377,6 @@ pub mod matrix {
         ///assert_eq!(p * m, l * u);
         /// ```
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
-
-        ///return the transpose of the matrice
-        /// TODO doc
-        fn transpose(&self) -> Self::Transpose;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -487,7 +503,6 @@ pub mod matrix {
         type MultIn<const P: usize> = Matrix<f32, M, P>;
         type MultOutput<const P: usize> = Matrix<f32, N, P>;
         type Square = Matrix<f32, N, N>;
-        type Transpose = Matrix<f32, M, N>;
 
         fn scale(&self, rhs: Self::Scalar) -> Self {
             let mut result = Self::default();
@@ -680,15 +695,7 @@ pub mod matrix {
             Some((p, l, u))
         }
 
-        fn transpose(&self) -> Self::Transpose {
-            let mut result = Self::Transpose::zero();
-            for i in 0..N {
-                for j in 0..M {
-                    result[j][i] = self[i][j]
-                }
-            }
-            result
-        }
+
 
         fn zero() -> Self {
             let mut result = Self::default();

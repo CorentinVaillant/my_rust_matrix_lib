@@ -171,8 +171,6 @@ mod tests {
         {
             use crate::my_matrix_lib::matrix::*;
 
-            const EPSILON: f32 = 10e-40;
-
             let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
             let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
@@ -187,7 +185,7 @@ mod tests {
                 [0., 0., 1., -(14. / 5.)],
             ]);
 
-            assert!(m.get_reduce_row_echelon().float_eq(&expected_m, EPSILON));
+            assert!(m.get_reduce_row_echelon().float_eq(&expected_m));
         }
         //test plu decomposition
         {
@@ -257,9 +255,25 @@ mod tests {
             let m: Matrix<f32, 3, 3> = Matrix::identity();
 
             assert_eq!(m, m.transpose());
+
+            let m = Matrix::from([
+                ["I", "am", "a", "Matrix"],
+                ["I", "am", "string", "compose"],
+                ["I", "ate", "some", "salade"],
+                ["You", "cant", "multiply", "me"],
+            ]);
+
+            let expected_m = Matrix::from([
+                ["I", "I", "I", "You"],
+                ["am", "am", "ate", "cant"],
+                ["a", "string", "some", "multiply"],
+                ["Matrix", "compose", "salade", "me"],
+            ]);
+
+            assert_eq!(m.transpose(),expected_m);
         }
 
         let elapsed_time = now.elapsed();
-        println!("test -2522.937368✅, took {}", elapsed_time.as_secs_f64());
+        println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
     }
 }
