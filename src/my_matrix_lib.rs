@@ -2,6 +2,8 @@ pub mod matrix {
     use core::fmt;
     use std::{ops::*, usize};
 
+    type VecTab<T> = Vec<Vec<T>>;
+
     //definition of Matrix
     #[derive(Debug, Clone)]
     pub struct Matrix<T, const N: usize, const M: usize> {
@@ -51,6 +53,14 @@ pub mod matrix {
         }
     }
 
+    trait TryIntoMatrice<T> {
+        fn t_tryinto_matrice(value:T)-> Self;
+    }
+
+    impl <T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> TryIntoMatrice<> { //TODO HERE
+        
+    }
+
     //definition using a vec
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize>
         TryFrom<Vec<Vec<T>>> for Matrix<T, N, M>
@@ -80,14 +90,7 @@ pub mod matrix {
         }
     }
 
-    impl<T, U, const N: usize, const M: usize> From<U> for Matrix<T, N, M>
-    where
-        Matrix<T, N, M>: ToMatrice<U>,
-    {
-        fn from(value: U) -> Self {
-            Self::t_to_matrice(value)
-        }
-    }
+
     trait ToMatrice<T> {
         fn t_to_matrice(value: T) -> Self;
     }
@@ -115,6 +118,16 @@ pub mod matrix {
             }
         }
     }
+
+    impl<T, U, const N: usize, const M: usize> From<U> for Matrix<T, N, M>
+    where
+        Matrix<T, N, M>: ToMatrice<U>,
+    {
+        fn from(value: U) -> Self {
+            Self::t_to_matrice(value)
+        }
+    }
+
     impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
         type Item = [T; M];
 
@@ -399,7 +412,7 @@ pub mod matrix {
         /// return none if the matrix is not squared
         /// ## Exemple :
         /// ```
-        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
         ///
         ///let m = Matrix::from([
@@ -425,6 +438,10 @@ pub mod matrix {
         ///assert_eq!(p * m, l * u);
         /// ```
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
+
+        fn get_inverse(&self) -> Option<Self>
+        where
+            Self: Sized;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -741,6 +758,32 @@ pub mod matrix {
             }
 
             Some((p, l, u))
+        }
+
+        fn get_inverse(&self) -> Option<Self>
+        where
+            Self: Sized,
+        {
+            let mut result: Option<Self>;
+            if N != M {
+                result = None;
+            } else if N == 1 {
+                if self[0][0] == 0.0 {
+                    result = None
+                }
+            } else if N == 2 {
+                if self.get_det() != 0.0 {
+                    result = Some((
+                        (1.0 / f32::from(self.get_det()))
+                            * Matrix::from([[self[1][1], -self[0][1]], [-self[1][0], self[0][0]]].clone())).try_into().unwrap(),
+                    );
+                }
+            }
+            else {
+                
+            }
+
+            todo!()
         }
 
         fn zero() -> Self {
