@@ -216,9 +216,48 @@ mod tests {
             assert_eq!(p * m, l * u);
         }
 
-        
+        //get det
+        {
+            use crate::my_matrix_lib::matrix::*;
+
+            const EPSILON: f64 = 10e-3;
+
+            let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+
+            println!("det -> {}", m.get_det());
+            assert_eq!(m.get_det(), 0.0);
+
+            let mut m: Matrix<f32, 5, 5> = Matrix::identity();
+
+            println!("det -> {}", m.get_det());
+            assert_eq!(m.get_det(), 1.0);
+
+            let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
+
+            println!("det -> {}", m.get_det());
+            assert_eq!(m.get_det(), -1.0);
+
+            let mut m = Matrix::from([
+                [6.0, 5.8, 3.8, 4.7, 8.5, 3.3],
+                [2.6, 1.0, 7.2, 8.5, 1.5, 5.3],
+                [1.8, 3.2, 1.1, 5.7, 1.0, 5.4],
+                [7.0, 0.9, 6.7, 2.1, 4.6, 5.8],
+                [4.2, 0.7, 5.2, 0.1, 8.7, 5.1],
+                [4.3, 3.0, 5.3, 5.0, 4.8, 3.0],
+            ]);
+
+            let det = m.get_det();
+            let expected_det = -2522.937368;
+
+            assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
+        }
+
+        //transpose
+        {
+            
+        }
 
         let elapsed_time = now.elapsed();
-        println!("test ✅, took {}", elapsed_time.as_secs_f64());
+        println!("test -2522.937368✅, took {}", elapsed_time.as_secs_f64());
     }
 }

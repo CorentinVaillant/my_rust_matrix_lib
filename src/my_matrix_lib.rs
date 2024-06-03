@@ -6,7 +6,7 @@ pub mod matrix {
     #[derive(Debug, Clone)]
     pub struct Matrix<T, const N: usize, const M: usize> {
         inner: [[T; M]; N],
-        determinant: Option<f32>,
+        determinant: Option<f64>,
     }
 
     //definition de index
@@ -226,7 +226,7 @@ pub mod matrix {
         /// ## Example :
         ///```
         ///
-        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///use my_rust_matrix_lib::my_matrix_lib::matrix::*;
         ///
         ///let m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.]]);
         ///let m2 = Matrix::from([[1.,2.],[3.,4.],[5.,6.]]);
@@ -259,12 +259,45 @@ pub mod matrix {
 
         //Matrix operation
 
-        ///return the determinant of the matrix (❗️**expensive computing do once**) (//!WIP)
-        /// # Example :
+        ///return the determinant of the matrix
+        /// the determinant is store in the matrix struc at the end, to be modified in consequence during other operations
+        ///
+        ///## Exemples :
         /// ```
-        /// //nothing for the moment TODO
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        /// 
+        ///const EPSILON: f64 = 10e-3;
+        ///
+        ///let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+        ///
+        ///println!("det -> {}", m.get_det());
+        ///assert_eq!(m.get_det(), 0.0);
+        ///
+        ///let mut m: Matrix<f32, 5, 5> = Matrix::identity();
+        ///
+        ///println!("det -> {}", m.get_det());
+        ///assert_eq!(m.get_det(), 1.0);
+        ///
+        ///let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
+        ///
+        ///println!("det -> {}", m.get_det());
+        ///assert_eq!(m.get_det(), -1.0);
+        ///
+        ///let mut m = Matrix::from([
+        ///    [6.0, 5.8, 3.8, 4.7, 8.5, 3.3],
+        ///    [2.6, 1.0, 7.2, 8.5, 1.5, 5.3],
+        ///    [1.8, 3.2, 1.1, 5.7, 1.0, 5.4],
+        ///    [7.0, 0.9, 6.7, 2.1, 4.6, 5.8],
+        ///    [4.2, 0.7, 5.2, 0.1, 8.7, 5.1],
+        ///    [4.3, 3.0, 5.3, 5.0, 4.8, 3.0],
+        ///]);
+        ///
+        ///let det = m.get_det();
+        ///let expected_det = -2522.937368;
+        ///
+        ///assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
         /// ```
-        fn get_det(&self) -> f32;
+        fn get_det(&mut self) -> f64;
 
         ///return a row echelon reduce form of the matrix
         ///
@@ -326,8 +359,7 @@ pub mod matrix {
 
         ///return the transpose of the matrice
         /// TODO doc
-        /// Mark : Here
-        fn transpose(&self)->Self::Transpose;
+        fn transpose(&self) -> Self::Transpose;
 
         ///return a permutation matrix
         /// that can be use with multiplication to get a row/column permuted matrice
@@ -463,6 +495,11 @@ pub mod matrix {
                     result.inner[i][j] = rhs * self[i][j];
                 }
             }
+
+            if let Some(det) = self.determinant {
+                result.determinant = Some(det * f64::powi(rhs as f64, N.try_into().unwrap()))
+            };
+
             result
         }
 
@@ -485,35 +522,60 @@ pub mod matrix {
                     }
                 }
             }
+
+            if let Some(det_1) = self.determinant {
+                if let Some(det_2) = rhs.determinant {
+                    result.determinant = Some(det_1 * det_2)
+                }
+            }
+
             result
         }
 
-        ///TODO
-        fn get_det(&self) -> f32 {
+        fn get_det(&mut self) -> f64 {
             match self.determinant {
                 Some(det) => det,
                 None => {
                     if N != M {
+                        self.determinant = Some(0.0);
                         return 0.0;
                     }
                     if N == 0 {
+                        self.determinant = Some(0.0);
                         return 0.0;
                     }
                     if N == 1 {
-                        return self[0][0];
+                        self.determinant = Some(self[0][0] as f64);
                     }
                     if N == 2 {
-                        self[0][0] * self[1][1] - self[1][0] * self[0][1]
+                        self.determinant =
+                            Some((self[0][0] * self[1][1] - self[1][0] * self[0][1]) as f64);
                     } else {
-                        let mut result = 1.0;
-                        let (p, l, u) = self.get_plu_decomposition().unwrap();
+                        let (p, _, u) = self.get_plu_decomposition().unwrap();
 
+                        //p determinant
 
+                        let mut permutation_nb: u8 = 0;
                         for i in 0..N {
-                            result *= self[i][i];
+                            if p[i][i] != 1.0 {
+                                permutation_nb += 1;
+                            }
+                            permutation_nb %= 4;
                         }
-                        result
+                        permutation_nb /= 2;
+                        let p_det = if permutation_nb == 0 { 1. } else { -1. };
+
+                        //u determinant
+                        let mut u_det: f64 = 1.0;
+                        for i in 0..N {
+                            u_det *= u[i][i] as f64;
+                        }
+
+                        self.determinant =
+                            Some(p_det * u_det /* * l_det (l_det is equal to 1)*/);
                     }
+
+                    self.determinant.unwrap()
                 }
             }
         }
@@ -561,7 +623,6 @@ pub mod matrix {
 
             result
         }
-
 
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)> {
             let self_square = match self.squared_or_none() {
@@ -618,10 +679,10 @@ pub mod matrix {
             Some((p, l, u))
         }
 
-        fn transpose(&self)->Self::Transpose {
+        fn transpose(&self) -> Self::Transpose {
             let mut result = Self::Transpose::zero();
-            for i in 0..N{
-                for j in 0..M{
+            for i in 0..N {
+                for j in 0..M {
                     result[j][i] = self[i][j]
                 }
             }
