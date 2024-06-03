@@ -270,7 +270,7 @@ mod tests {
                 ["Matrix", "compose", "salade", "me"],
             ]);
 
-            assert_eq!(m.transpose(),expected_m);
+            assert_eq!(m.transpose(), expected_m);
         }
 
         let elapsed_time = now.elapsed();

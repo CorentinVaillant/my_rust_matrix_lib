@@ -1,6 +1,6 @@
 pub mod matrix {
     use core::fmt;
-    use std::ops::*;
+    use std::{ops::*, usize};
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -80,16 +80,41 @@ pub mod matrix {
         }
     }
 
+    impl<T, U, const N: usize, const M: usize> From<U> for Matrix<T, N, M>
+    where
+        Matrix<T, N, M>: ToMatrice<U>,
+    {
+        fn from(value: U) -> Self {
+            Self::t_to_matrice(value)
+        }
+    }
+    trait ToMatrice<T> {
+        fn t_to_matrice(value: T) -> Self;
+    }
+    impl<T, U, const N: usize, const M: usize> ToMatrice<&Matrix<U, N, M>> for Matrix<T, N, M>
+    where
+        T: From<U> + Default + Copy,
+        U: Copy,
+    {
+        fn t_to_matrice(u_mat: &Matrix<U, N, M>) -> Self {
+            let mut result = Self::default();
+            for i in 0..N {
+                for j in 0..M {
+                    result[i][j] = u_mat[i][j].into();
+                }
+            }
+            result
+        }
+    }
     //definition using an array
-    impl<T, const N: usize, const M: usize> From<[[T; M]; N]> for Matrix<T, N, M> {
-        fn from(arr: [[T; M]; N]) -> Self {
+    impl<T, const N: usize, const M: usize> ToMatrice<[[T; M]; N]> for Matrix<T, N, M> {
+        fn t_to_matrice(arr: [[T; M]; N]) -> Self {
             Self {
                 inner: arr,
                 determinant: None,
             }
         }
     }
-
     impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
         type Item = [T; M];
 
@@ -118,11 +143,9 @@ pub mod matrix {
 
     //basic implementation
     impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
-        
-
         ///### Private
         ///If the matrix is square return self, if note none
-        fn squared_or_none(&self) -> Option<Matrix<T, N, N>>{
+        fn squared_or_none(&self) -> Option<Matrix<T, N, N>> {
             if N != M {
                 None
             } else {
@@ -137,10 +160,8 @@ pub mod matrix {
             }
         }
 
-
-        pub fn transpose(&self) ->Matrix<T,M,N>{
-                    
-            let mut result = Matrix::<T,M,N>::default();
+        pub fn transpose(&self) -> Matrix<T, M, N> {
+            let mut result = Matrix::<T, M, N>::default();
             for i in 0..N {
                 for j in 0..M {
                     result[j][i] = self[i][j]
@@ -151,8 +172,6 @@ pub mod matrix {
                 result.determinant = Some(det)
             }
             result
-        
-
         }
 
         ///Permute row i and j
@@ -694,8 +713,6 @@ pub mod matrix {
 
             Some((p, l, u))
         }
-
-
 
         fn zero() -> Self {
             let mut result = Self::default();
