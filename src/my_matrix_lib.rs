@@ -1,14 +1,11 @@
 pub mod matrix {
     use core::fmt;
-    use std::{ops::*, usize};
-
-    type VecTab<T> = Vec<Vec<T>>;
+    use std::ops::*;
 
     //definition of Matrix
     #[derive(Debug, Clone)]
     pub struct Matrix<T, const N: usize, const M: usize> {
         inner: [[T; M]; N],
-        determinant: Option<f64>,
     }
 
     //definition de index
@@ -22,7 +19,6 @@ pub mod matrix {
     //definition de index mut
     impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
         fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-            self.determinant = None;
             &mut self.inner[index]
         }
     }
@@ -48,48 +44,41 @@ pub mod matrix {
         fn default() -> Self {
             Self {
                 inner: [[T::default(); M]; N],
-                determinant: None,
             }
         }
     }
 
-    trait TryIntoMatrice<T> {
-        fn t_tryinto_matrice(value:T)-> Self;
+    trait TryMatrixFrom<T> {
+        type Error;
+        fn try_into_matrix(value: T) -> Result<Self, Self::Error>
+        where
+            Self: Sized;
     }
 
-    impl <T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> TryIntoMatrice<> { //TODO HERE
-        
-    }
-
-    //definition using a vec
-    impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize>
-        TryFrom<Vec<Vec<T>>> for Matrix<T, N, M>
+    impl<
+            T: std::default::Default + std::marker::Copy,
+            const N: usize,
+            const M: usize,
+            const P: usize,
+            const Q: usize,
+        > TryMatrixFrom<Matrix<T, P, Q>> for Matrix<T, N, M>
     {
         type Error = &'static str;
 
-        fn try_from(tab: Vec<Vec<T>>) -> Result<Self, Self::Error> {
-            if tab.len() != N {
-                return Err("matrix height does not match value lenght");
-            }
-            for row in &tab {
-                if row.len() != M {
-                    return Err("matrix width does not match all vectors in values lenght");
+        fn try_into_matrix(value: Matrix<T, P, Q>) -> Result<Self, Self::Error> {
+            if N == P && M == Q {
+                let mut result = Self::default();
+                for i in 0..N {
+                    for j in 0..M {
+                        result[i][j] = value[i][j];
+                    }
                 }
+                Ok(result)
+            } else {
+                Err("Size not match")
             }
-
-            let mut arr: [[T; M]; N] = [[T::default(); M]; N];
-            for (i, row) in tab.into_iter().enumerate() {
-                for (j, val) in row.into_iter().enumerate() {
-                    arr[i][j] = val;
-                }
-            }
-            Ok(Self {
-                inner: arr,
-                ..Default::default()
-            })
         }
     }
-
 
     trait ToMatrice<T> {
         fn t_to_matrice(value: T) -> Self;
@@ -112,10 +101,7 @@ pub mod matrix {
     //definition using an array
     impl<T, const N: usize, const M: usize> ToMatrice<[[T; M]; N]> for Matrix<T, N, M> {
         fn t_to_matrice(arr: [[T; M]; N]) -> Self {
-            Self {
-                inner: arr,
-                determinant: None,
-            }
+            Self { inner: arr }
         }
     }
 
@@ -182,16 +168,17 @@ pub mod matrix {
         ///
         ///assert_eq!(m, m.transpose());
         ///
+        ///
+        ///let m = Matrix::from([[0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]);
+        ///
+        ///assert_eq!(m, m.transpose());
+        ///
         ///let m = Matrix::from([
         ///     ["I", "am", "a", "Matrix"],
         ///     ["I", "am", "string", "compose"],
         ///     ["I", "ate", "some", "salade"],
         ///     ["You", "cant", "multiply", "me"],
         /// ]);
-        ///
-        ///let m = Matrix::from([[0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]);
-        ///
-        ///assert_eq!(m, m.transpose());
         ///
         ///let expected_m = Matrix::from([
         ///     ["I", "I", "I", "You"],
@@ -208,10 +195,6 @@ pub mod matrix {
                 for j in 0..M {
                     result[j][i] = self[i][j]
                 }
-            }
-
-            if let Some(det) = self.determinant {
-                result.determinant = Some(det)
             }
             result
         }
@@ -235,10 +218,6 @@ pub mod matrix {
             }
 
             self.inner.swap(i, j);
-
-            if let Some(det) = self.determinant {
-                self.determinant = Some(det * -1.0)
-            }
         }
         ///Permute column i and j
         ///Performe the permutation of the column i and j in a Matrix
@@ -259,10 +238,6 @@ pub mod matrix {
             for row_index in 0..N {
                 self[row_index].swap(i, j);
             }
-
-            if let Some(det) = self.determinant {
-                self.determinant = Some(det * -1.0)
-            }
         }
     }
 
@@ -272,8 +247,8 @@ pub mod matrix {
         pub fn float_eq(&self, other: &Self) -> bool {
             for i in 0..N {
                 for j in 0..M {
-                    if -std::f32::EPSILON >= self[i][j] - other[i][j]
-                        && self[i][j] - other[i][j] >= std::f32::EPSILON
+                    if -f32::EPSILON >= self[i][j] - other[i][j]
+                        && self[i][j] - other[i][j] >= f32::EPSILON
                     {
                         return false;
                     }
@@ -380,7 +355,7 @@ pub mod matrix {
         ///
         ///assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
         /// ```
-        fn get_det(&mut self) -> f64;
+        fn get_det(&self) -> f64;
 
         ///return a row echelon reduce form of the matrix
         ///
@@ -577,10 +552,6 @@ pub mod matrix {
                 }
             }
 
-            if let Some(det) = self.determinant {
-                result.determinant = Some(det * f64::powi(rhs as f64, N.try_into().unwrap()))
-            };
-
             result
         }
 
@@ -604,60 +575,43 @@ pub mod matrix {
                 }
             }
 
-            if let Some(det_1) = self.determinant {
-                if let Some(det_2) = rhs.determinant {
-                    result.determinant = Some(det_1 * det_2)
-                }
-            }
-
             result
         }
 
-        fn get_det(&mut self) -> f64 {
-            match self.determinant {
-                Some(det) => det,
-                None => {
-                    if N != M {
-                        self.determinant = Some(0.0);
-                        return 0.0;
+        fn get_det(&self) -> f64 {
+            if N != M {
+                return 0.0;
+            }
+            if N == 0 {
+                return 0.0;
+            }
+            if N == 1 {
+                return self[0][0] as f64;
+            }
+            if N == 2 {
+                (self[0][0] * self[1][1] - self[1][0] * self[0][1]) as f64
+            } else {
+                let (p, _, u) = self.get_plu_decomposition().unwrap();
+
+                //p determinant
+
+                let mut permutation_nb: u8 = 0;
+                for i in 0..N {
+                    if p[i][i] != 1.0 {
+                        permutation_nb += 1;
                     }
-                    if N == 0 {
-                        self.determinant = Some(0.0);
-                        return 0.0;
-                    }
-                    if N == 1 {
-                        self.determinant = Some(self[0][0] as f64);
-                    }
-                    if N == 2 {
-                        self.determinant =
-                            Some((self[0][0] * self[1][1] - self[1][0] * self[0][1]) as f64);
-                    } else {
-                        let (p, _, u) = self.get_plu_decomposition().unwrap();
-
-                        //p determinant
-
-                        let mut permutation_nb: u8 = 0;
-                        for i in 0..N {
-                            if p[i][i] != 1.0 {
-                                permutation_nb += 1;
-                            }
-                            permutation_nb %= 4;
-                        }
-                        permutation_nb /= 2;
-                        let p_det = if permutation_nb == 0 { 1. } else { -1. };
-
-                        //u determinant
-                        let mut u_det: f64 = 1.0;
-                        for i in 0..N {
-                            u_det *= u[i][i] as f64;
-                        }
-
-                        self.determinant =
-                            Some(p_det * u_det /* * l_det (l_det is equal to 1)*/);
-                    }
-
-                    self.determinant.unwrap()
+                    permutation_nb %= 4;
                 }
+                permutation_nb /= 2;
+                let p_det = if permutation_nb == 0 { 1. } else { -1. };
+
+                //u determinant
+                let mut u_det: f64 = 1.0;
+                for i in 0..N {
+                    u_det *= u[i][i] as f64;
+                }
+
+                p_det * u_det /* * l_det (l_det is equal to 1)*/
             }
         }
 
@@ -764,26 +718,28 @@ pub mod matrix {
         where
             Self: Sized,
         {
-            let mut result: Option<Self>;
-            if N != M {
-                result = None;
-            } else if N == 1 {
-                if self[0][0] == 0.0 {
-                    result = None
+            let mut result = None;
+            if N == M {
+                if N == 1 {
+                    if self[0][0] == 0.0 {
+                        result = None
+                    }
+                } else if N == 2 {
+                    if self.get_det() != 0.0 {
+                        result = Some( self.get_det() as f32 *
+                            Self::try_into_matrix(Matrix::from([
+                                [self[1][1], -self[0][1]],
+                                [-self[1][0], self[0][0]],
+                            ]))
+                            .unwrap(),
+                        );
+                    }
+                } else {
+                    todo!()
                 }
-            } else if N == 2 {
-                if self.get_det() != 0.0 {
-                    result = Some((
-                        (1.0 / f32::from(self.get_det()))
-                            * Matrix::from([[self[1][1], -self[0][1]], [-self[1][0], self[0][0]]].clone())).try_into().unwrap(),
-                    );
-                }
-            }
-            else {
-                
             }
 
-            todo!()
+            result
         }
 
         fn zero() -> Self {
@@ -876,49 +832,54 @@ pub mod matrix {
         }
     }
 
-    impl<const N: usize, const M: usize> Add for Matrix<f32, N, M> {
-        type Output = Self;
+    impl<T,const N: usize, const M: usize> Add for Matrix<T, N, M>
+    where Self :LinearAlgebra {
+        type Output = <Matrix<T,N,M> as LinearAlgebra>::AddOutput;
         fn add(self, rhs: Self) -> Self::Output {
             self.addition(rhs)
         }
     }
 
-    impl<const N: usize, const M: usize> AddAssign for Matrix<f32, N, M> {
+    impl<T,const N: usize, const M: usize> AddAssign for Matrix<T, N, M> 
+    where Self :LinearAlgebra,
+    <Matrix<T,N,M> as LinearAlgebra>::AddOutput : Into<Self> //???
+    {
         fn add_assign(&mut self, rhs: Self) {
-            *self = self.addition(rhs);
+            *self = self.addition(rhs).into();
         }
     }
 
-    impl<const N: usize, const M: usize, const P: usize> Mul<Matrix<f32, M, N>> for Matrix<f32, P, M> {
-        type Output = Matrix<f32, P, N>;
-        fn mul(self, rhs: Matrix<f32, M, N>) -> Self::Output {
+    impl<T, const M: usize, const P: usize> Mul<<Matrix<T, M, P> as LinearAlgebra>::MultIn<P>> for Matrix<T, M, P> 
+    where Self : LinearAlgebra,
+    {
+        type Output = <Self as LinearAlgebra>::MultOutput<P>;
+        fn mul(self, rhs: <Matrix<T, M, P> as LinearAlgebra>::MultIn<P>) -> Self::Output {
             self.multiply(rhs)
         }
     }
 
-    impl<const N: usize, const M: usize> Mul<f32> for Matrix<f32, N, M> {
+    impl<T,const N: usize, const M: usize> Mul<<Matrix<T, N, M>  as LinearAlgebra>::Scalar> for Matrix<T, N, M> 
+    where Self :LinearAlgebra
+    {
         type Output = Self;
-        fn mul(self, rhs: f32) -> Self::Output {
+        fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::Scalar) -> Self::Output {
             self.scale(rhs)
         }
     }
 
-    impl<const N: usize, const M: usize> MulAssign<f32> for Matrix<f32, N, M> {
-        fn mul_assign(&mut self, rhs: f32) {
-            *self = self.scale(rhs);
+    impl<T :std::marker::Copy,const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M> 
+    where Self :LinearAlgebra,
+    {
+        fn mul_assign(&mut self, rhs: T) {
+            *self = *self * rhs;
         }
     }
 
-    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
+    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32
+    {
         type Output = Matrix<f32, N, M>;
         fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
-            rhs.scale(self)
-        }
-    }
-
-    impl<const N: usize> MulAssign<Matrix<f32, N, N>> for Matrix<f32, N, N> {
-        fn mul_assign(&mut self, rhs: Matrix<f32, N, N>) {
-            *self = self.multiply(rhs)
+            rhs * self
         }
     }
 }

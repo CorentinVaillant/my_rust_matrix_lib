@@ -220,20 +220,20 @@ mod tests {
 
             const EPSILON: f64 = 10e-3;
 
-            let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
             assert_eq!(m.get_det(), 0.0);
 
-            let mut m: Matrix<f32, 5, 5> = Matrix::identity();
+            let m: Matrix<f32, 5, 5> = Matrix::identity();
 
             assert_eq!(m.get_det(), 1.0);
 
-            let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
+            let m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
 
             println!("det -> {}", m.get_det());
             assert_eq!(m.get_det(), -1.0);
 
-            let mut m = Matrix::from([
+            let m = Matrix::from([
                 [6.0, 5.8, 3.8, 4.7, 8.5, 3.3],
                 [2.6, 1.0, 7.2, 8.5, 1.5, 5.3],
                 [1.8, 3.2, 1.1, 5.7, 1.0, 5.4],
@@ -260,14 +260,14 @@ mod tests {
 
             assert_eq!(m, m.transpose());
 
-            let m = Matrix::from([
+            let m: Matrix<&str, 4, 4> = Matrix::from([
                 ["I", "am", "a", "Matrix"],
                 ["I", "am", "string", "compose"],
                 ["I", "ate", "some", "salade"],
                 ["You", "cant", "multiply", "me"],
             ]);
 
-            let expected_m = Matrix::from([
+            let expected_m: Matrix<&str, 4, 4> = Matrix::from([
                 ["I", "I", "I", "You"],
                 ["am", "am", "ate", "cant"],
                 ["a", "string", "some", "multiply"],
