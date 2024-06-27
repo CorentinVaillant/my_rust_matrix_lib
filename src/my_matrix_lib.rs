@@ -842,18 +842,18 @@ pub mod matrix {
 
     impl<T,const N: usize, const M: usize> AddAssign for Matrix<T, N, M> 
     where Self :LinearAlgebra,
-    <Matrix<T,N,M> as LinearAlgebra>::AddOutput : Into<Self> //???
+    <Matrix<T,N,M> as LinearAlgebra>::AddOutput : Into<Self>
     {
         fn add_assign(&mut self, rhs: Self) {
             *self = self.addition(rhs).into();
         }
     }
 
-    impl<T, const M: usize, const P: usize> Mul<<Matrix<T, M, P> as LinearAlgebra>::MultIn<P>> for Matrix<T, M, P> 
+    impl<T, const N: usize, const M: usize, const P: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::MultIn<P>> for Matrix<T, N, M> 
     where Self : LinearAlgebra,
     {
         type Output = <Self as LinearAlgebra>::MultOutput<P>;
-        fn mul(self, rhs: <Matrix<T, M, P> as LinearAlgebra>::MultIn<P>) -> Self::Output {
+        fn mul(self, rhs: <Self as LinearAlgebra>::MultIn<P>) -> Self::Output {
             self.multiply(rhs)
         }
     }
