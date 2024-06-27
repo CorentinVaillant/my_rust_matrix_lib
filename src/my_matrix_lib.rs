@@ -726,12 +726,13 @@ pub mod matrix {
                     }
                 } else if N == 2 {
                     if self.get_det() != 0.0 {
-                        result = Some( self.get_det() as f32 *
-                            Self::try_into_matrix(Matrix::from([
-                                [self[1][1], -self[0][1]],
-                                [-self[1][0], self[0][0]],
-                            ]))
-                            .unwrap(),
+                        result = Some(
+                            self.get_det() as f32
+                                * Self::try_into_matrix(Matrix::from([
+                                    [self[1][1], -self[0][1]],
+                                    [-self[1][0], self[0][0]],
+                                ]))
+                                .unwrap(),
                         );
                     }
                 } else {
@@ -832,34 +833,42 @@ pub mod matrix {
         }
     }
 
-    impl<T,const N: usize, const M: usize> Add for Matrix<T, N, M>
-    where Self :LinearAlgebra {
-        type Output = <Matrix<T,N,M> as LinearAlgebra>::AddOutput;
+    impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
+    where
+        Self: LinearAlgebra,
+    {
+        type Output = <Matrix<T, N, M> as LinearAlgebra>::AddOutput;
         fn add(self, rhs: Self) -> Self::Output {
             self.addition(rhs)
         }
     }
 
-    impl<T,const N: usize, const M: usize> AddAssign for Matrix<T, N, M> 
-    where Self :LinearAlgebra,
-    <Matrix<T,N,M> as LinearAlgebra>::AddOutput : Into<Self>
+    impl<T, const N: usize, const M: usize> AddAssign for Matrix<T, N, M>
+    where
+        Self: LinearAlgebra,
+        <Matrix<T, N, M> as LinearAlgebra>::AddOutput: Into<Self>,
     {
         fn add_assign(&mut self, rhs: Self) {
             *self = self.addition(rhs).into();
         }
     }
 
-    impl<T, const N: usize, const M: usize, const P: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::MultIn<P>> for Matrix<T, N, M> 
-    where Self : LinearAlgebra,
+    impl<T, const N: usize, const M: usize, const P: usize>
+        Mul<<Matrix<T, N, M> as LinearAlgebra>::MultIn<P>> for Matrix<T, N, M>
+    where
+        Matrix<T, N, M>: LinearAlgebra,
     {
-        type Output = <Self as LinearAlgebra>::MultOutput<P>;
-        fn mul(self, rhs: <Self as LinearAlgebra>::MultIn<P>) -> Self::Output {
+        type Output = <Matrix<T, N, M> as LinearAlgebra>::MultOutput<P>;
+
+        fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::MultIn<P>) -> Self::Output {
             self.multiply(rhs)
         }
     }
 
-    impl<T,const N: usize, const M: usize> Mul<<Matrix<T, N, M>  as LinearAlgebra>::Scalar> for Matrix<T, N, M> 
-    where Self :LinearAlgebra
+    impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::Scalar>
+        for Matrix<T, N, M>
+    where
+        Self: LinearAlgebra,
     {
         type Output = Self;
         fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::Scalar) -> Self::Output {
@@ -867,16 +876,16 @@ pub mod matrix {
         }
     }
 
-    impl<T :std::marker::Copy,const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M> 
-    where Self :LinearAlgebra,
+    impl<T: std::marker::Copy, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
+    where
+        Self: LinearAlgebra,
     {
         fn mul_assign(&mut self, rhs: T) {
             *self = *self * rhs;
         }
     }
 
-    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32
-    {
+    impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
         type Output = Matrix<f32, N, M>;
         fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
             rhs * self
