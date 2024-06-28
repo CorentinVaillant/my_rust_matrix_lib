@@ -277,6 +277,37 @@ mod tests {
             assert_eq!(m.transpose(), expected_m);
         }
 
+        //inverse
+        {
+            use crate::my_matrix_lib::matrix::*;
+
+            let m: Matrix<f32, 15, 15> = Matrix::identity();
+
+            assert_eq!(m,m.get_inverse().unwrap());
+
+            let m: Matrix<f32, 20,15> = Matrix::default();
+
+            assert_eq!(None,m.get_inverse());
+
+            let m: Matrix<f32, 15,15> = Matrix::default();
+
+            assert_eq!(None,m.get_inverse());
+
+            let m = Matrix::from([
+                [-1., 0., 0.],
+                [ 0., 2., 1.],
+                [ 0., 0., 2.]
+            ]);
+
+            let expected_m = Matrix::from([
+                [-1., 0., 0.],
+                [ 0.,0.5,-0.25],
+                [ 0., 0.,0.5]
+            ]);
+
+            assert_eq!(m.get_inverse().unwrap(),expected_m);
+        }
+
         let elapsed_time = now.elapsed();
         println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
     }

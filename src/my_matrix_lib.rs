@@ -718,29 +718,84 @@ pub mod matrix {
         where
             Self: Sized,
         {
-            let mut result = None;
+            // Check if the matrix is square
             if N == M {
+                // Special case for 1x1 matrix
                 if N == 1 {
                     if self[0][0] == 0.0 {
-                        result = None
+                        None
+                    } else {
+                        Some(
+                            Self::try_into_matrix(Matrix::from([[1.0 / self[0][0]]])).unwrap(),
+                        )
                     }
+                // Special case for 2x2 matrix
                 } else if N == 2 {
-                    if self.get_det() != 0.0 {
-                        result = Some(
-                            self.get_det() as f32
+                    let det = self.get_det();
+                    if det != 0.0 {
+                        // Return the inverse of 2x2 matrix using the formula
+                        return Some(
+                            (1.0 / det) as f32
                                 * Self::try_into_matrix(Matrix::from([
                                     [self[1][1], -self[0][1]],
                                     [-self[1][0], self[0][0]],
                                 ]))
                                 .unwrap(),
                         );
+                    } else {
+                        None
                     }
                 } else {
-                    todo!()
-                }
-            }
+                    //Gaussian elimination
+                    let mut m_self = *self; 
+                    let mut result = Self::identity();
 
-            result
+                    let mut lead = 0;
+
+                    //is the matrice singulare
+                    for r in 0..N {
+                        if lead >= N {
+                            return None; 
+                        }
+
+                        let mut i = r;
+                        while m_self[i][lead] == 0.0 {
+                            i += 1;
+                            //is the matrice singulare
+                            if i == N {
+                                return None; 
+                            }
+                        }
+
+                        m_self.permute_row(i, r);
+                        result.permute_row(i, r);
+
+                        // normalize the leading row
+                        let lead_value = m_self[r][lead];
+                        for j in 0..M {
+                            m_self[r][j] /= lead_value;
+                            result[r][j] /= lead_value;
+                        }
+
+                        // Elimination of all other entries in the column
+                        for i in 0..N {
+                            if i != r {
+                                let lead_value = m_self[i][lead];
+                                for j in 0..M {
+                                    m_self[i][j] -= lead_value * m_self[r][j];
+                                    result[i][j] -= lead_value * result[r][j];
+                                }
+                            }
+                        }
+                        lead += 1;
+                    }
+
+                    // Return the inverse matrix
+                    return Some(result);
+                }
+            } else {
+                None
+            }
         }
 
         fn zero() -> Self {
@@ -853,15 +908,15 @@ pub mod matrix {
         }
     }
 
-    impl<T, const N: usize, const M: usize, const P: usize>
-        Mul<<Matrix<T, N, M> as LinearAlgebra>::MultIn<P>> for Matrix<T, N, M>
+    impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
     where
-        Matrix<T, N, M>: LinearAlgebra,
+        Matrix<T, N, M>:
+            LinearAlgebra<MultIn<P> = Matrix<T, M, P>, MultOutput<P> = Matrix<T, N, P>>,
     {
         type Output = <Matrix<T, N, M> as LinearAlgebra>::MultOutput<P>;
 
-        fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::MultIn<P>) -> Self::Output {
-            self.multiply(rhs)
+        fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
+            self.multiply::<P>(rhs)
         }
     }
 
@@ -876,11 +931,12 @@ pub mod matrix {
         }
     }
 
-    impl<T: std::marker::Copy, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
+    impl<T: std::marker::Copy, const N: usize, const M: usize>
+        MulAssign<<Matrix<T, N, M> as LinearAlgebra>::Scalar> for Matrix<T, N, M>
     where
         Self: LinearAlgebra,
     {
-        fn mul_assign(&mut self, rhs: T) {
+        fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::Scalar) {
             *self = *self * rhs;
         }
     }
