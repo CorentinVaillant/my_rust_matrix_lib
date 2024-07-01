@@ -220,7 +220,7 @@ mod tests {
 
             const EPSILON: f64 = 10e-3;
 
-            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
             assert_eq!(m.get_det(), 0.0);
 
@@ -230,7 +230,6 @@ mod tests {
 
             let m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
 
-            println!("det -> {}", m.get_det());
             assert_eq!(m.get_det(), -1.0);
 
             let m = Matrix::from([
@@ -283,29 +282,21 @@ mod tests {
 
             let m: Matrix<f32, 15, 15> = Matrix::identity();
 
-            assert_eq!(m,m.get_inverse().unwrap());
+            assert_eq!(m, m.get_inverse().unwrap());
 
-            let m: Matrix<f32, 20,15> = Matrix::default();
+            let m: Matrix<f32, 20, 15> = Matrix::default();
 
-            assert_eq!(None,m.get_inverse());
+            assert_eq!(None, m.get_inverse());
 
-            let m: Matrix<f32, 15,15> = Matrix::default();
+            let m: Matrix<f32, 15, 15> = Matrix::default();
 
-            assert_eq!(None,m.get_inverse());
+            assert_eq!(None, m.get_inverse());
 
-            let m = Matrix::from([
-                [-1., 0., 0.],
-                [ 0., 2., 1.],
-                [ 0., 0., 2.]
-            ]);
+            let m = Matrix::from([[-1., 0., 0.], [0., 2., 1.], [0., 0., 2.]]);
 
-            let expected_m = Matrix::from([
-                [-1., 0., 0.],
-                [ 0.,0.5,-0.25],
-                [ 0., 0.,0.5]
-            ]);
+            let expected_m = Matrix::from([[-1., 0., 0.], [0., 0.5, -0.25], [0., 0., 0.5]]);
 
-            assert_eq!(m.get_inverse().unwrap(),expected_m);
+            assert_eq!(m.get_inverse().unwrap(), expected_m);
         }
 
         let elapsed_time = now.elapsed();

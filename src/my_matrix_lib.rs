@@ -241,10 +241,13 @@ pub mod matrix {
         }
     }
 
-    //TODO généricité
-    impl<const N: usize, const M: usize> Matrix<f32, N, M> {
+    pub trait FloatEq {
         ///equality with an epsilon, to carry floating point error
-        pub fn float_eq(&self, other: &Self) -> bool {
+        fn float_eq(&self, other: &Self) -> bool;
+    }
+
+    impl<const N: usize, const M: usize> FloatEq for Matrix<f32, N, M> {
+        fn float_eq(&self, other: &Self) -> bool {
             for i in 0..N {
                 for j in 0..M {
                     if -f32::EPSILON >= self[i][j] - other[i][j]
@@ -258,13 +261,29 @@ pub mod matrix {
         }
     }
 
+    impl<const N: usize, const M: usize> FloatEq for Matrix<f64, N, M> {
+        fn float_eq(&self, other: &Self) -> bool {
+            for i in 0..N {
+                for j in 0..M {
+                    if -f64::EPSILON >= self[i][j] - other[i][j]
+                        && self[i][j] - other[i][j] >= f64::EPSILON
+                    {
+                        return false;
+                    }
+                }
+            }
+            true
+        }
+    }
+
     //Algebra
     pub trait LinearAlgebra {
-        type Scalar;
+        type InnerType;
         type AddOutput;
         type MultIn<const P: usize>;
         type MultOutput<const P: usize>;
         type Square;
+        type Det;
 
         //basic operations :
 
@@ -314,7 +333,7 @@ pub mod matrix {
         ///assert_eq!(m*scale_factor,expected_result);
         ///assert_eq!(m.scale(scale_factor),expected_result);
         /// ```
-        fn scale(&self, rhs: Self::Scalar) -> Self;
+        fn scale(&self, rhs: Self::InnerType) -> Self;
 
         // fn pow(self, rhs: i16) -> Self; //TODO
 
@@ -329,19 +348,19 @@ pub mod matrix {
         ///
         ///const EPSILON: f64 = 10e-3;
         ///
-        ///let mut m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+        ///let m: Matrix<f32, 3, 3>= Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
         ///
         ///assert_eq!(m.get_det(), 0.0);
         ///
-        ///let mut m: Matrix<f32, 5, 5> = Matrix::identity();
+        ///let m: Matrix<f32, 5, 5> = Matrix::identity();
         ///
         ///assert_eq!(m.get_det(), 1.0);
         ///
-        ///let mut m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
+        ///let m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5);
         ///
         ///assert_eq!(m.get_det(), -1.0);
         ///
-        ///let mut m = Matrix::from([
+        ///let m = Matrix::from([
         ///    [6.0, 5.8, 3.8, 4.7, 8.5, 3.3],
         ///    [2.6, 1.0, 7.2, 8.5, 1.5, 5.3],
         ///    [1.8, 3.2, 1.1, 5.7, 1.0, 5.4],
@@ -355,7 +374,7 @@ pub mod matrix {
         ///
         ///assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
         /// ```
-        fn get_det(&self) -> f64;
+        fn get_det(&self) -> Self::Det;
 
         ///return a row echelon reduce form of the matrix
         ///
@@ -414,6 +433,39 @@ pub mod matrix {
         /// ```
         fn get_plu_decomposition(&self) -> Option<(Self::Square, Self::Square, Self::Square)>;
 
+        /// return the inverse of a matrix if exist, in the other case return None
+        /// `M * M.get_inverse() = M.get_inverse() * M = I`, where I is the identity matrix
+        ///
+        /// ```
+        /// use my_rust_matrix_lib::my_matrix_lib::matrix::*;
+        ///
+        ///let m: Matrix<f32, 15, 15> = Matrix::identity();
+        ///
+        ///assert_eq!(m,m.get_inverse().unwrap());
+        ///
+        ///let m: Matrix<f32, 20,15> = Matrix::default();
+        ///
+        ///assert_eq!(None,m.get_inverse());
+        ///
+        ///let m: Matrix<f32, 15,15> = Matrix::default();
+        ///
+        ///assert_eq!(None,m.get_inverse());
+        ///
+        ///let m = Matrix::from([
+        ///     [-1., 0., 0.],
+        ///     [ 0., 2., 1.],
+        ///     [ 0., 0., 2.]
+        /// ]);
+        ///
+        ///let expected_m = Matrix::from([
+        ///     [-1., 0., 0.],
+        ///     [ 0.,0.5,-0.25],
+        ///     [ 0., 0.,0.5]
+        /// ]);
+        ///
+        ///assert_eq!(m.get_inverse().unwrap(),expected_m);
+        ///
+        /// ```
         fn get_inverse(&self) -> Option<Self>
         where
             Self: Sized;
@@ -492,7 +544,7 @@ pub mod matrix {
         ///
         ///
         /// ```
-        fn inflation(i: usize, value: f32) -> Self;
+        fn inflation(i: usize, value: Self::InnerType) -> Self;
 
         ///return if a matrice is upper triangular
         ///
@@ -536,16 +588,22 @@ pub mod matrix {
         fn is_lower_triangular(&self) -> bool;
     }
 
-    ///implementation for f32
-    impl<const N: usize, const M: usize> LinearAlgebra for Matrix<f32, N, M> {
-        type Scalar = f32;
+    ///implementation for floats
+    impl<
+            T: num::Float + std::marker::Copy + std::default::Default,
+            const N: usize,
+            const M: usize,
+        > LinearAlgebra for Matrix<T, N, M>
+    {
+        type InnerType = T;
         type AddOutput = Self;
-        type MultIn<const P: usize> = Matrix<f32, M, P>;
-        type MultOutput<const P: usize> = Matrix<f32, N, P>;
-        type Square = Matrix<f32, N, N>;
+        type MultIn<const P: usize> = Matrix<T, M, P>;
+        type MultOutput<const P: usize> = Matrix<T, N, P>;
+        type Square = Matrix<T, N, N>;
+        type Det = T;
 
-        fn scale(&self, rhs: Self::Scalar) -> Self {
-            let mut result = Self::default();
+        fn scale(&self, rhs: Self::InnerType) -> Self {
+            let mut result = Self::zero();
             for i in 0..N {
                 for j in 0..M {
                     result.inner[i][j] = rhs * self[i][j];
@@ -556,7 +614,7 @@ pub mod matrix {
         }
 
         fn addition(&self, rhs: Self) -> Self {
-            let mut result = Self::default();
+            let mut result = Self::zero();
             for (i, (row1, row2)) in self.inner.into_iter().zip(rhs.inner).enumerate() {
                 for (j, (val1, val2)) in row1.into_iter().zip(row2).enumerate() {
                     result.inner[i][j] = val1 + val2;
@@ -565,12 +623,12 @@ pub mod matrix {
             result
         }
 
-        fn multiply<const P: usize>(&self, rhs: Matrix<f32, M, P>) -> Matrix<f32, N, P> {
-            let mut result = Matrix::default();
+        fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P> {
+            let mut result = Matrix::zero();
             for i in 0..N {
                 for j in 0..P {
                     for k in 0..M {
-                        result.inner[i][j] += self[i][k] * rhs[k][j];
+                        result.inner[i][j] = result.inner[i][j] + self[i][k] * rhs[k][j];
                     }
                 }
             }
@@ -578,40 +636,46 @@ pub mod matrix {
             result
         }
 
-        fn get_det(&self) -> f64 {
+        fn get_det(&self) -> Self::Det {
             if N != M {
-                return 0.0;
+                return T::zero();
             }
             if N == 0 {
-                return 0.0;
+                return T::zero();
             }
             if N == 1 {
-                return self[0][0] as f64;
+                return self[0][0];
             }
             if N == 2 {
-                (self[0][0] * self[1][1] - self[1][0] * self[0][1]) as f64
+                self[0][0] * self[1][1] - self[1][0] * self[0][1]
             } else {
-                let (p, _, u) = self.get_plu_decomposition().unwrap();
+                let (p, l, u) = self.get_plu_decomposition().unwrap();
 
                 //p determinant
 
                 let mut permutation_nb: u8 = 0;
                 for i in 0..N {
-                    if p[i][i] != 1.0 {
+                    if p[i][i] != T::one() {
                         permutation_nb += 1;
                     }
                     permutation_nb %= 4;
                 }
                 permutation_nb /= 2;
-                let p_det = if permutation_nb == 0 { 1. } else { -1. };
+                let p_det = if permutation_nb == 0 {
+                    T::one()
+                } else {
+                    -T::one()
+                };
 
                 //u determinant
-                let mut u_det: f64 = 1.0;
+                let mut u_det = T::one();
+                let mut l_det = T::one();
                 for i in 0..N {
-                    u_det *= u[i][i] as f64;
+                    u_det = u_det * u[i][i];
+                    l_det = l_det * l[i][i];
                 }
 
-                p_det * u_det /* * l_det (l_det is equal to 1)*/
+                p_det * u_det * l_det
             }
         }
 
@@ -626,7 +690,7 @@ pub mod matrix {
                 }
 
                 let mut i = r;
-                while result[i][lead] == 0.0 {
+                while result[i][lead] == T::zero() {
                     i += 1;
                     if i == N {
                         i = r;
@@ -641,7 +705,7 @@ pub mod matrix {
                 //Normalization of the leading row
                 let mut lead_value = result[r][lead];
                 for j in 0..M {
-                    result[r][j] /= lead_value;
+                    result[r][j] = result[r][j] / lead_value;
                 }
 
                 //Elimination of column entries
@@ -649,7 +713,7 @@ pub mod matrix {
                     if i != r {
                         lead_value = result[i][lead];
                         for j in 0..M {
-                            result[i][j] -= lead_value * result[r][j];
+                            result[i][j] = result[i][j] - lead_value * result[r][j];
                         }
                     }
                 }
@@ -702,13 +766,13 @@ pub mod matrix {
                 for i in (k + 1)..N {
                     l[i][k] = u[i][k] / u[k][k];
                     for j in k..N {
-                        u[i][j] -= l[i][k] * u[k][j];
+                        u[i][j] = u[i][j] - l[i][k] * u[k][j];
                     }
                 }
             }
 
             for i in 0..N {
-                l[i][i] = 1.0;
+                l[i][i] = T::one();
             }
 
             Some((p, l, u))
@@ -722,32 +786,32 @@ pub mod matrix {
             if N == M {
                 // Special case for 1x1 matrix
                 if N == 1 {
-                    if self[0][0] == 0.0 {
+                    if self[0][0] == T::zero() {
                         None
                     } else {
                         Some(
-                            Self::try_into_matrix(Matrix::from([[1.0 / self[0][0]]])).unwrap(),
+                            Self::try_into_matrix(Matrix::from([[T::one() / self[0][0]]])).unwrap(),
                         )
                     }
                 // Special case for 2x2 matrix
                 } else if N == 2 {
                     let det = self.get_det();
-                    if det != 0.0 {
+                    if det != T::zero() {
                         // Return the inverse of 2x2 matrix using the formula
                         return Some(
-                            (1.0 / det) as f32
-                                * Self::try_into_matrix(Matrix::from([
-                                    [self[1][1], -self[0][1]],
-                                    [-self[1][0], self[0][0]],
-                                ]))
-                                .unwrap(),
+                            Self::try_into_matrix(Matrix::from([
+                                [self[1][1], -self[0][1]],
+                                [-self[1][0], self[0][0]],
+                            ]))
+                            .unwrap()
+                                * (T::zero() / det),
                         );
                     } else {
                         None
                     }
                 } else {
                     //Gaussian elimination
-                    let mut m_self = *self; 
+                    let mut m_self = *self;
                     let mut result = Self::identity();
 
                     let mut lead = 0;
@@ -755,15 +819,15 @@ pub mod matrix {
                     //is the matrice singulare
                     for r in 0..N {
                         if lead >= N {
-                            return None; 
+                            return None;
                         }
 
                         let mut i = r;
-                        while m_self[i][lead] == 0.0 {
+                        while m_self[i][lead] == T::zero() {
                             i += 1;
                             //is the matrice singulare
                             if i == N {
-                                return None; 
+                                return None;
                             }
                         }
 
@@ -773,8 +837,8 @@ pub mod matrix {
                         // normalize the leading row
                         let lead_value = m_self[r][lead];
                         for j in 0..M {
-                            m_self[r][j] /= lead_value;
-                            result[r][j] /= lead_value;
+                            m_self[r][j] = m_self[r][j] / lead_value;
+                            result[r][j] = result[r][j] / lead_value;
                         }
 
                         // Elimination of all other entries in the column
@@ -782,8 +846,8 @@ pub mod matrix {
                             if i != r {
                                 let lead_value = m_self[i][lead];
                                 for j in 0..M {
-                                    m_self[i][j] -= lead_value * m_self[r][j];
-                                    result[i][j] -= lead_value * result[r][j];
+                                    m_self[i][j] = m_self[i][j] - lead_value * m_self[r][j];
+                                    result[i][j] = result[i][j] - lead_value * result[r][j];
                                 }
                             }
                         }
@@ -802,7 +866,7 @@ pub mod matrix {
             let mut result = Self::default();
             for i in 0..N {
                 for j in 0..M {
-                    result.inner[i][j] = 0.0;
+                    result.inner[i][j] = T::zero();
                 }
             }
             result
@@ -813,9 +877,9 @@ pub mod matrix {
             for i in 0..N {
                 for j in 0..M {
                     if i == j {
-                        result.inner[i][j] = 1.0;
+                        result.inner[i][j] = T::one();
                     } else {
-                        result.inner[i][j] = 0.0;
+                        result.inner[i][j] = T::zero();
                     }
                 }
             }
@@ -835,16 +899,16 @@ pub mod matrix {
                 }
                 for j in 0..M {
                     if j == col_index {
-                        result.inner[i][j] = 1.0;
+                        result.inner[i][j] = T::one();
                     } else {
-                        result.inner[i][j] = 0.0;
+                        result.inner[i][j] = T::zero();
                     }
                 }
             }
             result
         }
 
-        fn inflation(i: usize, value: f32) -> Self {
+        fn inflation(i: usize, value: Self::InnerType) -> Self {
             let mut result = Self::default();
             for row_index in 0..N {
                 for column_inndex in 0..M {
@@ -852,10 +916,10 @@ pub mod matrix {
                         if row_index == i {
                             result.inner[row_index][column_inndex] = value;
                         } else {
-                            result.inner[row_index][column_inndex] = 1.0;
+                            result.inner[row_index][column_inndex] = T::one();
                         }
                     } else {
-                        result.inner[row_index][column_inndex] = 0.0;
+                        result.inner[row_index][column_inndex] = T::zero();
                     }
                 }
             }
@@ -866,7 +930,7 @@ pub mod matrix {
             for i in 0..N {
                 if i < M {
                     for j in 0..i {
-                        if self[i][j] != 0.0 {
+                        if self[i][j] != T::zero() {
                             return false;
                         }
                     }
@@ -879,7 +943,7 @@ pub mod matrix {
         fn is_lower_triangular(&self) -> bool {
             for i in 0..N {
                 for j in (i + 1)..M {
-                    if self[i][j] != 0.0 {
+                    if self[i][j] != T::zero() {
                         return false;
                     }
                 }
@@ -920,23 +984,23 @@ pub mod matrix {
         }
     }
 
-    impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::Scalar>
+    impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::InnerType>
         for Matrix<T, N, M>
     where
         Self: LinearAlgebra,
     {
         type Output = Self;
-        fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::Scalar) -> Self::Output {
+        fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::InnerType) -> Self::Output {
             self.scale(rhs)
         }
     }
 
     impl<T: std::marker::Copy, const N: usize, const M: usize>
-        MulAssign<<Matrix<T, N, M> as LinearAlgebra>::Scalar> for Matrix<T, N, M>
+        MulAssign<<Matrix<T, N, M> as LinearAlgebra>::InnerType> for Matrix<T, N, M>
     where
         Self: LinearAlgebra,
     {
-        fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::Scalar) {
+        fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::InnerType) {
             *self = *self * rhs;
         }
     }
