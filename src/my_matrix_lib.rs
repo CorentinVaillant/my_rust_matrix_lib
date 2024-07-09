@@ -1,6 +1,8 @@
 pub mod matrix {
     use core::fmt;
-    use std::ops::*;
+    use std::{ops::*, usize};
+
+    type VecTab<T> = Vec<Vec<T>>;
 
     //definition of Matrix
     #[derive(Debug, Clone)]
@@ -20,6 +22,13 @@ pub mod matrix {
     impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
         fn index_mut(&mut self, index: usize) -> &mut Self::Output {
             &mut self.inner[index]
+        }
+    }
+
+    //definition of get
+    impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
+        pub fn get(&self, index: usize) -> Option<&[T; M]> {
+            self.inner.get(index)
         }
     }
 
@@ -55,28 +64,50 @@ pub mod matrix {
             Self: Sized;
     }
 
-    impl<
-            T: std::default::Default + std::marker::Copy,
-            const N: usize,
-            const M: usize,
-            const P: usize,
-            const Q: usize,
-        > TryMatrixFrom<Matrix<T, P, Q>> for Matrix<T, N, M>
+    impl<T, const N: usize, const M: usize, const P: usize, const Q: usize>
+        TryMatrixFrom<Matrix<T, P, Q>> for Matrix<T, N, M>
     {
         type Error = &'static str;
 
         fn try_into_matrix(value: Matrix<T, P, Q>) -> Result<Self, Self::Error> {
             if N == P && M == Q {
-                let mut result = Self::default();
-                for i in 0..N {
-                    for j in 0..M {
-                        result[i][j] = value[i][j];
-                    }
-                }
-                Ok(result)
+                // Manually drop the original matrix to prevent double free
+                let value = std::mem::ManuallyDrop::new(value);
+
+                // SAFETY: We have checked that N == P and M == Q
+                let inner =
+                    unsafe { std::ptr::read(&value.inner as *const _ as *const [[T; M]; N]) };
+
+                Ok(Matrix { inner })
             } else {
                 Err("Size not match")
             }
+        }
+    }
+
+    impl<T, const N: usize, const M: usize> TryMatrixFrom<VecTab<T>> for Matrix<T, N, M> {
+        type Error = &'static str;
+
+        fn try_into_matrix(tab: VecTab<T>) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if tab.len() != N {
+                return Err("Incorrect number of rows");
+            }
+
+            let mut matrix_data: [[T; M]; N] = unsafe { std::mem::zeroed() };
+
+            for (i, row) in tab.into_iter().enumerate() {
+                if row.len() != M {
+                    return Err("Incorrect number of columns");
+                }
+                for (j, value) in row.into_iter().enumerate() {
+                    matrix_data[i][j] = value;
+                }
+            }
+
+            Ok(Matrix { inner: matrix_data })
         }
     }
 
@@ -335,7 +366,12 @@ pub mod matrix {
         /// ```
         fn scale(&self, rhs: Self::InnerType) -> Self;
 
-        // fn pow(self, rhs: i16) -> Self; //TODO
+        ///dot product
+        fn dot_product(&self, rhs: &Self) -> Self;
+
+        fn pow<I: num::Integer + std::fmt::Debug>(self, rhs: I) -> Option<Self>
+        where
+            Self: Sized;
 
         //Matrix operation
 
@@ -590,7 +626,7 @@ pub mod matrix {
 
     ///implementation for floats
     impl<
-            T: num::Float + std::marker::Copy + std::default::Default,
+            T: num::Float + std::marker::Copy + std::default::Default + std::fmt::Display, //MARK: TOREMOVE
             const N: usize,
             const M: usize,
         > LinearAlgebra for Matrix<T, N, M>
@@ -623,20 +659,70 @@ pub mod matrix {
             result
         }
 
-
-        //TODO upgrade multiplication 
-        //MARK: TODO
         fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P> {
-            let mut result = Matrix::zero();
-            for i in 0..N {
-                for j in 0..P {
-                    for k in 0..M {
-                        result.inner[i][j] = result.inner[i][j] + self[i][k] * rhs[k][j];
+            if N < 16 && M < 16 {
+                //naive algorithm
+                let mut result = Matrix::zero();
+                for i in 0..N {
+                    for j in 0..P {
+                        for k in 0..M {
+                            result[i][j] = result[i][j] + self[i][k] * rhs[k][j];
+                        }
                     }
                 }
-            }
 
+                return result;
+            } else {
+                let mid_self = N / 2;
+
+                //split self and rhs
+                
+
+                todo!()
+            }
+        }
+
+        fn dot_product(&self, rhs: &Self) -> Self {
+            let mut result = Self::zero();
+            for i in 0..N {
+                for j in 0..M {
+                    result[i][j] = self[i][j] * rhs[i][j]
+                }
+            }
             result
+        }
+
+        //TEST
+        fn pow<I: num::Integer + std::fmt::Debug>(self, n: I) -> Option<Self> {
+            if N != M {
+                return None;
+            } else if n < I::zero() {
+                let inverse = self.get_inverse()?;
+                let minus_one = I::one() - I::one() - I::one(); //scotch
+                return inverse.pow(n * minus_one);
+            } else if n == I::zero() {
+                return Some(Self::identity());
+            } else if n == I::one() {
+                return Some(self.clone());
+            } else if n.is_even() {
+                let sqrt_result: Matrix<T, N, N> = Matrix::<T, N, N>::try_into_matrix(
+                    Self::pow(self, n / (I::one() + I::one())).unwrap(),
+                )
+                .unwrap(); //scotch
+
+                return Some(Self::try_into_matrix(sqrt_result * sqrt_result).unwrap());
+            } else {
+                let pow_n_min_one: Matrix<T, N, N> =
+                    Matrix::<T, N, N>::try_into_matrix(Self::pow(self, n - I::one()).unwrap())
+                        .unwrap(); //scotch
+
+                return Some(
+                    Self::try_into_matrix(
+                        Self::Square::try_into_matrix(self).unwrap() * pow_n_min_one,
+                    )
+                    .unwrap(),
+                );
+            }
         }
 
         fn get_det(&self) -> Self::Det {

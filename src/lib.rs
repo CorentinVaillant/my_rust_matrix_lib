@@ -32,8 +32,6 @@ mod tests {
             assert_eq!(m1.multiply(m2), expected_result_m1_time_m2);
             assert_eq!(m2 * m1, expected_result_m2_time_m1);
             assert_eq!(m2.multiply(m1), expected_result_m2_time_m1);
-            /*
-             */
         }
 
         //test scaling
@@ -297,6 +295,26 @@ mod tests {
             let expected_m = Matrix::from([[-1., 0., 0.], [0., 0.5, -0.25], [0., 0., 0.5]]);
 
             assert_eq!(m.get_inverse().unwrap(), expected_m);
+        }
+
+        //pow
+        {
+            use crate::my_matrix_lib::matrix::*;
+
+            let m: Matrix<f64, 3, 3> = Matrix::from([[1., 0., 0.], [2., 3., 0.], [4., 5., 6.]]);
+
+            assert_eq!(m.get_inverse(), m.pow(-1));
+            assert_eq!(m.pow(-2), m.get_inverse().unwrap().pow(2));
+            assert_eq!(m.pow(2).unwrap(), m * m);
+
+            let mut m_prod = Matrix::identity();
+            for _ in 0..10 {
+                m_prod = m_prod * m;
+            }
+            assert_eq!(m.pow(10).unwrap(), m_prod);
+
+            let m: Matrix<f32, 5, 5> = Matrix::identity();
+            assert_eq!(m, m.pow(20).unwrap());
         }
 
         let elapsed_time = now.elapsed();
