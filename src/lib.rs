@@ -3,14 +3,14 @@ pub mod my_matrix_lib;
 #[cfg(test)]
 mod tests {
 
+    use crate::my_matrix_lib::*;
+
     #[test]
     fn it_works() {
         let now = std::time::Instant::now();
 
         //test adition
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
             let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
             let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
@@ -21,8 +21,6 @@ mod tests {
 
         //test multiplication
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
             let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
             let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
@@ -36,8 +34,6 @@ mod tests {
 
         //test scaling
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
             let scale_factor = 0.5;
             let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
@@ -48,8 +44,6 @@ mod tests {
 
         //test zeroed
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::zero();
             let expected_m = Matrix::from([[0., 0., 0., 0.]]);
             assert_eq!(m, expected_m);
@@ -66,8 +60,6 @@ mod tests {
 
         //test identity
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let i = Matrix::identity();
             let expected_m = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
             assert_eq!(i, expected_m);
@@ -75,8 +67,6 @@ mod tests {
 
         //test permutation
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let p = Matrix::permutation(0, 1);
 
             let m = Matrix::from([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0], [3.0, 3.0, 3.0]]);
@@ -92,8 +82,6 @@ mod tests {
 
         //test permute row
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let mut m: Matrix<i32, 3, 3> = Matrix::from([[1, 1, 1], [2, 2, 2], [3, 3, 3]]);
             let expected_m = Matrix::from([[2, 2, 2], [1, 1, 1], [3, 3, 3]]);
             m.permute_row(0, 1);
@@ -103,8 +91,6 @@ mod tests {
 
         //test permute column
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let mut m = Matrix::from([[1, 2, 3], [1, 2, 3], [1, 2, 3]]);
             let expected_m = Matrix::from([[1, 3, 2], [1, 3, 2], [1, 3, 2]]);
             m.permute_column(1, 2);
@@ -114,8 +100,6 @@ mod tests {
 
         //test inflation
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let t = Matrix::inflation(2, 5.0);
             let expected_t = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 5.]]);
 
@@ -133,8 +117,6 @@ mod tests {
 
         //test is upper
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::<f32, 3, 3>::identity();
             assert!(m.is_upper_triangular());
 
@@ -150,8 +132,6 @@ mod tests {
 
         //test is lower
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::<f32, 3, 3>::identity();
             assert!(m.is_lower_triangular());
 
@@ -167,8 +147,6 @@ mod tests {
 
         //test get_reduce_row_echelon
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
             let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
@@ -187,8 +165,6 @@ mod tests {
         }
         //test plu decomposition
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m = Matrix::from([
                 [1., 2., 1., -1.],
                 [3., 8., 1., 4.],
@@ -214,8 +190,6 @@ mod tests {
 
         //get det
         {
-            use crate::my_matrix_lib::matrix::*;
-
             const EPSILON: f64 = 10e-3;
 
             let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
@@ -247,8 +221,6 @@ mod tests {
 
         //transpose
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m: Matrix<f32, 3, 3> = Matrix::identity();
 
             assert_eq!(m, m.transpose());
@@ -276,8 +248,6 @@ mod tests {
 
         //inverse
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m: Matrix<f32, 15, 15> = Matrix::identity();
 
             assert_eq!(m, m.get_inverse().unwrap());
@@ -299,8 +269,6 @@ mod tests {
 
         //pow
         {
-            use crate::my_matrix_lib::matrix::*;
-
             let m: Matrix<f64, 3, 3> = Matrix::from([[1., 0., 0.], [2., 3., 0.], [4., 5., 6.]]);
 
             assert_eq!(m.get_inverse(), m.pow(-1));
