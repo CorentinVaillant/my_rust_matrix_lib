@@ -3,7 +3,7 @@ pub mod my_matrix_lib;
 #[cfg(test)]
 mod tests {
 
-    use crate::my_matrix_lib::*;
+    use crate::my_matrix_lib::prelude::*;
 
     #[test]
     fn it_works() {
@@ -283,7 +283,14 @@ mod tests {
 
             let m: Matrix<f32, 5, 5> = Matrix::identity();
             assert_eq!(m, m.pow(20).unwrap());
+
+            let m: Matrix<f64, 4, 5> = Matrix::identity();
+            assert_eq!(None, m.pow(2));
+
+            let m: Matrix<f32, 2, 2> = Matrix::from([[1., 5.], [3., 15.]]);
+            assert_eq!(None, m.pow(-5));
         }
+
 
         let elapsed_time = now.elapsed();
         println!("test OK ✅, took {}", elapsed_time.as_secs_f64());

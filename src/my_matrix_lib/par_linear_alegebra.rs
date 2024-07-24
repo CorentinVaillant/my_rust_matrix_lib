@@ -1,9 +1,18 @@
-use crate::my_matrix_lib::matrix::*;
 use crate::my_matrix_lib::linear_algebra_trait::LinearAlgebra;
+use crate::my_matrix_lib::matrix::*;
+use rayon::prelude::*;
 
 ///Implementation for floats
-impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, const M: usize>
-    LinearAlgebra for Matrix<T, N, M>
+impl<
+        T: num::Float
+            + std::marker::Copy
+            + std::default::Default
+            + std::marker::Sync
+            + std::marker::Send
+            + std::fmt::Display,
+        const N: usize,
+        const M: usize,
+    > LinearAlgebra for Matrix<T, N, M>
 {
     type InnerType = T;
     type AddOutput = Self;
@@ -13,68 +22,73 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
     type Det = T;
 
     fn scale(&self, rhs: Self::InnerType) -> Self {
-        let mut result = Self::zero();
-        for i in 0..N {
-            for j in 0..M {
-                result[i][j] = rhs * self[i][j];
-            }
-        }
+        let mut result: [[T; M]; N] = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
-        result
+        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+            row.par_iter_mut().enumerate().for_each(|(j, value)| {
+                *value = rhs * self[i][j];
+            })
+        });
+
+        Self::from(result)
     }
 
     fn addition(&self, rhs: Self) -> Self {
-        let mut result = Self::zero();
-        for (i, (row1, row2)) in self.into_iter().zip(rhs).enumerate() {
-            for (j, (val1, val2)) in row1.into_iter().zip(row2).enumerate() {
-                result[i][j] = val1 + val2;
-            }
-        }
+        let mut result = self.clone();
+
+        result
+            .par_iter_mut()
+            .zip(rhs)
+            .for_each(|(row_self, row_rhs)| {
+                row_self
+                    .par_iter_mut()
+                    .zip(row_rhs)
+                    .for_each(|(self_value, rhs_value)| {
+                        *self_value = *self_value + rhs_value;
+                    });
+            });
         result
     }
 
     fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P> {
-        //naive algorithm
-        let mut result = Matrix::zero();
-        for i in 0..N {
-            for j in 0..P {
-                for k in 0..M {
-                    result[i][j] = result[i][j] + self[i][k] * rhs[k][j];
-                }
-            }
-        }
+        let mut result: Matrix<T, N, P> = Matrix::zero();
 
+        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+            row.par_iter_mut().enumerate().for_each(|(j, value)| {
+                let a = (0..M)
+                    .into_par_iter()
+                    .fold(T::zero, |acc, k| acc + self[i][k] * rhs[k][j])
+                    .reduce(T::zero, |a, b| a + b);
+
+                *value = a;
+            });
+        });
         result
     }
 
-
-    //TEST
     fn pow<I: num::Integer>(self, n: I) -> Option<Self> {
-        if N != M {
-            if n == I::one(){
-                Some(self)
-            }
-            else {
-                None
-            }
-        } else if n < I::zero() {
-            let inverse = self.get_inverse()?;
-            let minus_one = I::one() - I::one() - I::one(); //scotch
-            return inverse.pow(n * minus_one);
-        } else if n == I::zero() {
+        if n == I::zero() {
             return Some(Self::identity());
         } else if n == I::one() {
             Some(self)
+        } else if N != M {
+            None
+        } else if n < I::zero() {
+            let inverse = self.get_inverse()?;
+            let minus_one = I::zero() - I::one(); //scotch
+            return inverse.pow(n * minus_one);
         } else if n.is_even() {
-            let sqrt_result: Matrix<T, N, N> = Matrix::<T, N, N>::try_into_matrix(
-                Self::pow(self, n / (I::one() + I::one())).unwrap(),
-            )
-            .unwrap(); //scotch
+            let sqrt_result: Matrix<T, N, N> = Self::pow(self, n / (I::one() + I::one()))
+                .unwrap()
+                .squared_or_none()
+                .unwrap();
 
             return Some(Self::try_into_matrix(sqrt_result * sqrt_result).unwrap());
         } else {
-            let pow_n_min_one: Matrix<T, N, N> =
-                Matrix::<T, N, N>::try_into_matrix(Self::pow(self, n - I::one()).unwrap()).unwrap(); //scotch
+            let pow_n_min_one: Matrix<T, N, N> = Self::pow(self, n - I::one())
+                .unwrap()
+                .squared_or_none()
+                .unwrap(); //scotch
 
             return Some(
                 Self::try_into_matrix(Self::Square::try_into_matrix(self).unwrap() * pow_n_min_one)
@@ -328,44 +342,22 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
         result
     }
 
-    fn permutation(l1: usize, l2: usize) -> Self {
-        let mut result = Self::default();
-        let mut col_index;
-        for i in 0..N {
-            if i == l1 {
-                col_index = l2;
-            } else if i == l2 {
-                col_index = l1;
-            } else {
-                col_index = i
-            }
-            for j in 0..M {
-                if j == col_index {
-                    result[i][j] = T::one();
-                } else {
-                    result[i][j] = T::zero();
-                }
-            }
-        }
+    fn permutation(i1: usize, i2: usize) -> Self {
+        let mut result = Self::identity();
+        result.permute_row(i1, i2);
+
         result
     }
 
     fn inflation(i: usize, value: Self::InnerType) -> Self {
-        let mut result = Self::default();
-        for row_index in 0..N {
-            for column_inndex in 0..M {
-                if row_index == column_inndex {
-                    if row_index == i {
-                        result[row_index][column_inndex] = value;
-                    } else {
-                        result[row_index][column_inndex] = T::one();
-                    }
-                } else {
-                    result[row_index][column_inndex] = T::zero();
-                }
-            }
-        }
+        let mut result = Self::identity();
+        
+        match result.coord_get(i, i) {
+            None => (),
+            Some(_) => result[i][i] = value
+        };
         result
+        
     }
 
     fn is_upper_triangular(&self) -> bool {

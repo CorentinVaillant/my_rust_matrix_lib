@@ -1,5 +1,6 @@
-
 use core::fmt;
+#[cfg(feature = "multitrheaded")]
+use rayon::iter::*;
 use std::ops::*;
 
 type VecTab<T> = Vec<Vec<T>>;
@@ -164,6 +165,31 @@ impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
     }
 }
 
+#[cfg(feature="multitrheaded")]
+impl<T: std::marker::Send, const N: usize, const M: usize> IntoParallelIterator
+    for Matrix<T, N, M>
+{
+    type Iter = rayon::array::IntoIter<Self::Item, N>;
+
+    type Item = [T; M];
+
+    fn into_par_iter(self) -> Self::Iter {
+        self.inner.into_par_iter()
+    }
+}
+#[cfg(feature = "multitrheaded")]
+impl<'data, T: std::marker::Send + 'data, const N: usize, const M: usize> IntoParallelIterator
+    for &'data mut Matrix<T, N, M>
+{
+    type Iter = rayon::slice::IterMut<'data, [T; M]>;
+
+    type Item = &'data mut [T; M];
+
+    fn into_par_iter(self) -> Self::Iter {
+        (&mut self.inner).into_par_iter()
+    }
+}
+
 /*implementation to format*/
 impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -180,29 +206,25 @@ impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for
 //implementation of Copy
 impl<T: std::marker::Copy, const N: usize, const M: usize> Copy for Matrix<T, N, M> {}
 
-//basic implementation
-impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
-    ///If the matrix is square return self, if note none
+impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
+    ///If the matrix is square return self, if not none
     pub fn squared_or_none(&self) -> Option<Matrix<T, N, N>> {
         if N != M {
             None
         } else {
-            let mut result = Matrix::<T, N, N>::default();
-            for i in 0..N {
-                for j in 0..N {
-                    result[i][j] = self[i][j];
-                }
-            }
-
-            Some(result)
+            //asume that type Matrix<T, N, N> is equal to type Matrix<T, N, M>
+            unsafe { Some(std::mem::transmute_copy(self)) }
         }
     }
+}
 
+//basic implementation
+impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
     ///Give you the transpose Matrix
     ///
     /// ## Exemples :
     /// ```
-    ///use my_rust_matrix_lib::my_matrix_lib::*;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::*;
     ///let m: Matrix<f32, 3, 3> = Matrix::identity();
     ///
     ///assert_eq!(m, m.transpose());
@@ -242,7 +264,7 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
     ///Performe the permutation of the row i and j in a Matrix
     /// ## Example :
     /// ```
-    ///use my_rust_matrix_lib::my_matrix_lib::*;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::*;
     ///
     ///let mut m = Matrix::from([[1,1,1],[2,2,2],[3,3,3]]);
     ///let expected_m = Matrix::from([[2,2,2],[1,1,1],[3,3,3]]);
@@ -262,7 +284,7 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
     ///Performe the permutation of the column i and j in a Matrix
     /// ## Example :
     /// ```
-    ///use my_rust_matrix_lib::my_matrix_lib::*;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::*;
     ///
     ///let mut m = Matrix::from([[1,2,3],[1,2,3],[1,2,3]]);
     ///let expected_m = Matrix::from([[1,3,2],[1,3,2],[1,3,2]]);

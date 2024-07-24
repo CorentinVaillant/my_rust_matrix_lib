@@ -8,3 +8,9 @@ edition = "2021"
 [dependencies]
 num = "0.4.3"
 num-traits = "0.2.19"
+rayon = {version = "1.10.0", optional = true}
+
+
+[features]
+multitrheaded = ["dep:rayon"]
+
