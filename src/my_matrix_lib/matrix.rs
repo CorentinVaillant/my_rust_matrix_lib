@@ -1,3 +1,5 @@
+#![allow(clippy::uninit_assumed_init)]
+
 use core::fmt;
 #[cfg(feature = "multitrheaded")]
 use rayon::iter::*;
@@ -165,7 +167,7 @@ impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
     }
 }
 
-#[cfg(feature="multitrheaded")]
+#[cfg(feature = "multitrheaded")]
 impl<T: std::marker::Send, const N: usize, const M: usize> IntoParallelIterator
     for Matrix<T, N, M>
 {
@@ -219,7 +221,7 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
 }
 
 //basic implementation
-impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Matrix<T, N, M> {
+impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
     ///Give you the transpose Matrix
     ///
     /// ## Exemples :
@@ -250,8 +252,11 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
     ///
     ///assert_eq!(m.transpose(), expected_m);
     /// ```
-    pub fn transpose(&self) -> Matrix<T, M, N> {
-        let mut result = Matrix::<T, M, N>::default();
+    pub fn transpose(&self) -> Matrix<T, M, N>
+    where
+        T: Copy,
+    {
+        let mut result: Matrix<T, M, N> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
         for i in 0..N {
             for j in 0..M {
                 result[j][i] = self[i][j]
@@ -273,7 +278,7 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
     ///assert_eq!(m,expected_m)
     /// ```
     pub fn permute_row(&mut self, i: usize, j: usize) {
-        if cfg!(debug_assertion) {
+        if cfg!(debug_assertions) {
             assert!(i < N);
             assert!(j < N);
         }
@@ -292,7 +297,7 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
     ///assert_eq!(expected_m,m);
     /// ```
     pub fn permute_column(&mut self, i: usize, j: usize) {
-        if cfg!(debug_assertion) {
+        if cfg!(debug_assertions) {
             assert!(i < M);
             assert!(j < M);
         }

@@ -1,18 +1,18 @@
-use crate::my_matrix_lib::matrix::*;
+#![allow(clippy::uninit_assumed_init)]
+
 use crate::my_matrix_lib::linear_algebra_trait::LinearAlgebra;
+use crate::my_matrix_lib::matrix::*;
 
 ///Implementation for floats
-impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, const M: usize>
-    LinearAlgebra for Matrix<T, N, M>
-{
-    type InnerType = T;
+impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, N, M> {
+    type ScalarType = T;
     type AddOutput = Self;
-    type MultIn<const P: usize> = Matrix<T, M, P>;
-    type MultOutput<const P: usize> = Matrix<T, N, P>;
+    type DotIn<const P: usize> = Matrix<T, M, P>;
+    type DotOutput<const P: usize> = Matrix<T, N, P>;
     type Square = Matrix<T, N, N>;
     type Det = T;
 
-    fn scale(&self, rhs: Self::InnerType) -> Self {
+    fn scale(&self, rhs: Self::ScalarType) -> Self {
         let mut result = Self::zero();
         for i in 0..N {
             for j in 0..M {
@@ -33,9 +33,9 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
         result
     }
 
-    fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P> {
+    fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOutput<P> {
         //naive algorithm
-        let mut result = Matrix::zero();
+        let mut result: Matrix<T, N, P> = Matrix::zero();
         for i in 0..N {
             for j in 0..P {
                 for k in 0..M {
@@ -47,14 +47,26 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
         result
     }
 
+    fn multiply(&self, rhs: Self) -> Self {
+        let mut result: Matrix<T, N, M> = unsafe {
+            std::mem::MaybeUninit::uninit().assume_init()
+        };
+        
+        for i in 0..N{
+            for j in 0..M{
+                result[i][j] = self[i][j] * rhs[i][j];
+            }
+        }
+
+        result
+    }
 
     //TEST
     fn pow<I: num::Integer>(self, n: I) -> Option<Self> {
         if N != M {
-            if n == I::one(){
+            if n == I::one() {
                 Some(self)
-            }
-            else {
+            } else {
                 None
             }
         } else if n < I::zero() {
@@ -305,7 +317,7 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
     }
 
     fn zero() -> Self {
-        let mut result = Self::default();
+        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
         for i in 0..N {
             for j in 0..M {
                 result[i][j] = T::zero();
@@ -315,7 +327,7 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
     }
 
     fn identity() -> Self {
-        let mut result = Self::default();
+        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
         for i in 0..N {
             for j in 0..M {
                 if i == j {
@@ -329,7 +341,7 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
     }
 
     fn permutation(l1: usize, l2: usize) -> Self {
-        let mut result = Self::default();
+        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
         let mut col_index;
         for i in 0..N {
             if i == l1 {
@@ -350,8 +362,8 @@ impl<T: num::Float + std::marker::Copy + std::default::Default, const N: usize, 
         result
     }
 
-    fn inflation(i: usize, value: Self::InnerType) -> Self {
-        let mut result = Self::default();
+    fn inflation(i: usize, value: Self::ScalarType) -> Self {
+        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
         for row_index in 0..N {
             for column_inndex in 0..M {
                 if row_index == column_inndex {

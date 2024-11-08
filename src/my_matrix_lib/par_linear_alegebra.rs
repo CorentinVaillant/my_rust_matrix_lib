@@ -14,14 +14,14 @@ impl<
         const M: usize,
     > LinearAlgebra for Matrix<T, N, M>
 {
-    type InnerType = T;
+    type ScalarType = T;
     type AddOutput = Self;
-    type MultIn<const P: usize> = Matrix<T, M, P>;
-    type MultOutput<const P: usize> = Matrix<T, N, P>;
+    type DotIn<const P: usize> = Matrix<T, M, P>;
+    type DotOutput<const P: usize> = Matrix<T, N, P>;
     type Square = Matrix<T, N, N>;
     type Det = T;
 
-    fn scale(&self, rhs: Self::InnerType) -> Self {
+    fn scale(&self, rhs: Self::ScalarType) -> Self {
         let mut result: [[T; M]; N] = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
         result.par_iter_mut().enumerate().for_each(|(i, row)| {
@@ -50,7 +50,7 @@ impl<
         result
     }
 
-    fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P> {
+    fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOutput<P> {
         let mut result: Matrix<T, N, P> = Matrix::zero();
 
         result.par_iter_mut().enumerate().for_each(|(i, row)| {
@@ -349,15 +349,14 @@ impl<
         result
     }
 
-    fn inflation(i: usize, value: Self::InnerType) -> Self {
+    fn inflation(i: usize, value: Self::ScalarType) -> Self {
         let mut result = Self::identity();
-        
+
         match result.coord_get(i, i) {
             None => (),
-            Some(_) => result[i][i] = value
+            Some(_) => result[i][i] = value,
         };
         result
-        
     }
 
     fn is_upper_triangular(&self) -> bool {

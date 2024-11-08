@@ -3,10 +3,10 @@ use std::ops::*;
 
 //Algebra
 pub trait LinearAlgebra {
-    type InnerType;
+    type ScalarType;
     type AddOutput;
-    type MultIn<const P: usize>;
-    type MultOutput<const P: usize>;
+    type DotIn<const P: usize>;
+    type DotOutput<const P: usize>;
     type Square;
     type Det;
 
@@ -37,11 +37,28 @@ pub trait LinearAlgebra {
     ///let expected_result_m1_time_m2 = Matrix::from([[22.,28.],[49.,64.]]);
     ///let expected_result_m2_time_m1 = Matrix::from([[9.,12.,15.],[19.,26.,33.],[29.,40.,51.]]);
     ///assert_eq!(m1*m2,expected_result_m1_time_m2);
-    ///assert_eq!(m1.multiply(m2),expected_result_m1_time_m2);
+    ///assert_eq!(m1.dot(m2),expected_result_m1_time_m2);
     ///assert_eq!(m2*m1,expected_result_m2_time_m1);
-    ///assert_eq!(m2.multiply(m1),expected_result_m2_time_m1);
+    ///assert_eq!(m2.dot(m1),expected_result_m2_time_m1);
     /// ```
-    fn multiply<const P: usize>(&self, rhs: Self::MultIn<P>) -> Self::MultOutput<P>;
+    fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOutput<P>;
+
+    /// //TODO : more examples
+    ///Multiply element by element of to matrices
+    /// 
+    /// ## Example:
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::*;
+    /// 
+    /// let m1 = Matrix::from([[1.,1.,1.],[1.,1.,1.]]);
+    /// let m2 = Matrix::from([[4.,5.,8.],[8.,8.,9.]]);
+    /// 
+    /// assert_eq!(m1.multiply(m2),m2);
+    /// assert_eq!(m1.multiply(m2),m2.multiply(m1));
+    /// 
+    /// 
+    /// ```
+    fn multiply(&self, rhs: Self) -> Self;
 
     ///Scale a matrix by a value
     ///Perform a scale operation on a matrix
@@ -56,7 +73,7 @@ pub trait LinearAlgebra {
     ///assert_eq!(m*scale_factor,expected_result);
     ///assert_eq!(m.scale(scale_factor),expected_result);
     /// ```
-    fn scale(&self, rhs: Self::InnerType) -> Self;
+    fn scale(&self, rhs: Self::ScalarType) -> Self;
 
     ///Raise a matrix at power n
     /// # Example :
@@ -293,7 +310,7 @@ pub trait LinearAlgebra {
     ///
     ///
     /// ```
-    fn inflation(i: usize, value: Self::InnerType) -> Self;
+    fn inflation(i: usize, value: Self::ScalarType) -> Self;
 
     ///return if a matrice is upper triangular
     ///
@@ -360,32 +377,32 @@ where
 
 impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
 where
-    Matrix<T, N, M>: LinearAlgebra<MultIn<P> = Matrix<T, M, P>, MultOutput<P> = Matrix<T, N, P>>,
+    Matrix<T, N, M>: LinearAlgebra<DotIn<P> = Matrix<T, M, P>, DotOutput<P> = Matrix<T, N, P>>,
 {
-    type Output = <Matrix<T, N, M> as LinearAlgebra>::MultOutput<P>;
+    type Output = <Matrix<T, N, M> as LinearAlgebra>::DotOutput<P>;
 
     fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
-        self.multiply::<P>(rhs)
+        self.dot::<P>(rhs)
     }
 }
 
-impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::InnerType>
+impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::ScalarType>
     for Matrix<T, N, M>
 where
     Self: LinearAlgebra,
 {
     type Output = Self;
-    fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::InnerType) -> Self::Output {
+    fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) -> Self::Output {
         self.scale(rhs)
     }
 }
 
 impl<T: std::marker::Copy, const N: usize, const M: usize>
-    MulAssign<<Matrix<T, N, M> as LinearAlgebra>::InnerType> for Matrix<T, N, M>
+    MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
 where
     Self: LinearAlgebra,
 {
-    fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::InnerType) {
+    fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) {
         *self = *self * rhs;
     }
 }

@@ -3,10 +3,10 @@ pub mod my_matrix_lib;
 #[cfg(test)]
 mod tests {
 
-    use crate::my_matrix_lib::prelude::*;
-
     #[test]
-    fn it_works() {
+    fn prelude_test() {
+        use crate::my_matrix_lib::prelude::*;
+
         let now = std::time::Instant::now();
 
         //test adition
@@ -23,13 +23,14 @@ mod tests {
         {
             let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
             let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
+
             let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
             let expected_result_m2_time_m1 =
                 Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
             assert_eq!(m1 * m2, expected_result_m1_time_m2);
-            assert_eq!(m1.multiply(m2), expected_result_m1_time_m2);
+            assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
             assert_eq!(m2 * m1, expected_result_m2_time_m1);
-            assert_eq!(m2.multiply(m1), expected_result_m2_time_m1);
+            assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
         }
 
         //test scaling
@@ -291,8 +292,54 @@ mod tests {
             assert_eq!(None, m.pow(-5));
         }
 
-
         let elapsed_time = now.elapsed();
         println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
+    }
+
+    #[test]
+    fn usefull_fonctions_test() {
+        use crate::my_matrix_lib::prelude::*;
+
+        // random
+        {
+            use crate::my_matrix_lib::additional_funcs::more_utilities::RandomMatrix;
+
+            let m: Matrix<f32, 3, 3> = Matrix::random();
+            println!("{}", m);
+
+            let m: Matrix<(u8,f32), 3, 3> = Matrix::random();
+            println!("{:?}", m);
+
+            let m: Matrix<u8, 3, 3> = Matrix::random();
+            println!("{}", m);
+        }
+
+        //rng
+        {
+            use crate::my_matrix_lib::additional_funcs::more_utilities::RandomMatrix;
+            use rand::thread_rng;
+            let mut rng = thread_rng();
+
+            let m: Matrix<f32, 3, 3> = Matrix::rng_gen(&mut rng);
+            println!("{}", m);
+
+            let m: Matrix<f64, 3, 3> = Matrix::rng_gen(&mut rng);
+            println!("{}", m);
+
+            let m: Matrix<u8, 3, 3> = Matrix::rng_gen(&mut rng);
+            println!("{}", m);
+        }
+
+        //transpose dot
+        {
+            use crate::my_matrix_lib::additional_funcs::more_algebra::*;
+
+            let m1: Matrix<f32, 3, 4> = Matrix::identity();
+            let m2: Matrix<f32, 3, 4> = Matrix::zero();
+
+            assert_eq!(m1 * m2.transpose(), m1.transpose_dot(m2));
+
+
+        }
     }
 }
