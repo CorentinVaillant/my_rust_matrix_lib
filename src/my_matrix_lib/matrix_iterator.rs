@@ -1,4 +1,5 @@
-use std::ops::DerefMut;
+use std::{marker::PhantomData, ptr::NonNull};
+
 
 use super::matrix::Matrix;
 
@@ -30,9 +31,26 @@ pub struct MatrixColumnIterator<T, const N:usize, const M:usize>{
 }
 
 pub struct MatrixMutElemIterator<'a,T, const N:usize, const M:usize>{
-    matrix : &'a mut Matrix<T,N,M>,
-    curpos : (usize,usize),
-    iter_along : IterateAlong,
+    ptr :NonNull<T>,
+    curpos  :(usize,usize),
+    _marker :PhantomData<&'a mut T>,
+
+    iter_along :IterateAlong
+}
+
+impl <'a, T, const N:usize, const M:usize> MatrixMutElemIterator<'a,T,N,M>{
+    pub fn new(m: &mut Matrix<T,N,M>,iter_along:IterateAlong) -> Self {
+        Self {
+            // m.0 dans ton cas c'est le inner et faut le cast vers un *mut T
+            // en partant de *mut [[T; N]; M]
+            // SAFETY: m ne peut pas etre un pointeur null
+            ptr: unsafe{NonNull::new_unchecked(&mut m[0][0])},
+            curpos: (0,0),
+            _marker: PhantomData,
+
+            iter_along
+        }
+    }
 }
 
 impl<T, const N:usize, const M:usize> Iterator for MatrixElemIterator<T,N,M> 
@@ -101,7 +119,7 @@ impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T
         match self.curpos.0 < N && self.curpos.1 < M {
             false => None,
             true=>{
-                let result = self.matrix.get_coord_mut(self.curpos.0, self.curpos.1);
+                let result = unsafe {Some(self.ptr.add(self.curpos.0 + self.curpos.1).as_mut())};
                 match self.iter_along {
                     IterateAlong::Column=> {
                         if self.curpos.1+1 >= M{
@@ -184,10 +202,6 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
     /*-----------&Mut equivalent-----------*/
 
     pub fn iter_mut_elem(&mut self,iter_along : IterateAlong)->MatrixMutElemIterator<T,N,M>{
-        MatrixMutElemIterator{
-            matrix :self,
-            curpos :(0,0),
-            iter_along,
-        }
+        MatrixMutElemIterator::new(self, iter_along)
     }
 }
