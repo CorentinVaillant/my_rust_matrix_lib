@@ -41,10 +41,13 @@ pub struct MatrixMutElemIterator<'a,T, const N:usize, const M:usize>{
 impl <'a, T, const N:usize, const M:usize> MatrixMutElemIterator<'a,T,N,M>{
     pub fn new(m: &mut Matrix<T,N,M>,iter_along:IterateAlong) -> Self {
         Self {
-            // m.0 dans ton cas c'est le inner et faut le cast vers un *mut T
-            // en partant de *mut [[T; N]; M]
-            // SAFETY: m ne peut pas etre un pointeur null
-            ptr: unsafe{NonNull::new_unchecked(&mut m[0][0])},
+            // SAFETY: m cannot be null
+            // SAFETY: ||{std::mem::MaybeUninit::uninit().assume_init()} is call only if the matrix have N = 0 or M = 0, and so when next will be call this value will never be read.
+            //? I think this is good, but if you have a way to improve this, with define behavior, please tell me
+
+            #[allow(invalid_value)] // std::mem::MaybeUninit::uninit().assume_init() will never be read
+            ptr: unsafe{NonNull::new_unchecked( m.get_coord_mut(0, 0).unwrap_or_else(||{std::mem::MaybeUninit::uninit().assume_init()}))},
+            //m.get_coord_mut(0, 0).unwrap_or(std::ptr::null_mut::<T>().with_addr(N))
             curpos: (0,0),
             _marker: PhantomData,
 
@@ -70,7 +73,7 @@ where T:Copy{
                     IterateAlong::Row =>{
                         if self.curpos.0+1 >= N{
                             self.curpos.1 += 1;}
-                            self.curpos.0 = (self.curpos.0+1)%M;}
+                            self.curpos.0 = (self.curpos.0+1)%N;}
                 };
                 Some(*val)
             }
@@ -112,14 +115,15 @@ where T:Copy{
 }
 
 impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T,N,M>
+where T: std::fmt::Debug 
 {
     type Item = &'a mut T;
     fn next(&mut self) -> Option<Self::Item> {
-        
+        println!("curpos :{:?}",self.curpos);
         match self.curpos.0 < N && self.curpos.1 < M {
             false => None,
             true=>{
-                let result = unsafe {Some(self.ptr.add(self.curpos.0 + self.curpos.1).as_mut())};
+                let result = unsafe {Some(self.ptr.add(self.curpos.0 + self.curpos.1*N).as_mut())};
                 match self.iter_along {
                     IterateAlong::Column=> {
                         if self.curpos.1+1 >= M{
@@ -128,12 +132,13 @@ impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T
                     IterateAlong::Row =>{
                         if self.curpos.0+1 >= N{
                             self.curpos.1 += 1;}
-                            self.curpos.0 = (self.curpos.0+1)%M;}
+                            self.curpos.0 = (self.curpos.0+1)%N;}
                 };
                 result
             }
         }
     }
+
 }
 
 impl<T, const N:usize, const M:usize> Matrix<T,N,M> {

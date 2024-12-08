@@ -292,6 +292,57 @@ mod tests {
             assert_eq!(None, m.pow(-5));
         }
 
+        //test elem iterator
+        {
+            let mut m1 = Matrix::from([[1,2],[3,4],[5,6]]).iter_elem(IterateAlong::Column);
+            assert_eq!(m1.next(),Some(1));
+            assert_eq!(m1.next(),Some(2));
+            assert_eq!(m1.next(),Some(3));
+            assert_eq!(m1.next(),Some(4));
+            assert_eq!(m1.next(),Some(5));
+            assert_eq!(m1.next(),Some(6));
+            assert_eq!(m1.next(),None);
+
+            let mut m2 = Matrix::from([[1,2],[3,4],[5,6]]).iter_elem(IterateAlong::Row);
+            assert_eq!(m2.next(),Some(1));
+            assert_eq!(m2.next(),Some(3));
+            assert_eq!(m2.next(),Some(5));
+            assert_eq!(m2.next(),Some(2));
+            assert_eq!(m2.next(),Some(4));
+            assert_eq!(m2.next(),Some(6));
+            assert_eq!(m2.next(),None);
+
+        }
+
+        //test row iterator
+        {
+            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_row();
+            assert_eq!(m1.next(), Some([1,2]));
+            assert_eq!(m1.next(), Some([3,4]));
+            assert_eq!(m1.next(), None);
+        }
+
+        //test column iterator
+        {
+            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_column();
+            
+            assert_eq!(m1.next(), Some([1,3]));
+            assert_eq!(m1.next(), Some([2,4]));
+            assert_eq!(m1.next(), None);
+        }
+
+        //test elem mut iterator
+        {
+            let mut m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.],[7.,8.,9.]]);
+            let m2 = m1.clone();
+            for v in m1.iter_mut_elem(IterateAlong::Row){
+                *v +=1.;
+            }
+            let ones = Matrix::from([[1.,1.,1.],[1.,1.,1.],[1.,1.,1.]]);
+
+            assert_eq!(m2+ones, m1);
+        }
+
         let elapsed_time = now.elapsed();
         println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
     }
@@ -342,39 +393,6 @@ mod tests {
 
         }
 
-        //test elem iterator
-        {
-            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_elem(IterateAlong::Column);
-            assert_eq!(m1.next(),Some(1));
-            assert_eq!(m1.next(),Some(2));
-            assert_eq!(m1.next(),Some(3));
-            assert_eq!(m1.next(),Some(4));
-            assert_eq!(m1.next(),None);
 
-            let mut m2 = Matrix::from([[1,2],[3,4]]).iter_elem(IterateAlong::Row);
-            assert_eq!(m2.next(),Some(1));
-            assert_eq!(m2.next(),Some(3));
-            assert_eq!(m2.next(),Some(2));
-            assert_eq!(m2.next(),Some(4));
-            assert_eq!(m2.next(),None);
-
-        }
-
-        //test row iterator
-        {
-            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_row();
-            assert_eq!(m1.next(), Some([1,2]));
-            assert_eq!(m1.next(), Some([3,4]));
-            assert_eq!(m1.next(), None);
-        }
-
-        //test column iterator
-        {
-            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_column();
-            
-            assert_eq!(m1.next(), Some([1,3]));
-            assert_eq!(m1.next(), Some([2,4]));
-            assert_eq!(m1.next(), None);
-        }
     }
 }
