@@ -48,14 +48,7 @@ pub mod more_algebra {
         }
 
         fn matrix_of_ones() -> Self {
-            let mut result: Matrix<T, N, M> = unsafe{std::mem::MaybeUninit::uninit().assume_init()};
-            for i in 0..N{
-                for j in 0..M{
-                    result[i][j] = T::one();
-                }
-            }
-
-            result
+            Matrix::from([[T::one();M];N])
         }
     }
 

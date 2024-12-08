@@ -317,13 +317,7 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
     }
 
     fn zero() -> Self {
-        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-        for i in 0..N {
-            for j in 0..M {
-                result[i][j] = T::zero();
-            }
-        }
-        result
+        Matrix::from([[T::zero();M];N])
     }
 
     fn identity() -> Self {
