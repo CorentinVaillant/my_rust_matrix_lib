@@ -1,3 +1,5 @@
+use std::ops::DerefMut;
+
 use super::matrix::Matrix;
 
 ///Iterator direction </br>
@@ -11,6 +13,24 @@ pub enum IterateAlong {
 ///An iterator on matrix elements
 pub struct MatrixElemIterator<T, const N:usize, const M:usize>{
     matrix :Matrix<T,N,M>,
+    curpos : (usize,usize),
+    iter_along : IterateAlong,
+}
+
+///An iterator on matrix row
+pub struct MatrixRowIterator<T, const N:usize, const M:usize>{
+    matrix :Matrix<T,N,M>,
+    curpos : usize,
+}
+
+///An iterator on matrix column
+pub struct MatrixColumnIterator<T, const N:usize, const M:usize>{
+    matrix :Matrix<T,N,M>,
+    curpos : usize,
+}
+
+pub struct MatrixMutElemIterator<'a,T, const N:usize, const M:usize>{
+    matrix : &'a mut Matrix<T,N,M>,
     curpos : (usize,usize),
     iter_along : IterateAlong,
 }
@@ -40,11 +60,6 @@ where T:Copy{
     }
 }
 
-pub struct MatrixRowIterator<T, const N:usize, const M:usize>{
-    matrix :Matrix<T,N,M>,
-    curpos : usize,
-}
-
 impl<T, const N:usize, const M:usize> Iterator for MatrixRowIterator<T,N,M>
 where T:Copy{
     type Item = [T;M];
@@ -55,11 +70,6 @@ where T:Copy{
             Some(val)=>{self.curpos+=1;Some(*val)}
         }
     }
-}
-
-pub struct MatrixColumnIterator<T, const N:usize, const M:usize>{
-    matrix :Matrix<T,N,M>,
-    curpos : usize,
 }
 
 impl<T, const N:usize, const M:usize> Iterator for MatrixColumnIterator<T,N,M>
@@ -83,6 +93,31 @@ where T:Copy{
     }
 }
 
+impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T,N,M>
+{
+    type Item = &'a mut T;
+    fn next(&mut self) -> Option<Self::Item> {
+        
+        match self.curpos.0 < N && self.curpos.1 < M {
+            false => None,
+            true=>{
+                match self.iter_along {
+                    IterateAlong::Column=> {
+                        if self.curpos.1+1 >= M{
+                            self.curpos.0 += 1;}
+                            self.curpos.1 = (self.curpos.1+1)%M;}
+                    IterateAlong::Row =>{
+                        if self.curpos.0+1 >= N{
+                            self.curpos.1 += 1;}
+                            self.curpos.0 = (self.curpos.0+1)%M;}
+                };
+
+                let a = &mut self.matrix.deref_mut()[self.curpos.0][self.curpos.1];
+                Some(&mut self.matrix.deref_mut()[self.curpos.0][self.curpos.1])
+            }
+        }
+    }
+}
 
 impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
 
@@ -143,6 +178,17 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
         MatrixColumnIterator { 
             matrix: self, 
             curpos: 0 
+        }
+    }
+
+
+    /*-----------&Mut equivalent-----------*/
+
+    pub fn iter_mut_elem(&mut self,iter_along : IterateAlong)->MatrixMutElemIterator<T,N,M>{
+        MatrixMutElemIterator{
+            matrix :self,
+            curpos :(0,0),
+            iter_along,
         }
     }
 }
