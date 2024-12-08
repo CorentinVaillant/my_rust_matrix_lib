@@ -43,6 +43,20 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
             None => None,
         }
     }
+
+    pub fn get_mut(&mut self, index:usize)->Option<&mut [T; M]>{
+        self.inner.get_mut(index)
+    }
+
+    pub fn get_coord_mut(&mut self, i: usize, j: usize) -> Option<&mut T> {
+        match self.get_mut(i) {
+            Some(row) => match row.get_mut(j) {
+                Some(val) => Some(val),
+                None => None,
+            },
+            None => None,
+        }
+    }
 }
 
 //definition de l'egalite
