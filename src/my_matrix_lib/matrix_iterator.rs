@@ -101,6 +101,7 @@ impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T
         match self.curpos.0 < N && self.curpos.1 < M {
             false => None,
             true=>{
+                let result = self.matrix.get_coord_mut(self.curpos.0, self.curpos.1);
                 match self.iter_along {
                     IterateAlong::Column=> {
                         if self.curpos.1+1 >= M{
@@ -111,9 +112,7 @@ impl<'a,T, const N:usize, const M:usize> Iterator for MatrixMutElemIterator<'a,T
                             self.curpos.1 += 1;}
                             self.curpos.0 = (self.curpos.0+1)%M;}
                 };
-
-                let a = &mut self.matrix.deref_mut()[self.curpos.0][self.curpos.1];
-                Some(&mut self.matrix.deref_mut()[self.curpos.0][self.curpos.1])
+                result
             }
         }
     }
