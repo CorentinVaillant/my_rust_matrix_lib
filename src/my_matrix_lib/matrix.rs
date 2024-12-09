@@ -357,10 +357,11 @@ impl<const N: usize, const M: usize> FloatEq for Matrix<f64, N, M> {
 }
 
 
-//Iterators 
+/********************************************************
+ <====================Iterators =======================>
+ ********************************************************/
 
 use std::{marker::PhantomData, ptr::NonNull};
-
 
 
 ///Iterator direction </br>

@@ -45,7 +45,7 @@ mod tests {
             assert_eq!(m * scale_factor, expected_result);
             assert_eq!(m.scale(scale_factor), expected_result);
 
-            let m_empty: Matrix<f64, 1, 0> = Matrix::from([[]]);
+            let m_empty: Matrix<f64, 0, 65464> = Matrix::from([]);
             assert_eq!(m_empty,m_empty*5.);
         }
 
