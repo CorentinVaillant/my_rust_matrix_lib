@@ -16,9 +16,9 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
 
     fn scale(&self, rhs: Self::ScalarType) -> Self {
         let mut result = self.clone();
-        for elem in result.iter_mut_elem(IterateAlong::Column){
-            *elem = *elem * rhs;
-        }
+        result.iter_mut_elem(IterateAlong::Column).for_each(
+            |elem|*elem = *elem * rhs
+        );
 
         result
     }
