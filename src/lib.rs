@@ -17,6 +17,9 @@ mod tests {
             assert_eq!(m1 + m2, expected_result);
             assert_eq!(m1.addition(m2), expected_result);
             assert_eq!(m2.addition(m1), expected_result);
+
+            let m_empty: Matrix<f32, 3, 0> = Matrix::from([[],[],[]]);
+            assert_eq!(m_empty+m_empty,m_empty);
         }
 
         //test multiplication
@@ -41,6 +44,9 @@ mod tests {
             assert_eq!(scale_factor * m, expected_result);
             assert_eq!(m * scale_factor, expected_result);
             assert_eq!(m.scale(scale_factor), expected_result);
+
+            let m_empty: Matrix<f64, 1, 0> = Matrix::from([[]]);
+            assert_eq!(m_empty,m_empty*5.);
         }
 
         //test zeroed

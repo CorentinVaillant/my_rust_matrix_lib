@@ -3,6 +3,8 @@
 use crate::my_matrix_lib::linear_algebra_trait::LinearAlgebra;
 use crate::my_matrix_lib::matrix::*;
 
+use super::prelude::IterateAlong;
+
 ///Implementation for floats
 impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, N, M> {
     type ScalarType = T;
@@ -13,11 +15,9 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
     type Det = T;
 
     fn scale(&self, rhs: Self::ScalarType) -> Self {
-        let mut result = Self::zero();
-        for i in 0..N {
-            for j in 0..M {
-                result[i][j] = rhs * self[i][j];
-            }
+        let mut result = self.clone();
+        for elem in result.iter_mut_elem(IterateAlong::Column){
+            *elem = *elem * rhs;
         }
 
         result
