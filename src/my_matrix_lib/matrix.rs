@@ -406,7 +406,6 @@ impl <'a, T, const N:usize, const M:usize> MatrixMutElemIterator<'a,T,N,M>{
             // SAFETY: ||{std::mem::MaybeUninit::uninit().assume_init()} is call only if the matrix have N = 0 or M = 0, and so when next will be call this value will never be read.
             //? I think this is good, but if you have a way to improve this, with define behavior, please tell me
 
-            #[allow(invalid_value)] // std::mem::MaybeUninit::uninit().assume_init() will never be read
             ptr: unsafe{NonNull::new_unchecked( &mut m.inner as *mut[[T;M];N] as *mut [T; M] as *mut T)},
             curpos: (0,0),
             _marker: PhantomData,

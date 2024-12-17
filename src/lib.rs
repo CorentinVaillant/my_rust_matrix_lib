@@ -3,6 +3,7 @@ pub mod my_matrix_lib;
 #[cfg(test)]
 mod tests {
 
+
     #[test]
     fn prelude_test() {
         use crate::my_matrix_lib::prelude::*;
@@ -34,6 +35,8 @@ mod tests {
             assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
             assert_eq!(m2 * m1, expected_result_m2_time_m1);
             assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
+
+
         }
 
         //test scaling
@@ -358,34 +361,23 @@ mod tests {
         use crate::my_matrix_lib::prelude::*;
 
         // random
+        #[cfg(feature = "random")]
         {
-            use crate::my_matrix_lib::additional_funcs::more_utilities::RandomMatrix;
+            use rand::Rng;
 
-            let m: Matrix<f32, 3, 3> = Matrix::random();
+
+            let mut rng = rand::thread_rng();
+
+            let m: Matrix<bool, 3, 3> =rng.gen();
             println!("{}", m);
 
-            let m: Matrix<(u8,f32), 3, 3> = Matrix::random();
+            let m: Matrix<(u8,f32), 3, 3> = rng.gen();
             println!("{:?}", m);
 
-            let m: Matrix<u8, 3, 3> = Matrix::random();
+            let m: Matrix<u8, 3, 3> = rng.gen();
             println!("{}", m);
         }
 
-        //rng
-        {
-            use crate::my_matrix_lib::additional_funcs::more_utilities::RandomMatrix;
-            use rand::thread_rng;
-            let mut rng = thread_rng();
-
-            let m: Matrix<f32, 3, 3> = Matrix::rng_gen(&mut rng);
-            println!("{}", m);
-
-            let m: Matrix<f64, 3, 3> = Matrix::rng_gen(&mut rng);
-            println!("{}", m);
-
-            let m: Matrix<u8, 3, 3> = Matrix::rng_gen(&mut rng);
-            println!("{}", m);
-        }
 
         //transpose dot
         {
@@ -396,9 +388,7 @@ mod tests {
 
             assert_eq!(m1 * m2.transpose(), m1.transpose_dot(m2));
 
-
         }
-
 
     }
 }

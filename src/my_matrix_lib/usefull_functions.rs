@@ -59,9 +59,9 @@ pub mod more_utilities {
 
     use std::usize;
 
-    use rand::distributions::Standard;
     #[cfg(feature = "random")]
-    use rand::prelude::*;
+    use rand::distributions::Standard;
+    
 
     use super::Matrix;
 
@@ -116,32 +116,14 @@ pub mod more_utilities {
     }
 
     #[cfg(feature = "random")]
-    pub trait RandomMatrix {
-        fn random() -> Self;
-
-        fn rng_gen<RNG>(rng: &mut RNG) -> Self
-        where
-            RNG: Rng;
-    }
-
-    impl<T, const N: usize, const M: usize> RandomMatrix for Matrix<T, N, M>
-    where
-        Standard: Distribution<T>,
+    impl<T,const N:usize, const M:usize> Distribution<Matrix<T,N,M>> for Standard
+    where Standard : Distribution<[[T;M];N]>
     {
-        fn rng_gen<RNG>(rng: &mut RNG) -> Self
-        where
-            RNG: Rng,
-        {
-            let mut f = |(_, _): (usize, usize)| rng.gen::<T>();
-
-            Self::genrate_with_mut_func(&mut f)
-        }
-
-        fn random() -> Self {
-            let f = |(_, _): (usize, usize)| random::<T>();
-
-            Self::genrate_with_func(&f)
+        fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Matrix<T,N,M> {
+            Matrix::from(rng.gen())
         }
     }
+
+    
 }
 

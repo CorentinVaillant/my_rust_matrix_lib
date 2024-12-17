@@ -16,4 +16,4 @@ rand = {version = "0.8.5", optional = true}
 multitrheaded = ["dep:rayon"]
 random = ["dep:rand"]
 
-default = ["random"] #toremove
+# default = ["random"] #!toremove
