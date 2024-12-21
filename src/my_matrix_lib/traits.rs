@@ -1,5 +1,7 @@
 use crate::my_matrix_lib::matrix::*;
-use std::ops::*;
+use std::{fmt::Error, ops::*};
+
+use super::{additional_structs::Dimension, errors::MatrixError};
 
 //Algebra
 pub trait LinearAlgebra {
@@ -351,6 +353,67 @@ pub trait LinearAlgebra {
     ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
     ///assert!(!m.is_lower_triangular());
     /// ```
+    fn is_lower_triangular(&self) -> bool;
+}
+
+pub trait VectorSpace {
+    type Scalar;
+
+    fn add(&self, other :&Self)->Self;
+    fn substract(&self, other :&Self)->Self;
+    fn scale(&self, scalar : Self::Scalar)->Self;
+
+    fn zero()->Self;
+    fn one()->Self::Scalar;
+    fn scalar_zero()->Self::Scalar;
+    fn dimension()->Dimension;
+}
+
+pub trait EuclidianSpace 
+  where Self : VectorSpace{
+    fn lenght(&self)->Self::Scalar;
+
+    fn dot(&self, other :&Self)->Self::Scalar;
+
+    fn distance(&self, other :&Self) ->Self::Scalar
+      where Self::Scalar : PartialEq, Self : Sized{
+        self.substract(other).lenght()
+    }
+
+    fn angle(&self, rhs :Self)-> Self::Scalar;
+
+    fn is_orthogonal_to(&self, other :&Self)->bool
+     where Self::Scalar : PartialEq{
+        self.dot(other) == Self::scalar_zero()
+    }
+
+}
+
+pub trait MatrixTrait 
+ where Self : VectorSpace{
+     
+    type SquareMatrix;
+    
+    fn pow<I: num::Integer>(self, n: I) -> Result<Self,MatrixError> where Self: Sized;
+
+    fn det(&self) -> Self::Scalar;
+    fn reduce_row_echelon(&self) -> Self;
+
+    
+    fn plu_decomposition(&self) -> Result<(Self::SquareMatrix, Self::SquareMatrix, Self::SquareMatrix), MatrixError>;
+
+    
+    fn inverse(&self) -> Result<Self,MatrixError> where Self: Sized;
+
+    fn zero() -> Self;
+    fn identity() -> Self;
+
+    fn permutation(i: usize, j: usize) -> Self;
+    fn inflation(i: usize, value: Self::Scalar) -> Self;
+
+    
+    fn is_upper_triangular(&self) -> bool;
+
     fn is_lower_triangular(&self) -> bool;
 }
 

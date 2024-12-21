@@ -1,4 +1,5 @@
-mod linear_algebra_trait;
+mod additional_structs;
+mod traits;
 mod matrix;
 mod usefull_functions;
 mod vector_math;
@@ -9,7 +10,7 @@ mod linear_algebra;
 #[cfg(not(feature = "multitrheaded"))]
 pub mod prelude {
     pub use crate::my_matrix_lib::vector_math::*;
-    pub use crate::my_matrix_lib::linear_algebra_trait::*;
+    pub use crate::my_matrix_lib::traits::*;
     pub use crate::my_matrix_lib::matrix::*;
     
 }
@@ -19,7 +20,7 @@ pub mod prelude {
 mod par_linear_alegebra;
 #[cfg(feature = "multitrheaded")]
 pub mod prelude {
-    pub use crate::my_matrix_lib::linear_algebra_trait::*;
+    pub use crate::my_matrix_lib::traits::*;
     pub use crate::my_matrix_lib::matrix::*;
 }
 

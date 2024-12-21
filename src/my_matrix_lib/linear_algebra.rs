@@ -1,6 +1,6 @@
 #![allow(clippy::uninit_assumed_init)]
 
-use crate::my_matrix_lib::linear_algebra_trait::LinearAlgebra;
+use crate::my_matrix_lib::traits::LinearAlgebra;
 use crate::my_matrix_lib::matrix::*;
 
 use super::prelude::IterateAlong;
