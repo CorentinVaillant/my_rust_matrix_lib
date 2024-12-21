@@ -1,5 +1,5 @@
 use crate::my_matrix_lib::matrix::*;
-use std::{fmt::Error, ops::*};
+use std::ops::*;
 
 use super::{additional_structs::Dimension, errors::MatrixError};
 
@@ -393,7 +393,12 @@ pub trait MatrixTrait
  where Self : VectorSpace{
      
     type SquareMatrix;
-    
+    type DotIn<const P: usize>;
+    type DotOut<const P: usize>; 
+
+
+    fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOut<P>;
+
     fn pow<I: num::Integer>(self, n: I) -> Result<Self,MatrixError> where Self: Sized;
 
     fn det(&self) -> Self::Scalar;
@@ -402,7 +407,6 @@ pub trait MatrixTrait
     
     fn plu_decomposition(&self) -> Result<(Self::SquareMatrix, Self::SquareMatrix, Self::SquareMatrix), MatrixError>;
 
-    
     fn inverse(&self) -> Result<Self,MatrixError> where Self: Sized;
 
     fn zero() -> Self;
