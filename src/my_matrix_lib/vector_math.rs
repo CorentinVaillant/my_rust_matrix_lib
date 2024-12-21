@@ -1,4 +1,4 @@
-use std::{fmt::format, ops::{Index, IndexMut}};
+use std::ops::{Index, IndexMut};
 
 use super::errors::MatrixError;
 
