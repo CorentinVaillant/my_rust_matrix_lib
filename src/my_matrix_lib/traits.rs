@@ -369,8 +369,10 @@ pub trait VectorSpace {
     fn dimension()->Dimension;
 }
 
-pub trait EuclidianSpace 
+pub trait EuclidianSpace<AngleScalar>
   where Self : VectorSpace{
+
+
     fn lenght(&self)->Self::Scalar;
 
     fn dot(&self, other :&Self)->Self::Scalar;
@@ -380,7 +382,7 @@ pub trait EuclidianSpace
         self.substract(other).lenght()
     }
 
-    fn angle(&self, rhs :Self)-> Self::Scalar;
+    fn angle(&self, rhs :&Self)-> AngleScalar;
 
     fn is_orthogonal_to(&self, other :&Self)->bool
      where Self::Scalar : PartialEq{

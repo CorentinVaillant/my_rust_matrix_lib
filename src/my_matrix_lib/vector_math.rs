@@ -1,6 +1,5 @@
 use std::ops::{Index, IndexMut};
 
-
 use super::errors::MatrixError;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -69,43 +68,73 @@ impl<T, const N: usize> VectorMath<T,N>{
  <=================== Mathematics ======================>
  ********************************************************/
 
-use super::traits::VectorSpace;
+use super::traits::{EuclidianSpace, VectorSpace};
 use num::Num;
 
 impl<T, const N:usize> VectorSpace for VectorMath<T,N>
-  where T : Num{
+  where T : Num + Copy{
     type Scalar = T;
 
     fn add(&self, other :&Self)->Self {
-        todo!()
+        self.iter().zip(other.iter())
+          .map(|(self_elem,other_elem)|{
+            *self_elem + *other_elem 
+          }).collect()
     }
 
     fn substract(&self, other :&Self)->Self {
-        todo!()
+        self.iter().zip(other.iter())
+        .map(|(self_elem,other_elem)|{
+          *self_elem - *other_elem 
+        }).collect()
     }
 
     fn scale(&self, scalar : Self::Scalar)->Self {
-        todo!()
+        self.iter()
+        .map(|self_elem|{
+          *self_elem * scalar
+        }).collect()
     }
 
+    #[inline]
     fn zero()->Self {
-        todo!()
+        Self::from([T::zero();N])
     }
 
+    #[inline]
     fn one()->Self::Scalar {
-        todo!()
+        T::one()
     }
 
+    #[inline]
     fn scalar_zero()->Self::Scalar {
-        todo!()
+        T::zero()
     }
 
+    #[inline]
     fn dimension()->super::additional_structs::Dimension {
-        todo!()
+        super::additional_structs::Dimension::Finite(N)
     }
 }
 
 
+impl<T,AngleScalar, const N:usize> EuclidianSpace<AngleScalar> for VectorMath<T,N> 
+  where T : Num + Copy + num_traits::Pow<f32, Output = T> + Into<AngleScalar>,
+  AngleScalar : num::Float
+{
+
+    fn lenght(&self)->Self::Scalar {
+        self.iter().fold(Self::scalar_zero(), |acc, elem|{acc + *elem}).pow(0.5)
+    }
+  
+    fn dot(&self, other :&Self)->Self::Scalar {
+        self.iter().zip(other.iter()).fold(T::zero(), |acc,(el1,el2)|{acc * *el1 * *el2})
+    }
+  
+    fn angle(&self, rhs :&Self)-> AngleScalar {
+        (self.dot(&rhs)/(self.lenght() * rhs.lenght())).into().acos()
+    }
+  }
 
 
 /********************************************************
@@ -194,5 +223,15 @@ impl<T, const N: usize> IntoIterator for VectorMath<T, N> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.into_iter()
+    }
+}
+
+impl<T, const N: usize> FromIterator<T> for VectorMath<T,N> {
+    fn from_iter<ITER: IntoIterator<Item = T>>(iter: ITER) -> Self {
+        let mut vec_mat: [T;N] =unsafe{ core::mem::MaybeUninit::uninit().assume_init()};
+        for (elem,vec_mat_elem) in iter.into_iter().zip(&mut vec_mat) {
+            *vec_mat_elem = elem;
+        }
+        return Self::from(vec_mat);
     }
 }
