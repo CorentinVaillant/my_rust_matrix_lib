@@ -1,5 +1,6 @@
 use std::ops::{Index, IndexMut};
 
+
 use super::errors::MatrixError;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -20,7 +21,7 @@ impl<T, const N: usize> TryFrom<Vec<T>> for VectorMath<T,N>{
     {
         match value.try_into(){
             Ok(inner) => Ok(Self{inner}),
-            Err(e) => match e.len() == N {
+            Err(e) => match e.len() != N {
                 true => Err(MatrixError::SizeNotMatch),
                 false => Err(MatrixError::Other(format!("Vector error with vector {:?}", e.as_ptr()).to_string())),
             },
@@ -64,6 +65,127 @@ impl<T, const N: usize> VectorMath<T,N>{
     }
 }
 
+/********************************************************
+ <=================== Mathematics ======================>
+ ********************************************************/
+
+use super::traits::VectorSpace;
+use num::Num;
+
+impl<T, const N:usize> VectorSpace for VectorMath<T,N>
+  where T : Num{
+    type Scalar = T;
+
+    fn add(&self, other :&Self)->Self {
+        todo!()
+    }
+
+    fn substract(&self, other :&Self)->Self {
+        todo!()
+    }
+
+    fn scale(&self, scalar : Self::Scalar)->Self {
+        todo!()
+    }
+
+    fn zero()->Self {
+        todo!()
+    }
+
+    fn one()->Self::Scalar {
+        todo!()
+    }
+
+    fn scalar_zero()->Self::Scalar {
+        todo!()
+    }
+
+    fn dimension()->super::additional_structs::Dimension {
+        todo!()
+    }
+}
+
+
+
+
+/********************************************************
+ <====================Iterators =======================>
+ ********************************************************/
+
+use std::marker::PhantomData;
+use core::ptr::NonNull;
+
+
+pub struct VectorMathIterator<'a,T,const N:usize>{
+    curpos : usize,
+    vec : &'a VectorMath<T,N>
+}
+
+pub struct VectorMathMutIterator<'a, T, const N:usize>{
+    curpos : usize,
+    ptr : Option<core::ptr::NonNull<T>>,
+    _marker : PhantomData<&'a mut VectorMath<T,N>>
+}
+
+impl<T, const N:usize> VectorMath<T,N>{
+
+    ///Return an iterator over the vector  
+    /// Example :
+    /// ```
+    /// use my_matrix_lib
+    /// ```
+    pub fn iter(&self)->VectorMathIterator<T,N>
+    {
+        VectorMathIterator{
+            curpos : 0,
+            vec : self
+        }
+    }
+
+    pub fn iter_mut<'a>(&'a mut self)->VectorMathMutIterator<'a,T,N>{
+       VectorMathMutIterator{
+           curpos : 0,
+           ptr : (N>0).then_some(NonNull::from(&self.inner[0])),
+           _marker : PhantomData
+       }
+    }
+}
+
+impl<'a,T, const N:usize> Iterator for VectorMathIterator<'a,T,N> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.vec.get(self.curpos){
+            None => None,
+            Some(val)=>{
+                self.curpos+=1;
+                Some(&val)
+            }
+        }
+    }
+}
+
+impl<'a,T,const N:usize> Iterator for VectorMathMutIterator<'a,T,N> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match match self.curpos < N {
+
+            //SAFETY : Curpos will always be under N
+            //Unwrap : ptr is None, only if N = 0, and curpos >= 0
+            false=>None,
+            true =>unsafe {
+                Some(self.ptr.unwrap().add(self.curpos).as_mut())
+            },
+        }{
+            None => None,
+            Some(val)=>{
+                self.curpos += 1;
+                Some(val)
+            }
+        }
+    }
+}
 
 impl<T, const N: usize> IntoIterator for VectorMath<T, N> {
     type Item = T;

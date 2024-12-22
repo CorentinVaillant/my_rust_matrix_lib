@@ -4,8 +4,9 @@ pub mod my_matrix_lib;
 mod tests {
 
 
+
     #[test]
-    fn prelude_test() {
+    fn matrix_test() {
         use crate::my_matrix_lib::prelude::*;
 
         let now = std::time::Instant::now();
@@ -354,6 +355,70 @@ mod tests {
 
         let elapsed_time = now.elapsed();
         println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
+    }
+
+    #[test]
+    fn vector_test(){
+        let now = std::time::Instant::now();
+        
+        //from vec
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+            
+            let vec = vec!['x','y','z'];
+            assert_eq!(VectorMath::from(['x','y','z']), VectorMath::try_from(vec.clone()).unwrap());
+
+            let result:Result<VectorMath<char,4>,_> = VectorMath::try_from(vec);
+            let error = result.unwrap_err();
+            assert_eq!(error.to_string(), "The sizes does not matches".to_string())
+        }
+
+
+        //Iter
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let vec = VectorMath::from([4,2,5]);
+            let mut vec_iter = vec.iter();
+
+            assert_eq!(vec_iter.next(), Some(4).as_ref());
+            assert_eq!(vec_iter.next(), Some(2).as_ref());
+            assert_eq!(vec_iter.next(), Some(5).as_ref());
+            assert_eq!(vec_iter.next(), None);
+
+            let mut acc = 0;
+            for i in vec.iter(){
+                acc += *i;
+            }
+
+            assert_eq!(acc,11);
+            
+        }
+
+        //IterMut
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let mut vec = VectorMath::from(["hello", "worlde"]);
+            let mut vec_iter = vec.iter_mut();
+
+            assert_eq!(vec_iter.next(), Some("hello").as_mut());
+            assert_eq!(vec_iter.next(), Some("worlde").as_mut());
+            assert_eq!(vec_iter.next(), None);
+
+            for (i,value) in vec.iter_mut().enumerate(){
+                if i == 1{
+                    *value = " world";
+                }
+            }
+
+            assert_eq!(vec.get(0), Some("hello").as_ref());
+            assert_eq!(vec.get(1), Some(" world").as_ref());
+        }
+
+        let elapsed_time = now.elapsed();
+        println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
+
     }
 
     #[test]

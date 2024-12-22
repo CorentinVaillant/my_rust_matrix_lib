@@ -13,7 +13,6 @@ pub struct Matrix<T, const N: usize, const M: usize> {
     inner: [[T; M]; N],
 }
 
-//definition de index
 impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {
     type Output = [T; M];
     fn index(&self, index: usize) -> &Self::Output {
@@ -21,14 +20,12 @@ impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {
     }
 }
 
-//definition de index mut
 impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.inner[index]
     }
 }
 
-//definition of get
 impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
     pub fn get(&self, index: usize) -> Option<&[T; M]> {
         self.inner.get(index)
@@ -59,7 +56,6 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
     }
 }
 
-//definition de l'egalite
 impl<T: PartialEq, const N: usize, const M: usize> PartialEq for Matrix<T, N, M> {
     fn eq(&self, other: &Self) -> bool {
         for i in 0..N {
@@ -73,7 +69,6 @@ impl<T: PartialEq, const N: usize, const M: usize> PartialEq for Matrix<T, N, M>
     }
 }
 
-//definition of a default
 impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usize> Default
     for Matrix<T, N, M>
 {
@@ -94,7 +89,7 @@ pub trait TryIntoMatrix<T> {
 impl<T, const N: usize, const M: usize, const P: usize, const Q: usize>
     TryIntoMatrix<Matrix<T, P, Q>> for Matrix<T, N, M>
 {
-    type Error = &'static str;
+    type Error = &'static str;// ! garbage 
 
     fn try_into_matrix(value: Matrix<T, P, Q>) -> Result<Self, Self::Error> {
         if N == P && M == Q {
@@ -181,30 +176,6 @@ impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
     }
 }
 
-#[cfg(feature = "multitrheaded")]
-impl<T: std::marker::Send, const N: usize, const M: usize> IntoParallelIterator
-    for Matrix<T, N, M>
-{
-    type Iter = rayon::array::IntoIter<Self::Item, N>;
-
-    type Item = [T; M];
-
-    fn into_par_iter(self) -> Self::Iter {
-        self.inner.into_par_iter()
-    }
-}
-#[cfg(feature = "multitrheaded")]
-impl<'data, T: std::marker::Send + 'data, const N: usize, const M: usize> IntoParallelIterator
-    for &'data mut Matrix<T, N, M>
-{
-    type Iter = rayon::slice::IterMut<'data, [T; M]>;
-
-    type Item = &'data mut [T; M];
-
-    fn into_par_iter(self) -> Self::Iter {
-        (&mut self.inner).into_par_iter()
-    }
-}
 
 /*implementation to format*/
 impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
@@ -404,7 +375,6 @@ impl <'a, T, const N:usize, const M:usize> MatrixMutElemIterator<'a,T,N,M>{
         Self {
             // SAFETY: m cannot be null
             // SAFETY: ||{std::mem::MaybeUninit::uninit().assume_init()} is call only if the matrix have N = 0 or M = 0, and so when next will be call this value will never be read.
-            //? I think this is good, but if you have a way to improve this, with define behavior, please tell me
 
             ptr: unsafe{NonNull::new_unchecked( &mut m.inner as *mut[[T;M];N] as *mut [T; M] as *mut T)},
             curpos: (0,0),

@@ -7,7 +7,7 @@ pub mod more_algebra {
         type TransposeDotIn<const P: usize>;
         type TransposeDotOut<const P: usize>;
 
-        ///TODO
+        ///TODO : doc
         fn transpose_dot<const P: usize>(
             &self,
             rhs: Self::TransposeDotIn<P>,

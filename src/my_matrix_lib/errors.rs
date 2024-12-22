@@ -1,14 +1,35 @@
+use std::fmt::format;
+
 #[derive(Debug)]
 pub enum MatrixError{
     SizeNotMatch,
+    WidhtNotMatch,
+    HeigthNotMach,
     Other(String),
 }
 
 impl Into<String> for MatrixError{
     fn into(self) -> String {
-        match self {
+        match &self {
             Self::SizeNotMatch => "The sizes does not matches".to_string(),
-            Self::Other(s) =>format!("Other error :{}",s)
+            Self::HeigthNotMach=> "The heights does not matches".to_string(),
+            Self::WidhtNotMatch=> "The widths does not matches".to_string(),
+            
+            Self::Other(s) =>
+                format!("Other error :{}",s)
+        }
+        
+    }
+}
+impl Into<String> for &MatrixError{
+    fn into(self) -> String {
+        match self {
+            MatrixError::SizeNotMatch => "The sizes does not matches".to_string(),
+            MatrixError::HeigthNotMach=> "The heights does not matches".to_string(),
+            MatrixError::WidhtNotMatch=> "The widths does not matches".to_string(),
+
+            MatrixError::Other(s) =>
+                format!("Other error :{}",s)
         }
     }
 }
@@ -16,7 +37,7 @@ impl Into<String> for MatrixError{
 impl core::fmt::Display for MatrixError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f,
-        "{}", self.to_string()
+        "{}", <&Self as Into<String>>::into(self)
         
         )
     }
