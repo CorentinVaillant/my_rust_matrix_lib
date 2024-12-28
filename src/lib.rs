@@ -464,6 +464,33 @@ mod tests {
 
         }
 
+        //subtract
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
+
+            assert_eq!(vec1.substract(&vec1), VectorMath::zero());
+
+
+            let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
+            let vec2 = VectorMath::from([1.,1.,1.,1.]);
+
+            assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
+            assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(-1.));
+        }
+
+        //scale
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
+
+            assert_eq!(vec1.scale(0.), VectorMath::zero());
+            
+            assert_eq!(vec1.scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
+        }
+
         let elapsed_time = now.elapsed();
         println!("VectorMath test OK ✅, took {}", elapsed_time.as_secs_f64());
 

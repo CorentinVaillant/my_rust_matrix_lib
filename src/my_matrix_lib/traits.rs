@@ -360,7 +360,7 @@ pub trait VectorSpace {
     type Scalar;
 
 
-    ///add two vector together
+    ///Add two vector together
     /// ## Example
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
@@ -382,7 +382,38 @@ pub trait VectorSpace {
     ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
     /// ```
     fn add(&self, other :&Self)->Self;
+
+    ///Substract a vector by another
+    /// ## Example
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
+    /// 
+    ///let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
+    ///
+    ///assert_eq!(vec1.substract(&vec1), VectorMath::zero());
+    ///
+    ///
+    ///let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
+    ///let vec2 = VectorMath::from([1.,1.,1.,1.]);
+    ///
+    ///assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
+    ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(-1.));
+    /// ```
     fn substract(&self, other :&Self)->Self;
+
+    ///Scale a vector by a scalar
+    /// ## Example 
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
+    /// 
+    /// let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
+    /// 
+    /// assert_eq!(vec1.scale(0.), VectorMath::zero());
+    /// 
+    /// assert_eq!(vec1.scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
+    /// ```
     fn scale(&self, scalar : Self::Scalar)->Self;
 
     fn zero()->Self;
