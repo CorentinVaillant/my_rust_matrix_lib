@@ -510,7 +510,7 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
         }
     }
 
-    ///Consume a Matrix into a MatrixRowIterator. </br>
+    ///Borrow a Matrix into a MatrixRowIterator. </br>
     ///Use to iterate along all the row of a matrix
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
@@ -528,13 +528,14 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
         }
     }
 
-    ///Consume a Matrix into a MatrixColumnIterator. </br>
+    ///Borrow a Matrix into a MatrixColumnIterator. </br>
     ///Use to iterate along all the column of a matrix    ///```
-    ///let mut m1 = Matrix::from([[1,2],[3,4]]).iter_column();
-    ///        
-    ///assert_eq!(m1.next(), Some([1,3]));
-    ///assert_eq!(m1.next(), Some([2,4]));
-    ///assert_eq!(m1.next(), None);
+    ///let m1 = Matrix::from([[1,2],[3,4]]);
+    ///let mut iter = m1.iter_column();
+    ///
+    ///assert_eq!(iter.next(), Some([&1,&3]));
+    ///assert_eq!(iter.next(), Some([&2,&4]));
+    ///assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_column(&self)->MatrixColumnIterator<T,N,M>{
         MatrixColumnIterator { 

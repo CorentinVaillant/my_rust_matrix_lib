@@ -68,8 +68,7 @@ impl<T, const N: usize> VectorMath<T,N>{
  <=================== Mathematics ======================>
  ********************************************************/
 
-use super::matrix::Matrix;
-use super::traits::{EuclidianSpace, VectorSpace, MatrixTrait};
+use super::traits::{EuclidianSpace, VectorSpace};
 use num::Num;
 
 
