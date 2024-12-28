@@ -326,10 +326,11 @@ mod tests {
 
         //test row iterator
         {
-            let mut m1 = Matrix::from([[1,2],[3,4]]).iter_row();
-            assert_eq!(m1.next(), Some([1,2]));
-            assert_eq!(m1.next(), Some([3,4]));
-            assert_eq!(m1.next(), None);
+            let m1 = Matrix::from([[1,2],[3,4]]);
+            let mut iter = m1.iter_row();
+            assert_eq!(iter.next(), Some([1,2]).as_ref());
+            assert_eq!(iter.next(), Some([3,4]).as_ref());
+            assert_eq!(iter.next(), None);
         }
 
         //test column iterator

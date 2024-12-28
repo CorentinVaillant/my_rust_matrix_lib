@@ -68,10 +68,12 @@ impl<T, const N: usize> VectorMath<T,N>{
  <=================== Mathematics ======================>
  ********************************************************/
 
-use super::traits::{EuclidianSpace, VectorSpace};
+use super::matrix::Matrix;
+use super::traits::{EuclidianSpace, VectorSpace, MatrixTrait};
 use num::Num;
 
-impl<T, const N:usize> VectorSpace for VectorMath<T,N>
+
+impl<T, const N:usize> VectorSpace for VectorMath<T,N> //TODO test and doc
   where T : Num + Copy{
     type Scalar = T;
 
@@ -118,10 +120,10 @@ impl<T, const N:usize> VectorSpace for VectorMath<T,N>
 }
 
 
-impl<T,AngleScalar, const N:usize> EuclidianSpace<AngleScalar> for VectorMath<T,N> 
-  where T : Num + Copy + num_traits::Pow<f32, Output = T> + Into<AngleScalar>,
-  AngleScalar : num::Float
+impl<T : Into<f64> + From<f64>, const N:usize> EuclidianSpace for VectorMath<T,N> //TODO test and doc
+  where T : Num + Copy + num_traits::Pow<f32, Output = T>,
 {
+
 
     fn lenght(&self)->Self::Scalar {
         self.iter().fold(Self::scalar_zero(), |acc, elem|{acc + *elem}).pow(0.5)
@@ -131,11 +133,82 @@ impl<T,AngleScalar, const N:usize> EuclidianSpace<AngleScalar> for VectorMath<T,
         self.iter().zip(other.iter()).fold(T::zero(), |acc,(el1,el2)|{acc * *el1 * *el2})
     }
   
-    fn angle(&self, rhs :&Self)-> AngleScalar {
-        (self.dot(&rhs)/(self.lenght() * rhs.lenght())).into().acos()
+    fn angle(&self, rhs :&Self)-> Self::Scalar {
+        
+        let dot = EuclidianSpace::dot(self, rhs);
+        let denominator = self.lenght() * rhs.lenght();
+
+        (dot / denominator).into().acos().into()
+
     }
   }
 
+/*
+impl<T,const N:usize> MatrixTrait for VectorMath<T,N>
+where 
+  VectorMath<T,N> : EuclidianSpace,
+  T : std::marker::Copy
+{
+    type SquareMatrix = VectorMath<T,1>;
+
+    type DotIn<const P: usize> = Matrix<T,1,N>;
+
+    type DotOut<const P: usize> = <VectorMath<T, N> as VectorSpace>::Scalar;
+
+    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
+        for (vec_el, mat_el) in self.iter().zip(rhs.iter_column()).fold(Self::scalar_zero(), 
+        |acc,b|{
+
+        });
+        
+        todo!()
+    }
+
+    fn pow<I: num::Integer>(self, n: I) -> Result<Self,MatrixError> where Self: Sized {
+        todo!()
+    }
+
+    fn det(&self) -> Self::Scalar {
+        todo!()
+    }
+
+    fn reduce_row_echelon(&self) -> Self {
+        todo!()
+    }
+
+    fn plu_decomposition(&self) -> Result<(Self::SquareMatrix, Self::SquareMatrix, Self::SquareMatrix), MatrixError> {
+        todo!()
+    }
+
+    fn inverse(&self) -> Result<Self,MatrixError> where Self: Sized {
+        todo!()
+    }
+
+    fn zero() -> Self {
+        todo!()
+    }
+
+    fn identity() -> Self {
+        todo!()
+    }
+
+    fn permutation(i: usize, j: usize) -> Self {
+        todo!()
+    }
+
+    fn inflation(i: usize, value: Self::Scalar) -> Self {
+        todo!()
+    }
+
+    fn is_upper_triangular(&self) -> bool {
+        todo!()
+    }
+
+    fn is_lower_triangular(&self) -> bool {
+        todo!()
+    }
+}
+ */
 
 /********************************************************
  <====================Iterators =======================>
@@ -159,10 +232,7 @@ pub struct VectorMathMutIterator<'a, T, const N:usize>{
 impl<T, const N:usize> VectorMath<T,N>{
 
     ///Return an iterator over the vector  
-    /// Example :
-    /// ```
-    /// use my_matrix_lib
-    /// ```
+    ///TODO doc
     pub fn iter(&self)->VectorMathIterator<T,N>
     {
         VectorMathIterator{

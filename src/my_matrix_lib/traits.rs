@@ -369,7 +369,7 @@ pub trait VectorSpace {
     fn dimension()->Dimension;
 }
 
-pub trait EuclidianSpace<AngleScalar>
+pub trait EuclidianSpace
   where Self : VectorSpace{
 
 
@@ -382,7 +382,7 @@ pub trait EuclidianSpace<AngleScalar>
         self.substract(other).lenght()
     }
 
-    fn angle(&self, rhs :&Self)-> AngleScalar;
+    fn angle(&self, rhs :&Self)-> Self::Scalar;
 
     fn is_orthogonal_to(&self, other :&Self)->bool
      where Self::Scalar : PartialEq{
@@ -399,7 +399,7 @@ pub trait MatrixTrait
     type DotOut<const P: usize>; 
 
 
-    fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOut<P>;
+    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P>;
 
     fn pow<I: num::Integer>(self, n: I) -> Result<Self,MatrixError> where Self: Sized;
 

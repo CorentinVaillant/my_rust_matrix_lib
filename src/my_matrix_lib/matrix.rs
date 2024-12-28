@@ -27,17 +27,36 @@ impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
 }
 
 impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
-    pub fn get(&self, index: usize) -> Option<&[T; M]> {
+    pub fn get_row(&self, index: usize) -> Option<&[T; M]> {
         self.inner.get(index)
     }
 
     pub fn coord_get(&self, i: usize, j: usize) -> Option<&T> {
-        match self.get(i) {
+        match self.get_row(i) {
             Some(row) => match row.get(j) {
                 Some(val) => Some(val),
                 None => None,
             },
             None => None,
+        }
+    }
+
+
+    ///return the column of indice `index` of exist, None in the other case
+    /// TODO : test
+    pub fn get_column(&self, index :usize)-> Option<[&T;N]>{
+        let mut result = Vec::with_capacity(N);
+
+        for i in 0..N{
+            match self.coord_get(i, index) {
+                None => return None,
+                Some(val) => result.push(val),
+            };
+        }
+
+        match result.try_into() {
+            Err(_) => None,
+            Ok(arr) => Some(arr)
         }
     }
 
@@ -351,14 +370,14 @@ pub struct MatrixElemIterator<T, const N:usize, const M:usize>{
 }
 
 ///An iterator on matrix row
-pub struct MatrixRowIterator<T, const N:usize, const M:usize>{
-    matrix :Matrix<T,N,M>,
+pub struct MatrixRowIterator<'a,T, const N:usize, const M:usize>{
+    matrix :&'a Matrix<T,N,M>,
     curpos : usize,
 }
 
 ///An iterator on matrix column
-pub struct MatrixColumnIterator<T, const N:usize, const M:usize>{
-    matrix :Matrix<T,N,M>,
+pub struct MatrixColumnIterator<'a,T, const N:usize, const M:usize>{
+    matrix :&'a Matrix<T,N,M>,
     curpos : usize,
 }
 
@@ -409,35 +428,29 @@ where T:Copy{
     }
 }
 
-impl<T, const N:usize, const M:usize> Iterator for MatrixRowIterator<T,N,M>
+impl<'a,T, const N:usize, const M:usize> Iterator for MatrixRowIterator<'a,T,N,M>
 where T:Copy{
-    type Item = [T;M];
+    type Item = &'a[T;M];
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.matrix.get(self.curpos) {
+        match self.matrix.get_row(self.curpos) {
             None=>None,
-            Some(val)=>{self.curpos+=1;Some(*val)}
+            Some(val)=>{self.curpos+=1;Some(val)}
         }
     }
 }
 
-impl<T, const N:usize, const M:usize> Iterator for MatrixColumnIterator<T,N,M>
+impl<'a,T, const N:usize, const M:usize> Iterator for MatrixColumnIterator<'a,T,N,M>
 where T:Copy{
-    type Item = [T;N];
+    type Item = [&'a T;N];
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.matrix.coord_get(0, self.curpos) {
-            None=>None,
-            Some(_)=>{
-                self.curpos+=1;
-                Some(
-                    (0..N).map(|i| 
-                        self.matrix[i][self.curpos-1])
-                          .collect::<Vec<T>>()
-                          .try_into()
-                          .unwrap_or_else(|_vec|panic!("cannot convert vec to array into MatrixColumnIterator::next, please repport this bug"))
-                )
-            }
+        match self.matrix.get_column(self.curpos){
+            None => None,
+            Some(col) => {
+                self.curpos += 1;
+                Some(col)
+            },
         }
     }
 }
@@ -502,12 +515,13 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     /// 
-    ///let mut m1 = Matrix::from([[1,2],[3,4]]).iter_row();
-    ///assert_eq!(m1.next(), Some([1,2]));
-    ///assert_eq!(m1.next(), Some([3,4]));
-    ///assert_eq!(m1.next(), None);
+    ///let m1 = Matrix::from([[1,2],[3,4]]);
+    ///let mut iter = m1.iter_row();
+    ///assert_eq!(iter.next(), Some([1,2]).as_ref());
+    ///assert_eq!(iter.next(), Some([3,4]).as_ref());
+    ///assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter_row(self)->MatrixRowIterator<T,N,M>{
+    pub fn iter_row(&self)->MatrixRowIterator<T,N,M>{
         MatrixRowIterator{
             matrix:self,
             curpos:0
@@ -522,7 +536,7 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
     ///assert_eq!(m1.next(), Some([2,4]));
     ///assert_eq!(m1.next(), None);
     /// ```
-    pub fn iter_column(self)->MatrixColumnIterator<T,N,M>{
+    pub fn iter_column(&self)->MatrixColumnIterator<T,N,M>{
         MatrixColumnIterator { 
             matrix: self, 
             curpos: 0 

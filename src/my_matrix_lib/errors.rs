@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 #[derive(Debug)]
 pub enum MatrixError{
     SizeNotMatch,
