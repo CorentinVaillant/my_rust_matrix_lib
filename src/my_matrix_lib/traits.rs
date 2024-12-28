@@ -416,9 +416,34 @@ pub trait VectorSpace {
     /// ```
     fn scale(&self, scalar : Self::Scalar)->Self;
 
+    ///Return the 0 vector
+    /// ## Example 
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
+    /// 
+    ///let vec = VectorMath::from([0,0,0]);
+    ///assert_eq!(vec,VectorMath::zero())
+    /// ```
     fn zero()->Self;
+
+    ///Return the 1 scalar
+    /// ## Example
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
+    /// 
+    /// let vec = VectorMath::from([89,895,9856,956,9856,956]);
+    /// let one = VectorMath::<i32,6>::one();
+    ///
+    /// assert_eq!(vec.scale(one), vec);
+    /// ```
     fn one()->Self::Scalar;
+
+    ///Return the 0 scalar
     fn scalar_zero()->Self::Scalar;
+
+    ///Return the dimension
     fn dimension()->Dimension;
 }
 

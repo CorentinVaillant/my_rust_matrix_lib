@@ -491,6 +491,25 @@ mod tests {
             assert_eq!(vec1.scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
         }
 
+        //zero
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+
+            let vec = VectorMath::from([0,0,0]);
+            assert_eq!(vec,VectorMath::zero())
+        }
+
+        //one 
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let vec = VectorMath::from([89,895,9856,956,9856,956]);
+            let one = VectorMath::<i32,6>::one();
+                
+            assert_eq!(vec.scale(one), vec);
+        }
+
         let elapsed_time = now.elapsed();
         println!("VectorMath test OK ✅, took {}", elapsed_time.as_secs_f64());
 
