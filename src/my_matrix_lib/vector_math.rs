@@ -13,6 +13,8 @@ impl<T, const N:usize> From<[T;N]> for VectorMath<T,N>{
     }
 }
 
+
+
 impl<T, const N: usize> TryFrom<Vec<T>> for VectorMath<T,N>{
     type Error = MatrixError;
 
@@ -21,7 +23,7 @@ impl<T, const N: usize> TryFrom<Vec<T>> for VectorMath<T,N>{
         match value.try_into(){
             Ok(inner) => Ok(Self{inner}),
             Err(e) => match e.len() != N {
-                true => Err(MatrixError::SizeNotMatch),
+                true => Err(MatrixError::SizeNotMatch(e.len(),N)),
                 false => Err(MatrixError::Other(format!("Vector error with vector {:?}", e.as_ptr()).to_string())),
             },
         }
@@ -80,21 +82,21 @@ impl<T, const N:usize> VectorSpace for VectorMath<T,N> //TODO test and doc
         self.iter().zip(other.iter())
           .map(|(self_elem,other_elem)|{
             *self_elem + *other_elem 
-          }).collect()
+          }).collect::<Vec<T>>().try_into().unwrap()
     }
 
     fn substract(&self, other :&Self)->Self {
         self.iter().zip(other.iter())
         .map(|(self_elem,other_elem)|{
           *self_elem - *other_elem 
-        }).collect()
+        }).collect::<Vec<T>>().try_into().unwrap()
     }
 
     fn scale(&self, scalar : Self::Scalar)->Self {
         self.iter()
         .map(|self_elem|{
           *self_elem * scalar
-        }).collect()
+        }).collect::<Vec<T>>().try_into().unwrap()
     }
 
     #[inline]
@@ -295,12 +297,3 @@ impl<T, const N: usize> IntoIterator for VectorMath<T, N> {
     }
 }
 
-impl<T, const N: usize> FromIterator<T> for VectorMath<T,N> {
-    fn from_iter<ITER: IntoIterator<Item = T>>(iter: ITER) -> Self {
-        let mut vec_mat: [T;N] =unsafe{ core::mem::MaybeUninit::uninit().assume_init()};
-        for (elem,vec_mat_elem) in iter.into_iter().zip(&mut vec_mat) {
-            *vec_mat_elem = elem;
-        }
-        return Self::from(vec_mat);
-    }
-}

@@ -43,7 +43,15 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
 
 
     ///return the column of indice `index` of exist, None in the other case
-    /// TODO : test
+    /// ## Example
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///let m1 = Matrix::from([[11,12,13],[21,22,23],[31,32,33]]);
+    ///assert_eq!(m1.get_column(0), Some([&11,&21,&31]));
+    ///assert_eq!(m1.get_column(1), Some([&12,&22,&32]));
+    ///assert_eq!(m1.get_column(2), Some([&13,&23,&33]));
+    ///assert_eq!(m1.get_column(3), None);
+    /// ```
     pub fn get_column(&self, index :usize)-> Option<[&T;N]>{
         let mut result = Vec::with_capacity(N);
 
@@ -355,8 +363,8 @@ use std::{marker::PhantomData, ptr::NonNull};
 
 
 ///Iterator direction </br>
-/// Row : Top to bottom before the next column </br>
-/// Column : Left to right before the next line </br> 
+/// - Row : Top to bottom before the next column </br>
+/// - Column : Left to right before the next line </br> 
 pub enum IterateAlong {
     Row,
     Column
@@ -484,6 +492,7 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
 
     ///Consume a Matrix into a MatrixElemIterator. </br>
     ///Use to iterate along all the elements of a matrix
+    /// ## Example
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::IterateAlong;
@@ -512,6 +521,7 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
 
     ///Borrow a Matrix into a MatrixRowIterator. </br>
     ///Use to iterate along all the row of a matrix
+    /// ## Example
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     /// 
@@ -529,7 +539,10 @@ impl<T, const N:usize, const M:usize> Matrix<T,N,M> {
     }
 
     ///Borrow a Matrix into a MatrixColumnIterator. </br>
-    ///Use to iterate along all the column of a matrix    ///```
+    ///Use to iterate along all the column of a matrix    
+    /// ## Example
+    ///```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     ///let m1 = Matrix::from([[1,2],[3,4]]);
     ///let mut iter = m1.iter_column();
     ///

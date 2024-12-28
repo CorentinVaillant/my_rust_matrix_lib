@@ -2,6 +2,8 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
+    use crate::my_matrix_lib::prelude::VectorSpace;
+
 
 
 
@@ -343,6 +345,15 @@ mod tests {
             assert_eq!(iter.next(), None);
         }
 
+        //test get column
+        {
+            let m1 = Matrix::from([[11,12,13],[21,22,23],[31,32,33]]);
+            assert_eq!(m1.get_column(0), Some([&11,&21,&31]));
+            assert_eq!(m1.get_column(1), Some([&12,&22,&32]));
+            assert_eq!(m1.get_column(2), Some([&13,&23,&33]));
+            assert_eq!(m1.get_column(3), None);
+        }
+
         //test elem mut iterator
         {
             let mut m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.],[7.,8.,9.]]);
@@ -356,7 +367,7 @@ mod tests {
         }
 
         let elapsed_time = now.elapsed();
-        println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
+        println!("Matrix test OK ✅, took {}", elapsed_time.as_secs_f64());
     }
 
     #[test]
@@ -372,9 +383,21 @@ mod tests {
 
             let result:Result<VectorMath<char,4>,_> = VectorMath::try_from(vec);
             let error = result.unwrap_err();
-            assert_eq!(error.to_string(), "The sizes does not matches".to_string())
+            assert_eq!(error.to_string(), "The sizes does not matches (3 != 4)".to_string())
         }
 
+        //Into iter
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let vec = VectorMath::from(["one","two", "tree"]);
+            let mut vec_iter = vec.into_iter();
+
+            assert_eq!(vec_iter.next(), Some("one"));
+            assert_eq!(vec_iter.next(), Some("two"));
+            assert_eq!(vec_iter.next(), Some("tree"));
+            assert_eq!(vec_iter.next(), None);
+        }
 
         //Iter
         {
@@ -418,8 +441,31 @@ mod tests {
             assert_eq!(vec.get(1), Some(" world").as_ref());
         }
 
+        /* Vector Space */
+        
+        //add
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+            
+            let vec1 = VectorMath::from([1,2,3,4]);
+            let vec2 = VectorMath::from([4,3,2,1]);
+            assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+            
+
+            let vec1 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+            let vec2 :VectorMath<f64,5> = (0..5).map(|i|{5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+            let vec3 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i) + 5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+
+            assert_eq!(vec1.add(&vec2), vec3);
+
+            let vec1 = VectorMath::from([1_u8,2_u8,3_u8,4_u8]);
+            let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
+            assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+
+        }
+
         let elapsed_time = now.elapsed();
-        println!("test OK ✅, took {}", elapsed_time.as_secs_f64());
+        println!("VectorMath test OK ✅, took {}", elapsed_time.as_secs_f64());
 
     }
 

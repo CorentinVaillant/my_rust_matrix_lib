@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum MatrixError{
-    SizeNotMatch,
+    SizeNotMatch(usize,usize),
     WidhtNotMatch,
     HeigthNotMach,
     Other(String),
@@ -9,7 +9,7 @@ pub enum MatrixError{
 impl Into<String> for MatrixError{
     fn into(self) -> String {
         match &self {
-            Self::SizeNotMatch => "The sizes does not matches".to_string(),
+            Self::SizeNotMatch(size1,size2) => format!("The sizes does not matches ({} != {})",size1,size2),
             Self::HeigthNotMach=> "The heights does not matches".to_string(),
             Self::WidhtNotMatch=> "The widths does not matches".to_string(),
             
@@ -22,7 +22,7 @@ impl Into<String> for MatrixError{
 impl Into<String> for &MatrixError{
     fn into(self) -> String {
         match self {
-            MatrixError::SizeNotMatch => "The sizes does not matches".to_string(),
+            MatrixError::SizeNotMatch(size1,size2) => format!("The sizes does not matches ({} != {})",size1,size2),
             MatrixError::HeigthNotMach=> "The heights does not matches".to_string(),
             MatrixError::WidhtNotMatch=> "The widths does not matches".to_string(),
 

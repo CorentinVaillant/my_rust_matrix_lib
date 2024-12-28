@@ -359,6 +359,28 @@ pub trait LinearAlgebra {
 pub trait VectorSpace {
     type Scalar;
 
+
+    ///add two vector together
+    /// ## Example
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
+    /// 
+    ///let vec1 = VectorMath::from([1,2,3,4]);
+    ///let vec2 = VectorMath::from([4,3,2,1]);
+    ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+    ///
+    ///
+    ///let vec1 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+    ///let vec2 :VectorMath<f64,5> = (0..5).map(|i|{5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+    ///let vec3 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i) + 5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+    ///
+    ///assert_eq!(vec1.add(&vec2), vec3);
+    ///
+    ///let vec1 = VectorMath::from([1_u8,2_u8,3_u8,4_u8]);
+    ///let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
+    ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+    /// ```
     fn add(&self, other :&Self)->Self;
     fn substract(&self, other :&Self)->Self;
     fn scale(&self, scalar : Self::Scalar)->Self;
