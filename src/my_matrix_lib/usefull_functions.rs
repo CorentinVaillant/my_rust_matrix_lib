@@ -17,10 +17,10 @@ pub mod more_algebra {
         /// Examples :
         /// ```
         /// use my_rust_matrix_lib::my_matrix_lib::{prelude::*,additional_funcs::more_algebra::MoreLinearAlgebra};
-        /// 
+        ///
         /// let m1 = Matrix::from([[1.,1.,1.],[1.,1.,1.],[1.,1.,1.]]);
         /// let m2 : Matrix<f32,3,3> = Matrix::matrix_of_ones();
-        /// 
+        ///
         /// assert_eq!(m1,m2);
         /// ```
         fn matrix_of_ones() -> Self;
@@ -48,11 +48,9 @@ pub mod more_algebra {
         }
 
         fn matrix_of_ones() -> Self {
-            Matrix::from([[T::one();M];N])
+            Matrix::from([[T::one(); M]; N])
         }
     }
-
-
 }
 
 pub mod more_utilities {
@@ -61,7 +59,6 @@ pub mod more_utilities {
 
     #[cfg(feature = "random")]
     use rand::distributions::Standard;
-    
 
     use super::Matrix;
 
@@ -116,14 +113,12 @@ pub mod more_utilities {
     }
 
     #[cfg(feature = "random")]
-    impl<T,const N:usize, const M:usize> Distribution<Matrix<T,N,M>> for Standard
-    where Standard : Distribution<[[T;M];N]>
+    impl<T, const N: usize, const M: usize> Distribution<Matrix<T, N, M>> for Standard
+    where
+        Standard: Distribution<[[T; M]; N]>,
     {
-        fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Matrix<T,N,M> {
+        fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Matrix<T, N, M> {
             Matrix::from(rng.gen())
         }
     }
-
-    
 }
-

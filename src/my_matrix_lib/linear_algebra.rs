@@ -1,7 +1,7 @@
 #![allow(clippy::uninit_assumed_init)]
 
-use crate::my_matrix_lib::traits::LinearAlgebra;
 use crate::my_matrix_lib::matrix::*;
+use crate::my_matrix_lib::traits::LinearAlgebra;
 
 use super::prelude::IterateAlong;
 
@@ -16,9 +16,9 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
 
     fn scale(&self, rhs: Self::ScalarType) -> Self {
         let mut result = self.clone();
-        result.iter_mut_elem(IterateAlong::Column).for_each(
-            |elem|*elem = *elem * rhs
-        );
+        result
+            .iter_mut_elem(IterateAlong::Column)
+            .for_each(|elem| *elem = *elem * rhs);
 
         result
     }
@@ -48,12 +48,10 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
     }
 
     fn multiply(&self, rhs: Self) -> Self {
-        let mut result: Matrix<T, N, M> = unsafe {
-            std::mem::MaybeUninit::uninit().assume_init()
-        };
-        
-        for i in 0..N{
-            for j in 0..M{
+        let mut result: Matrix<T, N, M> = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+
+        for i in 0..N {
+            for j in 0..M {
                 result[i][j] = self[i][j] * rhs[i][j];
             }
         }
@@ -317,7 +315,7 @@ impl<T: num::Float, const N: usize, const M: usize> LinearAlgebra for Matrix<T, 
     }
 
     fn zero() -> Self {
-        Matrix::from([[T::zero();M];N])
+        Matrix::from([[T::zero(); M]; N])
     }
 
     fn identity() -> Self {

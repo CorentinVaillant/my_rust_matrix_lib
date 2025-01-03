@@ -1,42 +1,40 @@
-#[derive(Debug,Clone, Copy)]
-pub enum Dimension{
+#[derive(Debug, Clone, Copy)]
+pub enum Dimension {
     Finite(usize),
-    Infinity(Infinity)
+    Infinity(Infinity),
 }
 
-#[derive(Debug,Clone, Copy)]
-pub enum Infinity{
+#[derive(Debug, Clone, Copy)]
+pub enum Infinity {
     MinusInfinity,
-    PlusInfinity
+    PlusInfinity,
 }
 
-#[derive(Debug,PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DimensionError {
     InfinniteDimmension,
 }
 
 impl Dimension {
-
     #[inline]
-    pub fn minus_inifinity()->Self{
+    pub fn minus_inifinity() -> Self {
         Dimension::Infinity(Infinity::MinusInfinity)
     }
 
     #[inline]
-    pub fn plus_inifinity()->Self{
+    pub fn plus_inifinity() -> Self {
         Dimension::Infinity(Infinity::PlusInfinity)
     }
 }
 
-impl From<usize> for Dimension{
+impl From<usize> for Dimension {
     #[inline]
     fn from(dimension: usize) -> Self {
         Self::Finite(dimension)
     }
 }
 
-
-impl TryInto<usize> for Dimension{
+impl TryInto<usize> for Dimension {
     type Error = DimensionError;
 
     #[inline]

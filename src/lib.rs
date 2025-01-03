@@ -2,10 +2,6 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::prelude::VectorSpace;
-
-
-
 
     #[test]
     fn matrix_test() {
@@ -22,8 +18,8 @@ mod tests {
             assert_eq!(m1.addition(m2), expected_result);
             assert_eq!(m2.addition(m1), expected_result);
 
-            let m_empty: Matrix<f32, 3, 0> = Matrix::from([[],[],[]]);
-            assert_eq!(m_empty+m_empty,m_empty);
+            let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
+            assert_eq!(m_empty + m_empty, m_empty);
         }
 
         //test multiplication
@@ -38,8 +34,6 @@ mod tests {
             assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
             assert_eq!(m2 * m1, expected_result_m2_time_m1);
             assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
-
-
         }
 
         //test scaling
@@ -52,7 +46,7 @@ mod tests {
             assert_eq!(m.scale(scale_factor), expected_result);
 
             let m_empty: Matrix<f64, 0, 65464> = Matrix::from([]);
-            assert_eq!(m_empty,m_empty*5.);
+            assert_eq!(m_empty, m_empty * 5.);
         }
 
         //test zeroed
@@ -306,64 +300,63 @@ mod tests {
 
         //test elem iterator
         {
-            let mut m1 = Matrix::from([[1,2],[3,4],[5,6]]).iter_elem(IterateAlong::Column);
-            assert_eq!(m1.next(),Some(1));
-            assert_eq!(m1.next(),Some(2));
-            assert_eq!(m1.next(),Some(3));
-            assert_eq!(m1.next(),Some(4));
-            assert_eq!(m1.next(),Some(5));
-            assert_eq!(m1.next(),Some(6));
-            assert_eq!(m1.next(),None);
+            let mut m1 = Matrix::from([[1, 2], [3, 4], [5, 6]]).iter_elem(IterateAlong::Column);
+            assert_eq!(m1.next(), Some(1));
+            assert_eq!(m1.next(), Some(2));
+            assert_eq!(m1.next(), Some(3));
+            assert_eq!(m1.next(), Some(4));
+            assert_eq!(m1.next(), Some(5));
+            assert_eq!(m1.next(), Some(6));
+            assert_eq!(m1.next(), None);
 
-            let mut m2 = Matrix::from([[1,2],[3,4],[5,6]]).iter_elem(IterateAlong::Row);
-            assert_eq!(m2.next(),Some(1));
-            assert_eq!(m2.next(),Some(3));
-            assert_eq!(m2.next(),Some(5));
-            assert_eq!(m2.next(),Some(2));
-            assert_eq!(m2.next(),Some(4));
-            assert_eq!(m2.next(),Some(6));
-            assert_eq!(m2.next(),None);
-
+            let mut m2 = Matrix::from([[1, 2], [3, 4], [5, 6]]).iter_elem(IterateAlong::Row);
+            assert_eq!(m2.next(), Some(1));
+            assert_eq!(m2.next(), Some(3));
+            assert_eq!(m2.next(), Some(5));
+            assert_eq!(m2.next(), Some(2));
+            assert_eq!(m2.next(), Some(4));
+            assert_eq!(m2.next(), Some(6));
+            assert_eq!(m2.next(), None);
         }
 
         //test row iterator
         {
-            let m1 = Matrix::from([[1,2],[3,4]]);
+            let m1 = Matrix::from([[1, 2], [3, 4]]);
             let mut iter = m1.iter_row();
-            assert_eq!(iter.next(), Some([1,2]).as_ref());
-            assert_eq!(iter.next(), Some([3,4]).as_ref());
+            assert_eq!(iter.next(), Some([1, 2]).as_ref());
+            assert_eq!(iter.next(), Some([3, 4]).as_ref());
             assert_eq!(iter.next(), None);
         }
 
         //test column iterator
         {
-            let m1 = Matrix::from([[1,2],[3,4]]);
+            let m1 = Matrix::from([[1, 2], [3, 4]]);
             let mut iter = m1.iter_column();
-            
-            assert_eq!(iter.next(), Some([&1,&3]));
-            assert_eq!(iter.next(), Some([&2,&4]));
+
+            assert_eq!(iter.next(), Some([&1, &3]));
+            assert_eq!(iter.next(), Some([&2, &4]));
             assert_eq!(iter.next(), None);
         }
 
         //test get column
         {
-            let m1 = Matrix::from([[11,12,13],[21,22,23],[31,32,33]]);
-            assert_eq!(m1.get_column(0), Some([&11,&21,&31]));
-            assert_eq!(m1.get_column(1), Some([&12,&22,&32]));
-            assert_eq!(m1.get_column(2), Some([&13,&23,&33]));
+            let m1 = Matrix::from([[11, 12, 13], [21, 22, 23], [31, 32, 33]]);
+            assert_eq!(m1.get_column(0), Some([&11, &21, &31]));
+            assert_eq!(m1.get_column(1), Some([&12, &22, &32]));
+            assert_eq!(m1.get_column(2), Some([&13, &23, &33]));
             assert_eq!(m1.get_column(3), None);
         }
 
         //test elem mut iterator
         {
-            let mut m1 = Matrix::from([[1.,2.,3.],[4.,5.,6.],[7.,8.,9.]]);
+            let mut m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
             let m2 = m1.clone();
-            for v in m1.iter_mut_elem(IterateAlong::Row){
-                *v +=1.;
+            for v in m1.iter_mut_elem(IterateAlong::Row) {
+                *v += 1.;
             }
-            let ones = Matrix::from([[1.,1.,1.],[1.,1.,1.],[1.,1.,1.]]);
+            let ones = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
 
-            assert_eq!(m2+ones, m1);
+            assert_eq!(m2 + ones, m1);
         }
 
         let elapsed_time = now.elapsed();
@@ -371,26 +364,32 @@ mod tests {
     }
 
     #[test]
-    fn vector_test(){
+    fn vector_test() {
         let now = std::time::Instant::now();
-        
+
         //from vec
         {
             use crate::my_matrix_lib::prelude::VectorMath;
-            
-            let vec = vec!['x','y','z'];
-            assert_eq!(VectorMath::from(['x','y','z']), VectorMath::try_from(vec.clone()).unwrap());
 
-            let result:Result<VectorMath<char,4>,_> = VectorMath::try_from(vec);
+            let vec = vec!['x', 'y', 'z'];
+            assert_eq!(
+                VectorMath::from(['x', 'y', 'z']),
+                VectorMath::try_from(vec.clone()).unwrap()
+            );
+
+            let result: Result<VectorMath<char, 4>, _> = VectorMath::try_from(vec);
             let error = result.unwrap_err();
-            assert_eq!(error.to_string(), "The sizes does not matches (3 != 4)".to_string())
+            assert_eq!(
+                error.to_string(),
+                "The sizes does not matches (3 != 4)".to_string()
+            )
         }
 
         //Into iter
         {
             use crate::my_matrix_lib::prelude::VectorMath;
 
-            let vec = VectorMath::from(["one","two", "tree"]);
+            let vec = VectorMath::from(["one", "two", "tree"]);
             let mut vec_iter = vec.into_iter();
 
             assert_eq!(vec_iter.next(), Some("one"));
@@ -403,7 +402,7 @@ mod tests {
         {
             use crate::my_matrix_lib::prelude::VectorMath;
 
-            let vec = VectorMath::from([4,2,5]);
+            let vec = VectorMath::from([4, 2, 5]);
             let mut vec_iter = vec.iter();
 
             assert_eq!(vec_iter.next(), Some(4).as_ref());
@@ -412,12 +411,11 @@ mod tests {
             assert_eq!(vec_iter.next(), None);
 
             let mut acc = 0;
-            for i in vec.iter(){
+            for i in vec.iter() {
                 acc += *i;
             }
 
-            assert_eq!(acc,11);
-            
+            assert_eq!(acc, 11);
         }
 
         //IterMut
@@ -431,8 +429,8 @@ mod tests {
             assert_eq!(vec_iter.next(), Some("worlde").as_mut());
             assert_eq!(vec_iter.next(), None);
 
-            for (i,value) in vec.iter_mut().enumerate(){
-                if i == 1{
+            for (i, value) in vec.iter_mut().enumerate() {
+                if i == 1 {
                     *value = " world";
                 }
             }
@@ -442,77 +440,156 @@ mod tests {
         }
 
         /* Vector Space */
-        
+
         //add
         {
-            use crate::my_matrix_lib::prelude::VectorMath;
-            
-            let vec1 = VectorMath::from([1,2,3,4]);
-            let vec2 = VectorMath::from([4,3,2,1]);
-            assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
-            
+            use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
-            let vec1 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
-            let vec2 :VectorMath<f64,5> = (0..5).map(|i|{5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
-            let vec3 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i) + 5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
+            let vec1 = VectorMath::from([1, 2, 3, 4]);
+            let vec2 = VectorMath::from([4, 3, 2, 1]);
+            assert_eq!(vec1.add(&vec2), VectorMath::from([5, 5, 5, 5]));
+
+            let vec1: VectorMath<f64, 5> = (0..5)
+                .map(|i| 2.0_f64.powi(i))
+                .collect::<Vec<f64>>()
+                .try_into()
+                .unwrap();
+            let vec2: VectorMath<f64, 5> = (0..5)
+                .map(|i| 5.0_f64.powi(i))
+                .collect::<Vec<f64>>()
+                .try_into()
+                .unwrap();
+            let vec3: VectorMath<f64, 5> = (0..5)
+                .map(|i| 2.0_f64.powi(i) + 5.0_f64.powi(i))
+                .collect::<Vec<f64>>()
+                .try_into()
+                .unwrap();
 
             assert_eq!(vec1.add(&vec2), vec3);
 
-            let vec1 = VectorMath::from([1_u8,2_u8,3_u8,4_u8]);
-            let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
-            assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
-
+            let vec1 = VectorMath::from([1_u8, 2_u8, 3_u8, 4_u8]);
+            let vec2 = VectorMath::from([4_u8, 3_u8, 2_u8, 1_u8]);
+            assert_eq!(vec1.add(&vec2), VectorMath::from([5, 5, 5, 5]));
         }
 
         //subtract
         {
-            use crate::my_matrix_lib::prelude::VectorMath;
+            use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
-            let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
+            let vec1 = VectorMath::from([7, 6, 8, 8, 64, 9, 5, 9, 44, 9491, 5, 964, 9]);
 
             assert_eq!(vec1.substract(&vec1), VectorMath::zero());
 
+            let vec1 = VectorMath::from([5.0_f64, 4.0_f64, 3.0_f64, 2.0_f64]);
+            let vec2 = VectorMath::from([1., 1., 1., 1.]);
 
-            let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
-            let vec2 = VectorMath::from([1.,1.,1.,1.]);
-
-            assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
-            assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(-1.));
+            assert_eq!(vec1.substract(&vec2), VectorMath::from([4., 3., 2., 1.]));
+            assert_eq!(
+                vec2.substract(&vec1),
+                VectorMath::from([4., 3., 2., 1.]).scale(-1.)
+            );
         }
 
         //scale
         {
-            use crate::my_matrix_lib::prelude::VectorMath;
+            use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
-            let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
+            let vec1 = VectorMath::from([8., 9., 45., 63., 46.]);
 
             assert_eq!(vec1.scale(0.), VectorMath::zero());
-            
-            assert_eq!(vec1.scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
+
+            assert_eq!(vec1.scale(2.), VectorMath::from([16., 18., 90., 126., 92.]));
         }
 
         //zero
         {
-            use crate::my_matrix_lib::prelude::VectorMath;
+            use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
-
-            let vec = VectorMath::from([0,0,0]);
-            assert_eq!(vec,VectorMath::zero())
+            let vec = VectorMath::from([0, 0, 0]);
+            assert_eq!(vec, VectorMath::zero())
         }
 
-        //one 
+        //one
         {
-            use crate::my_matrix_lib::prelude::VectorMath;
+            use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
-            let vec = VectorMath::from([89,895,9856,956,9856,956]);
-            let one = VectorMath::<i32,6>::one();
-                
+            let vec = VectorMath::from([89, 895, 9856, 956, 9856, 956]);
+            let one = VectorMath::<i32, 6>::one();
+
             assert_eq!(vec.scale(one), vec);
+        }
+
+        /* Euclidian Space */
+
+        //lenght
+        {
+            use crate::my_matrix_lib::prelude::{EuclidianSpace, VectorMath, VectorSpace};
+
+            let vec1 = VectorMath::from([-1., 0.]);
+            assert_eq!(vec1.lenght(), 1.);
+
+            assert_eq!(vec1.scale(2.).lenght(), 2.);
+
+            let vec2 = VectorMath::from([0., 1.]).add(&vec1);
+            assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
+
+            let vec3: VectorMath<f32, 0> = VectorMath::from([]);
+            assert_eq!(vec3.lenght(), 0.);
+
+            let vec4 = VectorMath::from([8., 7., 9., 15.]);
+            assert_eq!(vec4.lenght(), 20.46948949045872);
+        }
+
+        //dot
+        {
+            use crate::my_matrix_lib::prelude::{EuclidianSpace, VectorMath};
+
+            let vec1 = VectorMath::from([1., 3., -5.]);
+            let vec2 = VectorMath::from([4., -2., -1.]);
+            assert_eq!(vec1.dot(&vec2), 3.);
+
+            let vec1 = VectorMath::from([8., 4.]);
+            let vec2 = VectorMath::from([72., 24.]);
+            assert_eq!(vec1.dot(&vec2), 672.);
+
+            let can1 = VectorMath::from([1., 0., 0., 0.]);
+            let can2 = VectorMath::from([0., 1., 0., 25.]);
+            assert_eq!(can1.dot(&can2), 0.);
+        }
+
+        //angle
+        {
+            use crate::my_matrix_lib::prelude::{EuclidianSpace, VectorMath, VectorSpace};
+
+            let can1 = VectorMath::from([1., 0., 0.]);
+            let can2 = VectorMath::from([0., 1., 0.]);
+            let can3 = VectorMath::from([0., 0., 1.]);
+            assert_eq!(can1.angle(&can2), core::f64::consts::FRAC_PI_2);
+            assert_eq!(can1.angle(&can3.scale(-1.)), core::f64::consts::FRAC_PI_2);
+
+            let vec1 = VectorMath::from([1., 1., 0.]);
+            assert!(
+                core::f64::consts::FRAC_PI_4 - f64::EPSILON < vec1.angle(&can1)
+                    && vec1.angle(&can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON
+            );
+
+            let vec2 = VectorMath::from([1., 2., 2.]);
+            assert_eq!(vec2.angle(&vec2), 0.);
+        }
+
+        //is_orthogonal_to
+        {
+            use crate::my_matrix_lib::prelude::{EuclidianSpace, VectorMath};
+            let can1 = VectorMath::from([1., 0., 0.]);
+            let can2 = VectorMath::from([0., 1., 0.]);
+            let can3 = VectorMath::from([0., 0., 1.]);
+            assert!(can1.is_orthogonal_to(&can2));
+            assert!(can2.is_orthogonal_to(&can3));
+            assert!(can1.is_orthogonal_to(&can3));
         }
 
         let elapsed_time = now.elapsed();
         println!("VectorMath test OK ✅, took {}", elapsed_time.as_secs_f64());
-
     }
 
     #[test]
@@ -524,19 +601,17 @@ mod tests {
         {
             use rand::Rng;
 
-
             let mut rng = rand::thread_rng();
 
-            let m: Matrix<bool, 3, 3> =rng.gen();
+            let m: Matrix<bool, 3, 3> = rng.gen();
             println!("{}", m);
 
-            let m: Matrix<(u8,f32), 3, 3> = rng.gen();
+            let m: Matrix<(u8, f32), 3, 3> = rng.gen();
             println!("{:?}", m);
 
             let m: Matrix<u8, 3, 3> = rng.gen();
             println!("{}", m);
         }
-
 
         //transpose dot
         {
@@ -546,8 +621,6 @@ mod tests {
             let m2: Matrix<f32, 3, 4> = Matrix::zero();
 
             assert_eq!(m1 * m2.transpose(), m1.transpose_dot(m2));
-
         }
-
     }
 }
