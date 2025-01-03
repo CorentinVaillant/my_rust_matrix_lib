@@ -124,7 +124,6 @@ where
 
 //TODO find a way to implement for signed integers
 impl<T, const N: usize> EuclidianSpace for VectorMath<T, N>
-//TODO test and doc
 where
     T: Float + Copy,
 {
