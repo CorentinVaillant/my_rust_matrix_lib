@@ -151,6 +151,97 @@ where
     }
 }
 
+impl<T, const N: usize> MatrixTrait for VectorMath<T, N>
+//TODO test and doc
+where
+    T: Copy + Float,
+{
+    type DotIn<const P: usize> = Matrix<T, N, P>;
+
+    type DotOut<const P: usize> = Matrix<T, 1, P>;
+
+    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
+        let a = rhs
+            .iter_column()
+            .map(|col| {
+                self.iter()
+                    .zip(col.iter())
+                    .fold(T::zero(), |acc, (el1, el2)| acc * *el1 * **el2)
+            })
+            .collect::<Vec<T>>()
+            .try_into();
+
+        match a {
+            Ok(val) => Matrix::from([val; 1]),
+            Err(_) => panic!("Unexpected error in dot, please contact me "),
+        }
+    }
+
+    fn det(&self) -> Self::Scalar {
+        match N == 1 {
+            true => self[0],
+            false => T::zero(),
+        }
+    }
+
+    fn reduce_row_echelon(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> SquaredMatrixTrait for VectorMath<T, 1>
+//TODO test and doc
+where
+    T: Copy + Float,
+{
+    fn identity() -> Self {
+        Self::from([T::one()])
+    }
+
+    fn pow(&self, n: i32) -> VectorMath<T, 1> {
+        Self::from([self[0].powi(n)])
+    }
+
+    fn plu_decomposition(&self) -> Result<(Self, Self, Self), MatrixError>
+    where
+        Self: Sized,
+    {
+        Ok((Self::identity(), Self::identity(), *self))
+    }
+
+    fn inverse(&self) -> Result<Self, MatrixError>
+    where
+        Self: Sized,
+    {
+        match self[0] == T::zero() {
+            true => Err(MatrixError::NotInversible),
+            false => Ok(Self::from([T::one() / self[0]])),
+        }
+    }
+
+    fn permutation(i: usize, j: usize) -> Result<VectorMath<T, 1>, MatrixError> {
+        match (i, j) {
+            (0, 0) => Ok(Self::from([T::one()])),
+            _ => Err(MatrixError::IndexOutOfRange),
+        }
+    }
+
+    fn inflation(i: usize, value: Self::Scalar) -> Result<VectorMath<T, 1>, MatrixError> {
+        match i {
+            0 => Ok(Self::from([value])),
+            _ => Err(MatrixError::IndexOutOfRange),
+        }
+    }
+
+    fn is_upper_triangular(&self) -> bool {
+        true
+    }
+
+    fn is_lower_triangular(&self) -> bool {
+        true
+    }
+}
+
 /********************************************************
 <====================Iterators =======================>
 ********************************************************/
