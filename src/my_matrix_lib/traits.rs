@@ -1,6 +1,3 @@
-use crate::my_matrix_lib::matrix::*;
-use std::ops::*;
-
 use super::{additional_structs::Dimension, errors::MatrixError};
 
 //Algebra
@@ -580,6 +577,7 @@ where
     fn is_lower_triangular(&self) -> bool;
 }
 
+/*
 //Operators
 impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
 where
@@ -639,3 +637,4 @@ impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
         rhs * self
     }
 }
+*/

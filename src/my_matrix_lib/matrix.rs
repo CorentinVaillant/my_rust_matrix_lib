@@ -5,16 +5,15 @@ use core::fmt;
 use rayon::iter::*;
 use std::ops::*;
 
-type VecTab<T> = Vec<Vec<T>>;
 
 //definition of Matrix
 #[derive(Debug, Clone)]
 pub struct Matrix<T, const N: usize, const M: usize> {
-    inner: [[T; M]; N],
+    inner: VectorMath<VectorMath<T,M>,N>,
 }
 
 impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {
-    type Output = [T; M];
+    type Output = VectorMath<T,M>;
     fn index(&self, index: usize) -> &Self::Output {
         &self.inner[index]
     }
@@ -27,7 +26,7 @@ impl<T, const N: usize, const M: usize> IndexMut<usize> for Matrix<T, N, M> {
 }
 
 impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
-    pub fn get_row(&self, index: usize) -> Option<&[T; M]> {
+    pub fn get_row(&self, index: usize) -> Option<&VectorMath<T,M>> {
         self.inner.get(index)
     }
 
@@ -41,7 +40,7 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
         }
     }
 
-    ///return the column of indice `index` of exist, None in the other case
+    ///return the column of indice `index` if exist, None in the other case
     /// ## Example
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
@@ -67,7 +66,7 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
         }
     }
 
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut [T; M]> {
+    pub fn get_mut<'a>(&'a mut self, index: usize) -> Option<&'a mut VectorMath<T,M>> {
         self.inner.get_mut(index)
     }
 
@@ -100,107 +99,40 @@ impl<T: std::default::Default + std::marker::Copy, const N: usize, const M: usiz
 {
     fn default() -> Self {
         Self {
-            inner: [[T::default(); M]; N],
+            inner: VectorMath::from([VectorMath::default(); N]),
         }
     }
 }
 
-pub trait TryIntoMatrix<T> {
-    type Error;
-    fn try_into_matrix(value: T) -> Result<Self, Self::Error>
-    where
-        Self: Sized;
-}
-
-impl<T, const N: usize, const M: usize, const P: usize, const Q: usize>
-    TryIntoMatrix<Matrix<T, P, Q>> for Matrix<T, N, M>
+impl<U,T, const N:usize, const M:usize> From<[U;N]> for Matrix<T,N,M>
+where U : Into<VectorMath<T,M>>
 {
-    type Error = &'static str; // ! garbage
-
-    fn try_into_matrix(value: Matrix<T, P, Q>) -> Result<Self, Self::Error> {
-        if N == P && M == Q {
-            // Manually drop the original matrix to prevent double free
-            let value = std::mem::ManuallyDrop::new(value);
-
-            // SAFETY: We have checked that N == P and M == Q
-            let inner = unsafe { std::ptr::read(&value.inner as *const _ as *const [[T; M]; N]) };
-
-            Ok(Matrix { inner })
-        } else {
-            Err("Size not match")
-        }
-    }
-}
-
-impl<T, const N: usize, const M: usize> TryIntoMatrix<VecTab<T>> for Matrix<T, N, M> {
-    type Error = &'static str;
-
-    fn try_into_matrix(tab: VecTab<T>) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        if tab.len() != N {
-            return Err("Incorrect number of rows");
+    fn from(values: [U;N]) -> Self {
+        let mut result: Matrix<T, N, M> = unsafe{core::mem::MaybeUninit::uninit().assume_init()};
+        for (value,result_vec) in values.into_iter().zip(result.iter_mut_row()){
+            *result_vec = value.into(); 
         }
 
-        let mut matrix_data: [[T; M]; N] = unsafe { std::mem::zeroed() };
 
-        for (i, row) in tab.into_iter().enumerate() {
-            if row.len() != M {
-                return Err("Incorrect number of columns");
-            }
-            for (j, value) in row.into_iter().enumerate() {
-                matrix_data[i][j] = value;
-            }
-        }
-
-        Ok(Matrix { inner: matrix_data })
-    }
-}
-
-trait ToMatrice<T> {
-    fn t_to_matrice(value: T) -> Self;
-}
-impl<T, U, const N: usize, const M: usize> ToMatrice<&Matrix<U, N, M>> for Matrix<T, N, M>
-where
-    T: From<U> + Default + Copy,
-    U: Copy,
-{
-    fn t_to_matrice(u_mat: &Matrix<U, N, M>) -> Self {
-        let mut result = Self::default();
-        for i in 0..N {
-            for j in 0..M {
-                result[i][j] = u_mat[i][j].into();
-            }
-        }
         result
     }
 }
-//definition using an array
-impl<T, const N: usize, const M: usize> ToMatrice<[[T; M]; N]> for Matrix<T, N, M> {
-    fn t_to_matrice(arr: [[T; M]; N]) -> Self {
-        Self { inner: arr }
-    }
-}
 
-impl<T, U, const N: usize, const M: usize> From<U> for Matrix<T, N, M>
-where
-    Matrix<T, N, M>: ToMatrice<U>,
+impl<U,T, const N:usize, const M:usize> From<VectorMath<U,N>> for Matrix<T,N,M>
+where U : Into<VectorMath<T,M>>
 {
-    fn from(value: U) -> Self {
-        Self::t_to_matrice(value)
+    fn from(values: VectorMath<U,N>) -> Self {
+        let mut result: Matrix<T, N, M> = unsafe{core::mem::MaybeUninit::uninit().assume_init()};
+        for (value,result_vec) in values.into_iter().zip(result.iter_mut_row()){
+            *result_vec = value.into(); 
+        }
+
+
+        result
     }
 }
 
-impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
-    type Item = [T; M];
 
-    type IntoIter = std::array::IntoIter<Self::Item, N>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.inner.into_iter()
-    }
-}
 
 /*implementation to format*/
 impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
@@ -358,6 +290,8 @@ impl<const N: usize, const M: usize> FloatEq for Matrix<f64, N, M> {
 
 use std::{marker::PhantomData, ptr::NonNull};
 
+use super::prelude::{VectorMath, VectorMathMutIterator};
+
 ///Iterator direction </br>
 /// - Row : Top to bottom before the next column </br>
 /// - Column : Left to right before the next line </br>
@@ -393,13 +327,19 @@ pub struct MatrixMutElemIterator<'a, T, const N: usize, const M: usize> {
     iter_along: IterateAlong,
 }
 
+pub struct MatrixMutRowIterator<'a, T, const N: usize, const M:usize>{
+    inner : VectorMathMutIterator<'a, VectorMath<T,M>,N>
+}
+
 impl<'a, T, const N: usize, const M: usize> MatrixMutElemIterator<'a, T, N, M> {
     pub fn new(m: &mut Matrix<T, N, M>, iter_along: IterateAlong) -> Self {
         Self {
             // SAFETY: m cannot be null
             // SAFETY: ||{std::mem::MaybeUninit::uninit().assume_init()} is call only if the matrix have N = 0 or M = 0, and so when next will be call this value will never be read.
             ptr: unsafe {
-                NonNull::new_unchecked(&mut m.inner as *mut [[T; M]; N] as *mut [T; M] as *mut T)
+                NonNull::new_unchecked(
+                    &mut m.inner as *mut VectorMath<VectorMath<T, M>, N> as *mut [[T; M]; N] as *mut [T; M] as *mut T
+                )
             },
             curpos: (0, 0),
             _marker: PhantomData,
@@ -443,7 +383,7 @@ impl<'a, T, const N: usize, const M: usize> Iterator for MatrixRowIterator<'a, T
 where
     T: Copy,
 {
-    type Item = &'a [T; M];
+    type Item = &'a VectorMath<T,M>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.matrix.get_row(self.curpos) {
@@ -498,6 +438,14 @@ impl<'a, T, const N: usize, const M: usize> Iterator for MatrixMutElemIterator<'
                 result
             }
         }
+    }
+}
+
+impl<'a, T, const N: usize, const M:usize> Iterator for MatrixMutRowIterator<'a,T,N,M>{
+    type Item = &'a mut VectorMath<T,M>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next()
     }
 }
 
@@ -573,5 +521,21 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
 
     pub fn iter_mut_elem(&mut self, iter_along: IterateAlong) -> MatrixMutElemIterator<T, N, M> {
         MatrixMutElemIterator::new(self, iter_along)
+    }
+
+    pub fn iter_mut_row(&mut self)->MatrixMutRowIterator<T,N,M>{
+        MatrixMutRowIterator{
+            inner : self.inner.iter_mut()
+        }
+    }
+}
+
+impl<T, const N: usize, const M: usize> IntoIterator for Matrix<T, N, M> {
+    type Item = VectorMath<T,M>;
+
+    type IntoIter = std::array::IntoIter<Self::Item, N>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.into_iter()
     }
 }
