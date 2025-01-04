@@ -5,24 +5,11 @@ pub enum MatrixError {
     HeigthNotMach,
     NotInversible,
     IndexOutOfRange,
+    ConversionError,
     Other(String),
 }
 
-impl Into<String> for MatrixError {
-    fn into(self) -> String {
-        match &self {
-            Self::SizeNotMatch(size1, size2) => {
-                format!("The sizes does not matches ({} != {})", size1, size2)
-            }
-            Self::HeigthNotMach => "The heights does not matches".to_string(),
-            Self::WidhtNotMatch => "The widths does not matches".to_string(),
-            Self::NotInversible => "The matrix is not inversible".to_string(),
-            Self::IndexOutOfRange => "The index is out of range".to_string(),
 
-            Self::Other(s) => format!("Other error :{}", s),
-        }
-    }
-}
 impl Into<String> for &MatrixError {
     fn into(self) -> String {
         match self {
@@ -33,9 +20,16 @@ impl Into<String> for &MatrixError {
             MatrixError::WidhtNotMatch => "The widths does not matches".to_string(),
             MatrixError::NotInversible => "The matrix is not inversible".to_string(),
             MatrixError::IndexOutOfRange => "The index is out of range".to_string(),
+            MatrixError::ConversionError=> "Cannot convert types between each others".to_string(),
 
             MatrixError::Other(s) => format!("Other error :{}", s),
         }
+    }
+}
+
+impl Into<String> for MatrixError {
+    fn into(self) -> String {
+        (&self).to_string()
     }
 }
 

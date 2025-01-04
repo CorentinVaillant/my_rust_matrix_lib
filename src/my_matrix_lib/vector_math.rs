@@ -7,27 +7,92 @@ pub struct VectorMath<T, const N: usize> {
     inner: [T; N],
 }
 
-impl<T, const N: usize> From<[T; N]> for VectorMath<T, N> {
-    fn from(inner: [T; N]) -> Self {
-        Self { inner }
+pub trait IntoVecMath<T,const N: usize>{
+    fn into_vec_math(self)->VectorMath<T,N>;
+}
+
+pub trait TryIntoVecMath<T, const N: usize>{
+    type Error;
+
+    fn try_into_vec_math(self)->Result<VectorMath<T,N>,Self::Error>;
+}
+
+impl<U,T, const N: usize> IntoVecMath<T,N> for [U;N]
+where U : Into<T>
+{
+    fn into_vec_math(self)->VectorMath<T,N> {
+        let inner = match self.into_iter().map(|val|{
+            val.into()
+        }).collect::<Vec<T>>().try_into(){
+            Ok(val)=> val,
+            Err(_)=>panic!("error in into_vec_math, cannot convert Vec<{}> into [{};{N}] please contact me"
+            ,core::any::type_name::<T>(),core::any::type_name::<T>())
+        };
+
+        VectorMath { inner }
     }
 }
 
-impl<T, const N: usize> TryFrom<Vec<T>> for VectorMath<T, N> {
+impl<U,T, const N:usize> TryIntoVecMath<T,N> for [U;N] 
+where U : TryInto<T>
+{
+    type Error = <U as TryInto<T>>::Error;
+
+    fn try_into_vec_math(self)->Result<VectorMath<T,N>,Self::Error> {
+        let mut inner :[T;N] = unsafe {core::mem::MaybeUninit::uninit().assume_init()};
+        
+        for (val,inner_val) in self.into_iter().zip(inner.iter_mut()){
+            match val.try_into() {
+                Ok(v)=> *inner_val = v,
+                Err(e)=> return Err(e),
+            };
+        }
+        
+        Ok(VectorMath{inner})
+    
+    }
+}
+
+impl<U,T,const N:usize> TryIntoVecMath<T,N> for Vec<U>
+where U :TryInto<T>
+{
     type Error = MatrixError;
 
-    fn try_from(value: Vec<T>) -> Result<Self, Self::Error> {
-        match value.try_into() {
-            Ok(inner) => Ok(Self { inner }),
-            Err(e) => match e.len() != N {
+    fn try_into_vec_math(self)->Result<VectorMath<T,N>,Self::Error> {
+        let array: [U;N];
+        match self.try_into(){
+            Ok(arr)=> array = arr,
+            Err(e)=> return match e.len() != N {
                 true => Err(MatrixError::SizeNotMatch(e.len(), N)),
                 false => Err(MatrixError::Other(
                     format!("Vector error with vector {:?}", e.as_ptr()).to_string(),
                 )),
             },
+        };
+
+        match array.try_into_vec_math(){
+            Ok(val)=> Ok(val),
+            Err(_)=> Err(MatrixError::ConversionError) //TODO make MatrixError generic, with the convertion error in it
         }
     }
 }
+
+impl<T, const N: usize> From<[T;N]> for VectorMath<T,N>{
+    fn from(value: [T;N]) -> Self {
+        value.into_vec_math()
+    }
+}
+
+impl<U,T, const N: usize> TryFrom<Vec<U>> for VectorMath<T, N> 
+where U : TryInto<T>
+{
+    type Error = MatrixError;
+
+    fn try_from(value: Vec<U>) -> Result<Self, Self::Error> {
+        value.try_into_vec_math()
+    }
+}
+
 
 impl<T: std::default::Default + std::marker::Copy, const N: usize> Default for VectorMath<T, N> {
     fn default() -> Self {
@@ -57,6 +122,12 @@ impl<T, const N: usize> VectorMath<T, N> {
 
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         self.inner.get_mut(index)
+    }
+}
+
+impl<T,const N:usize> VectorMath<T,N>{
+    pub fn swap(&mut self,i:usize,j:usize){
+        self.inner.swap(i, j);
     }
 }
 
@@ -157,23 +228,20 @@ where
 {
     type DotIn<const P: usize> = Matrix<T, N, P>;
 
-    type DotOut<const P: usize> = Matrix<T, 1, P>;
+    type DotOut<const P: usize> = VectorMath<T,P>;
 
     fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
-        let a = rhs
+        match <Vec<T> as TryInto<VectorMath<T,P>>>::try_into( rhs
             .iter_column()
             .map(|col| {
                 self.iter()
-                    .zip(col.iter())
-                    .fold(T::zero(), |acc, (el1, el2)| acc * *el1 * **el2)
+                    .zip(col.into_iter())
+                    .fold(T::zero(), |acc, (el1, el2)| acc + *el1 * *el2)
             })
-            .collect::<Vec<T>>()
-            .try_into();
-
-        match a {
-            Ok(val) => Matrix::from([val; 1]),
-            Err(_) => panic!("Unexpected error in dot, please contact me "),
-        }
+            .collect::<Vec<T>>()){
+                Ok(val) => val,
+                Err(_) => panic!("Unexpected error in dot, please contact me "),
+            }
     }
 
     fn det(&self) -> Self::Scalar {
