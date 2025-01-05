@@ -63,7 +63,23 @@ T: Copy + Num + PartialOrd + Signed + From<<VectorMath<T, N> as VectorSpace>::Sc
 
     type Det = T;
 
-    //TODO doc and test
+    ///Perform the dot operation between two matrices
+    /// ## Examples :
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::MatrixTrait;
+    /// 
+    ///let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
+    ///let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
+    ///
+    ///let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
+    ///let expected_result_m2_time_m1 = Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
+    /// 
+    ///assert_eq!(m1 * m2, expected_result_m1_time_m2);
+    ///assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
+    ///assert_eq!(m2 * m1, expected_result_m2_time_m1);
+    ///assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
+    /// ```
     fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
         //naive algorithm
         let mut result: Matrix<T, N, P> = Matrix::zero();
