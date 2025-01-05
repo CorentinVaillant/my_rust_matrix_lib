@@ -1,5 +1,7 @@
+
 use super::{additional_structs::Dimension, errors::MatrixError};
 
+/*
 //Algebra
 pub trait LinearAlgebra {
     type ScalarType;
@@ -352,7 +354,7 @@ pub trait LinearAlgebra {
     /// ```
     fn is_lower_triangular(&self) -> bool;
 }
-
+*/
 pub trait VectorSpace {
     type Scalar;
 
@@ -394,7 +396,7 @@ pub trait VectorSpace {
     ///let vec2 = VectorMath::from([1.,1.,1.,1.]);
     ///
     ///assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
-    ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(-1.));
+    ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(&-1.));
     /// ```
     fn substract(&self, other: &Self) -> Self;
 
@@ -406,11 +408,11 @@ pub trait VectorSpace {
     ///
     /// let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
     ///
-    /// assert_eq!(vec1.scale(0.), VectorMath::zero());
+    /// assert_eq!(vec1.scale(&0.), VectorMath::zero());
     ///
-    /// assert_eq!(vec1.scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
+    /// assert_eq!(vec1.scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
     /// ```
-    fn scale(&self, scalar: Self::Scalar) -> Self;
+    fn scale(&self, scalar: &Self::Scalar) -> Self;
 
     ///Return the 0 vector
     /// ## Example
@@ -432,7 +434,7 @@ pub trait VectorSpace {
     /// let vec = VectorMath::from([89,895,9856,956,9856,956]);
     /// let one = VectorMath::<i32,6>::one();
     ///
-    /// assert_eq!(vec.scale(one), vec);
+    /// assert_eq!(vec.scale(&one), vec);
     /// ```
     fn one() -> Self::Scalar;
 
@@ -457,7 +459,7 @@ where
     ///let vec1 = VectorMath::from([1.,0.]);
     ///assert_eq!(vec1.lenght(), 1.);
     ///
-    ///assert_eq!(vec1.scale(2.).lenght(), 2.);
+    ///assert_eq!(vec1.scale(&2.).lenght(), 2.);
     ///
     ///let vec2 = VectorMath::from([0.,1.]).add(&vec1);
     ///assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
@@ -475,7 +477,6 @@ where
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
     ///use crate::my_rust_matrix_lib::my_matrix_lib::prelude::EuclidianSpace;
-    ///use crate::my_rust_matrix_lib::my_matrix_lib::prelude::LinearAlgebra;
     ///
     ///
     ///let vec1 = VectorMath::from([1.,3.,-5.]);
@@ -509,7 +510,7 @@ where
     ///let can2 = VectorMath::from([0.,1.,0.]);
     ///let can3 = VectorMath::from([0.,0.,1.]);
     ///assert_eq!(can1.angle(&can2),core::f64::consts::FRAC_PI_2);
-    ///assert_eq!(can1.angle(&can3.scale(-1.)),core::f64::consts::FRAC_PI_2);
+    ///assert_eq!(can1.angle(&can3.scale(&-1.)),core::f64::consts::FRAC_PI_2);
     ///
     ///let vec1 = VectorMath::from([1.,1.,0.]);
     ///assert!(core::f64::consts::FRAC_PI_4 - f64::EPSILON <vec1.angle(&can1) && vec1.angle(&can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON);
@@ -577,64 +578,3 @@ where
     fn is_lower_triangular(&self) -> bool;
 }
 
-/*
-//Operators
-impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
-where
-    Self: LinearAlgebra,
-{
-    type Output = <Matrix<T, N, M> as LinearAlgebra>::AddOutput;
-    fn add(self, rhs: Self) -> Self::Output {
-        self.addition(rhs)
-    }
-}
-
-impl<T, const N: usize, const M: usize> AddAssign for Matrix<T, N, M>
-where
-    Self: LinearAlgebra,
-    <Matrix<T, N, M> as LinearAlgebra>::AddOutput: Into<Self>,
-{
-    fn add_assign(&mut self, rhs: Self) {
-        *self = self.addition(rhs).into();
-    }
-}
-
-impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
-where
-    Matrix<T, N, M>: LinearAlgebra<DotIn<P> = Matrix<T, M, P>, DotOutput<P> = Matrix<T, N, P>>,
-{
-    type Output = <Matrix<T, N, M> as LinearAlgebra>::DotOutput<P>;
-
-    fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
-        self.dot::<P>(rhs)
-    }
-}
-
-impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::ScalarType>
-    for Matrix<T, N, M>
-where
-    Self: LinearAlgebra,
-{
-    type Output = Self;
-    fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) -> Self::Output {
-        self.scale(rhs)
-    }
-}
-
-impl<T: std::marker::Copy, const N: usize, const M: usize>
-    MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
-where
-    Self: LinearAlgebra,
-{
-    fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) {
-        *self = *self * rhs;
-    }
-}
-
-impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
-    type Output = Matrix<f32, N, M>;
-    fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
-        rhs * self
-    }
-}
-*/

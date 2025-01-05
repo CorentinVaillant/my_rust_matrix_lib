@@ -132,6 +132,24 @@ where U : Into<VectorMath<T,M>>
     }
 }
 
+pub trait TryIntoMatrix<T,const N: usize, const M: usize> {
+    type Error;
+
+    fn try_into_matrix(self) -> Result<Matrix<T,N,M>,Self::Error>;
+}
+
+impl<U,T,const N: usize, const M:usize> TryIntoMatrix<T,N,M> for U
+where U : TryIntoVecMath<VectorMath<T,M>,N>
+{
+    type Error = <U as TryIntoVecMath<VectorMath<T, M>, N>>::Error;
+
+    fn try_into_matrix(self) -> Result<Matrix<T,N,M>,Self::Error> {
+        match self.try_into_vec_math() {
+            Ok(vec)=> Ok(Matrix::from(vec)),
+            Err(e)=>Err(e),
+        }
+    }
+}
 
 
 /*implementation to format*/
@@ -290,7 +308,7 @@ impl<const N: usize, const M: usize> FloatEq for Matrix<f64, N, M> {
 
 use std::{marker::PhantomData, ptr::NonNull};
 
-use super::prelude::{VectorMath, VectorMathMutIterator};
+use super::prelude::{TryIntoVecMath, VectorMath, VectorMathMutIterator};
 
 ///Iterator direction </br>
 /// - Row : Top to bottom before the next column </br>
@@ -484,11 +502,12 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
     /// ## Example
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
     ///
     ///let m1 = Matrix::from([[1,2],[3,4]]);
     ///let mut iter = m1.iter_row();
-    ///assert_eq!(iter.next(), Some([1,2]).as_ref());
-    ///assert_eq!(iter.next(), Some([3,4]).as_ref());
+    ///assert_eq!(iter.next(), Some(VectorMath::from([1,2])).as_ref());
+    ///assert_eq!(iter.next(), Some(VectorMath::from([3,4])).as_ref());
     ///assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_row(&self) -> MatrixRowIterator<T, N, M> {

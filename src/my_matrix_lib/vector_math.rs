@@ -164,9 +164,9 @@ where
             .unwrap()
     }
 
-    fn scale(&self, scalar: Self::Scalar) -> Self {
+    fn scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter()
-            .map(|self_elem| *self_elem * scalar)
+            .map(|self_elem| *self_elem * *scalar)
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
