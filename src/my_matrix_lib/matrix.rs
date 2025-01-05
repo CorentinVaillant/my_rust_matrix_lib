@@ -1,8 +1,6 @@
 #![allow(clippy::uninit_assumed_init)]
 
 use core::fmt;
-#[cfg(feature = "multitrheaded")]
-use rayon::iter::*;
 use std::ops::*;
 
 
@@ -147,6 +145,22 @@ where U : TryIntoVecMath<VectorMath<T,M>,N>
         match self.try_into_vec_math() {
             Ok(vec)=> Ok(Matrix::from(vec)),
             Err(e)=>Err(e),
+        }
+    }
+}
+
+impl<T, const N:usize, const M:usize, const P:usize, const Q:usize> TryIntoMatrix<T,N,M> for Matrix<T,P,Q>{
+    type Error = MatrixError;
+
+    fn try_into_matrix(self) -> Result<Matrix<T,N,M>,Self::Error> {
+        match (N==P, M==Q) {
+            (true,true)=>Ok(unsafe {//SAFETY : we've checked that N = P and Q = M, so we can asume that the two types are the same
+                core::mem::transmute::<*const Matrix<T, P, Q>,*const Matrix<T, N, M>>(std::ptr::from_ref(&self)).read()
+
+            }),
+            
+            (false,_)=> Err(MatrixError::HeigthNotMach),
+            (_,false)=> Err(MatrixError::WidhtNotMatch),
         }
     }
 }
@@ -308,6 +322,7 @@ impl<const N: usize, const M: usize> FloatEq for Matrix<f64, N, M> {
 
 use std::{marker::PhantomData, ptr::NonNull};
 
+use super::errors::MatrixError;
 use super::prelude::{TryIntoVecMath, VectorMath, VectorMathMutIterator};
 
 ///Iterator direction </br>

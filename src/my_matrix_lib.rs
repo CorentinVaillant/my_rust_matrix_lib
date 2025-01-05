@@ -6,19 +6,10 @@ mod vector_math;
 mod matrix_math;
 mod operators;
 
-#[cfg(not(feature = "multitrheaded"))]
 pub mod prelude {
     pub use crate::my_matrix_lib::matrix::*;
     pub use crate::my_matrix_lib::traits::*;
     pub use crate::my_matrix_lib::vector_math::*;
+    pub use crate::my_matrix_lib::errors::MatrixError;
 
 }
-
-#[cfg(feature = "multitrheaded")]
-mod par_linear_alegebra;
-#[cfg(feature = "multitrheaded")]
-pub mod prelude {
-    pub use crate::my_matrix_lib::matrix::*;
-    pub use crate::my_matrix_lib::traits::*;
-}
-

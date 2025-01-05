@@ -59,21 +59,21 @@ where U :TryInto<T>
     type Error = MatrixError;
 
     fn try_into_vec_math(self)->Result<VectorMath<T,N>,Self::Error> {
-        let array: [U;N];
-        match self.try_into(){
-            Ok(arr)=> array = arr,
+        match <Self as TryInto<[U;N]>>::try_into(self){
             Err(e)=> return match e.len() != N {
                 true => Err(MatrixError::SizeNotMatch(e.len(), N)),
                 false => Err(MatrixError::Other(
                     format!("Vector error with vector {:?}", e.as_ptr()).to_string(),
                 )),
             },
-        };
+            Ok(array)=> match array.try_into_vec_math(){
+                Ok(val)=> Ok(val),
+                Err(_)=> Err(MatrixError::ConversionError) //TODO make MatrixError generic, with the convertion error in it
+            }
 
-        match array.try_into_vec_math(){
-            Ok(val)=> Ok(val),
-            Err(_)=> Err(MatrixError::ConversionError) //TODO make MatrixError generic, with the convertion error in it
         }
+
+        
     }
 }
 
@@ -230,6 +230,8 @@ where
 
     type DotOut<const P: usize> = VectorMath<T,P>;
 
+    type Det = T;
+
     fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
         match <Vec<T> as TryInto<VectorMath<T,P>>>::try_into( rhs
             .iter_column()
@@ -265,15 +267,12 @@ where
         Self::from([T::one()])
     }
 
-    fn pow(&self, n: i32) -> VectorMath<T, 1> {
-        Self::from([self[0].powi(n)])
-    }
 
-    fn plu_decomposition(&self) -> Result<(Self, Self, Self), MatrixError>
+    fn plu_decomposition(&self) -> (Self, Self, Self)
     where
         Self: Sized,
     {
-        Ok((Self::identity(), Self::identity(), *self))
+        (Self::identity(), Self::identity(), *self)
     }
 
     fn inverse(&self) -> Result<Self, MatrixError>
@@ -387,5 +386,25 @@ impl<T, const N: usize> IntoIterator for VectorMath<T, N> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.into_iter()
+    }
+}
+
+pub struct UnknownSizeVectorMath<T>{
+    inner : Box<[T]>
+}
+
+impl<T> FromIterator<T> for UnknownSizeVectorMath<T> {
+    fn from_iter<IT: IntoIterator<Item = T>>(iter: IT) -> Self {
+        UnknownSizeVectorMath { inner: iter.into_iter().collect() }
+    }
+}
+
+impl<T,const N: usize> TryInto<VectorMath<T,N>> for UnknownSizeVectorMath<T> {
+    type Error = MatrixError;
+
+    fn try_into(self) -> Result<VectorMath<T,N>, Self::Error> {
+
+        self.inner.into_vec().try_into_vec_math()
+
     }
 }

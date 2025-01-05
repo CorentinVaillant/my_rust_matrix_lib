@@ -545,9 +545,11 @@ where
     type DotIn<const P: usize>;
     type DotOut<const P: usize>;
 
+    type Det;
+
     fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P>;
 
-    fn det(&self) -> Self::Scalar;
+    fn det(&self) -> Self::Det;
     fn reduce_row_echelon(&self) -> Self;
 }
 
@@ -555,10 +557,12 @@ pub trait SquaredMatrixTrait
 where
     Self: MatrixTrait,
 {
-    fn identity() -> Self;
 
-    fn pow(&self, n: i32) -> Self;
-    fn plu_decomposition(&self) -> Result<(Self, Self, Self), MatrixError>
+    
+    fn identity() -> Self;
+    
+
+    fn plu_decomposition(&self) -> (Self, Self, Self)
     where
         Self: Sized;
     fn inverse(&self) -> Result<Self, MatrixError>
