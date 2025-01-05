@@ -11,45 +11,46 @@ mod tests {
 
         //test adition
         {
-            let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
-            let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
-            let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
-            assert_eq!(m1 + m2, expected_result);
-            assert_eq!(m1.add(&m2), expected_result);
-            assert_eq!(m2.add(&m1), expected_result);
+        let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
+        let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
+        let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
+        assert_eq!(m1 + m2, expected_result);
+        assert_eq!(m1.add(&m2), expected_result);
+        assert_eq!(m2.add(&m1), expected_result);
+        
+        let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
+        assert_eq!(m_empty + m_empty, m_empty);
+    }
+    
+    //test dot
+    {
+    let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
+    let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
+    
+    let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
+    let expected_result_m2_time_m1 =
+    Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
+    assert_eq!(m1 * m2, expected_result_m1_time_m2);
+    assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
+    assert_eq!(m2 * m1, expected_result_m2_time_m1);
+    assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
+    }
 
-            let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
-            assert_eq!(m_empty + m_empty, m_empty);
-        }
-/*
 
-        //test multiplication
-        {
-            let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
-            let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
+    //test scaling
+    {
+        let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
+        let scale_factor = 0.5;
+        let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
+        assert_eq!(scale_factor * m, expected_result);
+        assert_eq!(m * scale_factor, expected_result);
+        assert_eq!(m.scale(&scale_factor), expected_result);
+        
+        let empty :[[f64;15];0] = [];
+        let m_empty= Matrix::from(empty);
+        assert_eq!(m_empty, m_empty * 5.);
+    }
 
-            let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
-            let expected_result_m2_time_m1 =
-                Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
-            assert_eq!(m1 * m2, expected_result_m1_time_m2);
-            assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
-            assert_eq!(m2 * m1, expected_result_m2_time_m1);
-            assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
-        }
-
-        //test scaling
-        {
-            let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
-            let scale_factor = 0.5;
-            let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
-            assert_eq!(scale_factor * m, expected_result);
-            assert_eq!(m * scale_factor, expected_result);
-            assert_eq!(m.scale(scale_factor), expected_result);
-
-            let empty :[[f64;65464];0] = [];
-            let m_empty: Matrix<f64, 0, 65464> = Matrix::from(empty);
-            assert_eq!(m_empty, m_empty * 5.);
-        }
 
         //test zeroed
         {
@@ -66,6 +67,7 @@ mod tests {
             ]);
             assert_eq!(m, expected_m)
         }
+/*
 
         //test identity
         {
@@ -88,7 +90,7 @@ mod tests {
 
             assert_eq!(m * p, expected_m);
         }
-        */
+*/
 
         //test permute row
         {
@@ -154,14 +156,14 @@ mod tests {
             let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
             assert!(!m.is_lower_triangular());
         }
-
+*/
         //test get_reduce_row_echelon
         {
             let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
             let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
 
-            assert_eq!(m.get_reduce_row_echelon(), expected_m);
+            assert_eq!(m.reduce_row_echelon(), expected_m);
 
             let m = Matrix::from([[1., 2., 1., -1.], [3., 8., 1., 4.], [0., 4., 1., 0.]]);
 
@@ -171,8 +173,9 @@ mod tests {
                 [0., 0., 1., -(14. / 5.)],
             ]);
 
-            assert!(m.get_reduce_row_echelon().float_eq(&expected_m));
+            assert!(m.reduce_row_echelon().float_eq(&expected_m));
         }
+/*
         //test plu decomposition
         {
             let m = Matrix::from([

@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub enum MatrixError {
+pub enum MatrixError {//TODO another error type for vectorSpace / EuclidianSpace / MatrixTrait / 
     SizeNotMatch(usize, usize),
     WidhtNotMatch,
     HeigthNotMach,

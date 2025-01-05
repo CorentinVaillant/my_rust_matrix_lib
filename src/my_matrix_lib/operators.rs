@@ -1,6 +1,8 @@
+#[allow(uncovered_param_in_projection)]// !removeme
+
 use core::ops::{Add,AddAssign,Mul};
 
-use super::{matrix::Matrix, prelude::VectorMath, traits::VectorSpace};
+use super::{matrix::Matrix, prelude::VectorMath, traits::{MatrixTrait, VectorSpace}};
 
 //Add operator
 impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
@@ -58,31 +60,40 @@ where VectorMath<T,N> : VectorSpace
     }
 }
 
-/*
-impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
-where
-    Matrix<T, N, M>: LinearAlgebra<DotIn<P> = Matrix<T, M, P>, DotOutput<P> = Matrix<T, N, P>>,
+impl<T, const N: usize, const M: usize> Mul<Matrix<T,N,M>> for <Matrix<T,N,M> as VectorSpace>::Scalar //TODO fixme
+where Matrix<T,N,M> : VectorSpace
 {
-    type Output = <Matrix<T, N, M> as LinearAlgebra>::DotOutput<P>;
+    type Output = Matrix<T,N,M>;
 
-    fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
-        self.dot::<P>(rhs)
+    fn mul(self, rhs: Matrix<T,N,M>) -> Self::Output {
+        rhs.scale(&self)
     }
 }
 
-impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as LinearAlgebra>::ScalarType>
-    for Matrix<T, N, M>
-where
-    Self: LinearAlgebra,
+impl<T, const N: usize, const M: usize> Mul< <Matrix<T,N,M> as VectorSpace>::Scalar> for Matrix<T,N,M>
+where Matrix<T,N,M> : VectorSpace 
 {
     type Output = Self;
-    fn mul(self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) -> Self::Output {
-        self.scale(rhs)
+
+    fn mul(self, rhs: <Matrix<T,N,M> as VectorSpace>::Scalar) -> Self::Output {
+        self.scale(&rhs)
     }
 }
 
-impl<T: std::marker::Copy, const N: usize, const M: usize>
-    MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
+
+impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
+where
+    Matrix<T, N, M>: MatrixTrait<DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
+{
+    type Output = <Matrix<T, N, M> as MatrixTrait>::DotOut<P>;
+
+    fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
+        self.dot::<P>(&rhs)
+    }
+}
+
+/*
+impl<T: std::marker::Copy, const N: usize, const M: usize> MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
 where
     Self: LinearAlgebra,
 {

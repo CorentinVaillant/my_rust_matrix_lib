@@ -340,7 +340,8 @@ impl<T, const N: usize> VectorMath<T, N> {
     pub fn iter_mut<'a>(&'a mut self) -> VectorMathMutIterator<'a, T, N> {
         VectorMathMutIterator {
             curpos: 0,
-            ptr: (N > 0).then_some(NonNull::from(&self.inner[0])),
+            // ptr: (N > 0).then_some(NonNull::from(&self.inner[0])),
+            ptr: self.get(0).and_then(|val|{Some(NonNull::from(val))}),
             _marker: PhantomData,
         }
     }

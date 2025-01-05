@@ -11,8 +11,7 @@ pub mod prelude {
     pub use crate::my_matrix_lib::matrix::*;
     pub use crate::my_matrix_lib::traits::*;
     pub use crate::my_matrix_lib::vector_math::*;
-    pub use crate::my_matrix_lib::matrix_math::*;
-    pub use crate::my_matrix_lib::operators::*;
+
 }
 
 #[cfg(feature = "multitrheaded")]

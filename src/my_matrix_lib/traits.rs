@@ -44,7 +44,6 @@ pub trait LinearAlgebra {
     /// ```
     fn dot<const P: usize>(&self, rhs: Self::DotIn<P>) -> Self::DotOutput<P>;
 
-    /// //TODO : more examples
     ///Multiply element by element of to matrices
     ///
     /// ## Example:

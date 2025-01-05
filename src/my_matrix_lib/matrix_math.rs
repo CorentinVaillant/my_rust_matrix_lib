@@ -76,10 +76,53 @@ T: Copy + Num
     }
 
     fn det(&self) -> Self::Scalar {
-        todo!()
+        match N==M {
+            true=> todo!(), //have to do square matrix handling before 
+            false=> Self::scalar_zero()
+        }
     }
 
     fn reduce_row_echelon(&self) -> Self {
-        todo!()
+        let mut result = *self;
+
+        let mut lead = 0;
+
+        for r in 0..N {
+            if lead >= N {
+                return result;
+            }
+
+            let mut i = r;
+            while result[i][lead] == T::zero() {
+                i += 1;
+                if i == N {
+                    i = r;
+                    lead += 1;
+                    if lead >= M {
+                        return result;
+                    }
+                }
+            }
+            result.permute_row(i, r);
+
+            //Normalization of the leading row
+            let mut lead_value = result[r][lead];
+            for j in 0..M {
+                result[r][j] = result[r][j] / lead_value;
+            }
+
+            //Elimination of column entries
+            for i in 0..N {
+                if i != r {
+                    lead_value = result[i][lead];
+                    for j in 0..M {
+                        result[i][j] = result[i][j] - lead_value * result[r][j];
+                    }
+                }
+            }
+            lead += 1;
+        }
+
+        result
     }
 }
