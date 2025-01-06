@@ -491,7 +491,22 @@ where
         }
     }
 
-
+    ///Returns the trace a square matrix
+    /// ## Examples :
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    /// 
+    ///let m: Matrix<f32, 5, 5> = Matrix::identity();
+    ///assert_eq!(m.trace(),5.);
+    ///
+    ///let m = Matrix::from([
+    ///    [5.,6.,8.],
+    ///    [5.,6.,8.],
+    ///    [5.,6.,8.],
+    ///]);
+    ///assert_eq!(m.trace(),19.);
+    /// ```
     fn trace(&self) -> Self::Scalar {
         self.iter_column()
             .enumerate()
