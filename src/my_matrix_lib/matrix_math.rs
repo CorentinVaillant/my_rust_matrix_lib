@@ -496,7 +496,7 @@ where
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    ///
     ///let m: Matrix<f32, 5, 5> = Matrix::identity();
     ///assert_eq!(m.trace(),5.);
     ///
@@ -519,37 +519,38 @@ where
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    ///
     ///let p = Matrix::permutation(0, 1).unwrap();
     ///
     ///let m = Matrix::from([
-    ///    [1.0, 1.0, 1.0], 
-    ///    [2.0, 2.0, 2.0], 
+    ///    [1.0, 1.0, 1.0],
+    ///    [2.0, 2.0, 2.0],
     ///    [3.0, 3.0, 3.0]
     ///]);
     ///let expected_m = Matrix::from([
-    ///    [2.0, 2.0, 2.0], 
-    ///    [1.0, 1.0, 1.0], 
+    ///    [2.0, 2.0, 2.0],
+    ///    [1.0, 1.0, 1.0],
     ///    [3.0, 3.0, 3.0]
     ///]);
     ///
     ///assert_eq!(p * m, expected_m);
     ///
     ///let m = Matrix::from([
-    ///    [1., 2., 3.], 
-    ///    [1., 2., 3.], 
+    ///    [1., 2., 3.],
+    ///    [1., 2., 3.],
     ///    [1., 2., 3.]
     ///]);
     ///let expected_m = Matrix::from([
-    ///    [2., 1., 3.], 
-    ///    [2., 1., 3.], 
+    ///    [2., 1., 3.],
+    ///    [2., 1., 3.],
     ///    [2., 1., 3.]
     ///]);
     ///
     ///assert_eq!(m * p, expected_m);
     /// ```
     fn permutation(i: usize, j: usize) -> Result<Matrix<T, N, N>, MatrixError>
-    where Self: Sized,
+    where
+        Self: Sized,
     {
         if i > N || j > N {
             return Err(MatrixError::IndexOutOfRange);
@@ -564,7 +565,7 @@ where
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    ///
     ///let t = Matrix::inflation(2, 5.0).unwrap();
     ///let expected_t = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 5.]]);
     ///
@@ -596,7 +597,7 @@ where
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    ///
     ///let m = Matrix::<f32, 3, 3>::identity();
     ///assert!(m.is_upper_triangular());
     ///
@@ -620,7 +621,24 @@ where
         true
     }
 
-    ///TODO test and doc
+    ///Returns if a square matrix is lower triangular or not
+    /// ## Examples :
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    ///
+    ///let m = Matrix::<f32, 3, 3>::identity();
+    ///assert!(m.is_lower_triangular());
+    ///
+    ///let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+    ///assert!(m.is_lower_triangular());
+    ///
+    ///let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+    ///assert!(!m.is_lower_triangular());
+    ///
+    ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+    ///assert!(!m.is_lower_triangular());
+    /// ```
     fn is_lower_triangular(&self) -> bool {
         for i in 0..N {
             for j in (i + 1)..N {
