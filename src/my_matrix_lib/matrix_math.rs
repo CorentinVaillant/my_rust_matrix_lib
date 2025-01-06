@@ -549,8 +549,7 @@ where
     ///assert_eq!(m * p, expected_m);
     /// ```
     fn permutation(i: usize, j: usize) -> Result<Matrix<T, N, N>, MatrixError>
-    where
-        Self: Sized,
+    where Self: Sized,
     {
         if i > N || j > N {
             return Err(MatrixError::IndexOutOfRange);
@@ -560,6 +559,26 @@ where
         Ok(result)
     }
 
+    ///Return an inflation matrix (a square matrix with the ith row multiplied by a value)
+    /// ## Examples :
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    /// 
+    ///let t = Matrix::inflation(2, 5.0).unwrap();
+    ///let expected_t = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 5.]]);
+    ///
+    ///assert_eq!(t, expected_t);
+    ///
+    ///let m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
+    ///let expected_m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [5., 5., 5.]]);
+    ///
+    ///assert_eq!(t * m, expected_m);
+    ///
+    ///let expected_m = Matrix::from([[1., 1., 5.], [1., 1., 5.], [1., 1., 5.]]);
+    ///
+    ///assert_eq!(m * t, expected_m);
+    /// ```
     fn inflation(i: usize, value: Self::Scalar) -> Result<Matrix<T, N, N>, MatrixError>
     where
         Self: Sized,
@@ -572,6 +591,7 @@ where
         Ok(result)
     }
 
+    ///TODO test and doc
     fn is_upper_triangular(&self) -> bool {
         for i in 0..N {
             for j in 0..i {
@@ -583,6 +603,7 @@ where
         true
     }
 
+    ///TODO test and doc
     fn is_lower_triangular(&self) -> bool {
         for i in 0..N {
             for j in (i + 1)..N {
