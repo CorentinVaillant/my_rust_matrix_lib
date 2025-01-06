@@ -2,7 +2,7 @@
 use core::ops::{Add, AddAssign, Mul};
 use std::ops::MulAssign;
 
-use num::Float;
+use num::{Float, Num};
 
 use super::{
     matrix::Matrix,
@@ -106,6 +106,16 @@ where
 
     fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
         self.dot::<P>(&rhs)
+    }
+}
+
+impl<T, const N:usize, const P:usize> Mul<Matrix<T,N,P>> for VectorMath<T,N>
+where 
+    T : Float + Copy
+{
+    type Output = VectorMath<T,P>;
+    fn mul(self, rhs: Matrix<T,N,P>) -> Self::Output {
+        self.dot(&rhs)
     }
 }
 
