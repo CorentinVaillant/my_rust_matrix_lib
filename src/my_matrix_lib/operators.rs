@@ -136,6 +136,15 @@ where
     }
 }
 
+impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for Matrix<T, N, N>
+where
+    T: Copy + Float,
+{
+    fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
+        *self = self.dot(&rhs);
+    }
+}
+
 /*
 impl<T: std::marker::Copy, const N: usize, const M: usize> MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
 where
