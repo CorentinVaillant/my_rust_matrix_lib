@@ -1,5 +1,6 @@
 #[derive(Debug, PartialEq)]
-pub enum MatrixError {//TODO another error type for vectorSpace / EuclidianSpace / MatrixTrait / 
+pub enum MatrixError {
+    //TODO another error type for vectorSpace / EuclidianSpace / MatrixTrait /
     SizeNotMatch(usize, usize),
     WidhtNotMatch,
     HeigthNotMach,
@@ -8,7 +9,6 @@ pub enum MatrixError {//TODO another error type for vectorSpace / EuclidianSpace
     ConversionError,
     Other(String),
 }
-
 
 impl Into<String> for &MatrixError {
     fn into(self) -> String {
@@ -20,7 +20,7 @@ impl Into<String> for &MatrixError {
             MatrixError::WidhtNotMatch => "The widths does not matches".to_string(),
             MatrixError::NotInversible => "The matrix is not inversible".to_string(),
             MatrixError::IndexOutOfRange => "The index is out of range".to_string(),
-            MatrixError::ConversionError=> "Cannot convert types between each others".to_string(),
+            MatrixError::ConversionError => "Cannot convert types between each others".to_string(),
 
             MatrixError::Other(s) => format!("Other error :{}", s),
         }

@@ -1,4 +1,3 @@
-
 use super::{additional_structs::Dimension, errors::MatrixError};
 
 /*
@@ -14,7 +13,7 @@ pub trait LinearAlgebra {
     //basic operations :
 
     ///Addition of the matrix with a Self type matrix <br />
-    ///Perform the adition of a matrice with another one     
+    ///Perform the adition of a matrice with another one
     /// ## Example :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::*;
@@ -243,7 +242,7 @@ pub trait LinearAlgebra {
     /// ## Example :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::*;
-    ///            
+    ///
     ///let m = Matrix::<f32, 3, 3>::identity();
     ///assert!(m.is_upper_triangular());
     ///
@@ -316,7 +315,7 @@ pub trait LinearAlgebra {
     ///
     /// ## Example
     ///
-    /// ```            
+    /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::*;
     ///
     /// let m = Matrix::<f32, 3, 3>::identity();
@@ -557,10 +556,7 @@ pub trait SquaredMatrixTrait
 where
     Self: MatrixTrait,
 {
-
-    
     fn identity() -> Self;
-    
 
     fn plu_decomposition(&self) -> (Self, Self, Self)
     where
@@ -582,4 +578,3 @@ where
 
     fn is_lower_triangular(&self) -> bool;
 }
-

@@ -11,236 +11,218 @@ mod tests {
 
         //test adition
         {
-        let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
-        let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
-        let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
-        assert_eq!(m1 + m2, expected_result);
-        assert_eq!(m1.add(&m2), expected_result);
-        assert_eq!(m2.add(&m1), expected_result);
-        
-        let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
-        assert_eq!(m_empty + m_empty, m_empty);
-    }
-    
-    //test dot
-    {
-    let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
-    let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
-    
-    let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
-    let expected_result_m2_time_m1 =
-    Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
-    assert_eq!(m1 * m2, expected_result_m1_time_m2);
-    assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
-    assert_eq!(m2 * m1, expected_result_m2_time_m1);
-    assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
-    }
+            let m1 = Matrix::from([[1.0, 0.0, 0.0], [0., 1., 0.], [0., 0., 1.]]);
+            let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
+            let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
+            assert_eq!(m1 + m2, expected_result);
+            assert_eq!(m1.add(&m2), expected_result);
+            assert_eq!(m2.add(&m1), expected_result);
 
+            let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
+            assert_eq!(m_empty + m_empty, m_empty);
+        }
 
-    //test scaling
-    {
-        let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
-        let scale_factor = 0.5;
-        let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
-        assert_eq!(scale_factor * m, expected_result);
-        assert_eq!(m * scale_factor, expected_result);
-        assert_eq!(m.scale(&scale_factor), expected_result);
-        
-        let empty :[[f64;15];0] = [];
-        let m_empty= Matrix::from(empty);
-        assert_eq!(m_empty, m_empty * 5.);
-    }
+        //test dot
+        {
+            let m1 = Matrix::from([[1., 2., 3.], [4., 5., 6.]]);
+            let m2 = Matrix::from([[1., 2.], [3., 4.], [5., 6.]]);
 
+            let expected_result_m1_time_m2 = Matrix::from([[22., 28.], [49., 64.]]);
+            let expected_result_m2_time_m1 =
+                Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
+            assert_eq!(m1 * m2, expected_result_m1_time_m2);
+            assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
+            assert_eq!(m2 * m1, expected_result_m2_time_m1);
+            assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
+        }
 
-    //test zeroed
-    {
-        let m = Matrix::zero();
-        let expected_m = Matrix::from([[0., 0., 0., 0.]]);
-        assert_eq!(m, expected_m);
+        //test scaling
+        {
+            let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
+            let scale_factor = 0.5;
+            let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
+            assert_eq!(scale_factor * m, expected_result);
+            assert_eq!(m * scale_factor, expected_result);
+            assert_eq!(m.scale(&scale_factor), expected_result);
 
-        let m = Matrix::zero();
-        let expected_m = Matrix::from([
-            [0., 0., 0., 0.],
-            [0., 0., 0., 0.],
-            [0., 0., 0., 0.],
-            [0., 0., 0., 0.],
-        ]);
-        assert_eq!(m, expected_m)
-    }
-    
-    //test identity
-    {
-        let i = Matrix::identity();
-        let expected_m = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
-        assert_eq!(i, expected_m);
-    }
-            
+            let empty: [[f64; 15]; 0] = [];
+            let m_empty = Matrix::from(empty);
+            assert_eq!(m_empty, m_empty * 5.);
+        }
 
-    //test permutation
-    {
-        let p = Matrix::permutation(0, 1).unwrap();
+        //test zeroed
+        {
+            let m = Matrix::zero();
+            let expected_m = Matrix::from([[0., 0., 0., 0.]]);
+            assert_eq!(m, expected_m);
 
-        let m = Matrix::from([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0], [3.0, 3.0, 3.0]]);
-        let expected_m = Matrix::from([[2.0, 2.0, 2.0], [1.0, 1.0, 1.0], [3.0, 3.0, 3.0]]);
+            let m = Matrix::zero();
+            let expected_m = Matrix::from([
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+                [0., 0., 0., 0.],
+            ]);
+            assert_eq!(m, expected_m)
+        }
 
-        assert_eq!(p * m, expected_m);
+        //test identity
+        {
+            let i = Matrix::identity();
+            let expected_m = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
+            assert_eq!(i, expected_m);
+        }
 
-        let m = Matrix::from([[1., 2., 3.], [1., 2., 3.], [1., 2., 3.]]);
-        let expected_m = Matrix::from([[2., 1., 3.], [2., 1., 3.], [2., 1., 3.]]);
+        //test permutation
+        {
+            let p = Matrix::permutation(0, 1).unwrap();
 
-        assert_eq!(m * p, expected_m);
-    }
+            let m = Matrix::from([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0], [3.0, 3.0, 3.0]]);
+            let expected_m = Matrix::from([[2.0, 2.0, 2.0], [1.0, 1.0, 1.0], [3.0, 3.0, 3.0]]);
 
+            assert_eq!(p * m, expected_m);
 
-    //test permute row
-    {
-        let mut m: Matrix<i32, 3, 3> = Matrix::from([[1, 1, 1], [2, 2, 2], [3, 3, 3]]);
-        let expected_m = Matrix::from([[2, 2, 2], [1, 1, 1], [3, 3, 3]]);
-        m.permute_row(0, 1);
+            let m = Matrix::from([[1., 2., 3.], [1., 2., 3.], [1., 2., 3.]]);
+            let expected_m = Matrix::from([[2., 1., 3.], [2., 1., 3.], [2., 1., 3.]]);
 
-        assert_eq!(m, expected_m);
-    }
+            assert_eq!(m * p, expected_m);
+        }
 
-    //test permute column
-    {
-        let mut m = Matrix::from([[1, 2, 3], [1, 2, 3], [1, 2, 3]]);
-        let expected_m = Matrix::from([[1, 3, 2], [1, 3, 2], [1, 3, 2]]);
-        m.permute_column(1, 2);
+        //test permute row
+        {
+            let mut m: Matrix<i32, 3, 3> = Matrix::from([[1, 1, 1], [2, 2, 2], [3, 3, 3]]);
+            let expected_m = Matrix::from([[2, 2, 2], [1, 1, 1], [3, 3, 3]]);
+            m.permute_row(0, 1);
 
-        assert_eq!(expected_m, m);
-    }
+            assert_eq!(m, expected_m);
+        }
 
-    //test inflation
-    {
-        let t = Matrix::inflation(2, 5.0).unwrap();
-        let expected_t = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 5.]]);
+        //test permute column
+        {
+            let mut m = Matrix::from([[1, 2, 3], [1, 2, 3], [1, 2, 3]]);
+            let expected_m = Matrix::from([[1, 3, 2], [1, 3, 2], [1, 3, 2]]);
+            m.permute_column(1, 2);
 
-        assert_eq!(t, expected_t);
+            assert_eq!(expected_m, m);
+        }
 
-        let m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
-        let expected_m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [5., 5., 5.]]);
+        //test inflation
+        {
+            let t = Matrix::inflation(2, 5.0).unwrap();
+            let expected_t = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 5.]]);
 
-        assert_eq!(t * m, expected_m);
+            assert_eq!(t, expected_t);
 
-        let expected_m = Matrix::from([[1., 1., 5.], [1., 1., 5.], [1., 1., 5.]]);
+            let m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
+            let expected_m = Matrix::from([[1., 1., 1.], [1., 1., 1.], [5., 5., 5.]]);
 
-        assert_eq!(m * t, expected_m);
-    }
+            assert_eq!(t * m, expected_m);
 
-    //test is upper
-    {
-        let m = Matrix::<f32, 3, 3>::identity();
-        assert!(m.is_upper_triangular());
+            let expected_m = Matrix::from([[1., 1., 5.], [1., 1., 5.], [1., 1., 5.]]);
 
-        let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
-        assert!(m.is_upper_triangular());
+            assert_eq!(m * t, expected_m);
+        }
 
-        let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
-        assert!(!m.is_upper_triangular());
+        //test is upper
+        {
+            let m = Matrix::<f32, 3, 3>::identity();
+            assert!(m.is_upper_triangular());
 
-        let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
-        assert!(!m.is_upper_triangular());
-    }
+            let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+            assert!(m.is_upper_triangular());
 
-    //test is lower
-    {
-        let m = Matrix::<f32, 3, 3>::identity();
-        assert!(m.is_lower_triangular());
+            let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+            assert!(!m.is_upper_triangular());
 
-        let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
-        assert!(m.is_lower_triangular());
+            let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+            assert!(!m.is_upper_triangular());
+        }
 
-        let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
-        assert!(!m.is_lower_triangular());
+        //test is lower
+        {
+            let m = Matrix::<f32, 3, 3>::identity();
+            assert!(m.is_lower_triangular());
 
-        let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
-        assert!(!m.is_lower_triangular());
-    }
+            let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+            assert!(m.is_lower_triangular());
 
-    //test get_reduce_row_echelon
-    {
-        let m = Matrix::from([
-            [1., 2., 3.], 
-            [4., 5., 6.], 
-            [7., 8., 9.]
-        ]);
+            let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+            assert!(!m.is_lower_triangular());
 
-        let expected_m = Matrix::from([
-            [1., 0.,-1.], 
-            [0., 1., 2.], 
-            [0., 0., 0.]
-        ]);
+            let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+            assert!(!m.is_lower_triangular());
+        }
 
-        assert_eq!(m.reduce_row_echelon(), expected_m);
+        //test get_reduce_row_echelon
+        {
+            let m = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
-        let m = Matrix::from([
-            [1., 2., 1.,-1.], 
-            [3., 8., 1., 4.], 
-            [0., 4., 1., 0.]
-        ]);
+            let expected_m = Matrix::from([[1., 0., -1.], [0., 1., 2.], [0., 0., 0.]]);
 
-        let expected_m = Matrix::from([
-            [1., 0., 0., 2. / 5.],
-            [0., 1., 0., 7. / 10.],
-            [0., 0., 1., -(14. / 5.)],
-        ]);
+            assert_eq!(m.reduce_row_echelon(), expected_m);
 
-        assert!(m.reduce_row_echelon().float_eq(&expected_m));
-    }
-    //test plu decomposition
-    {
-        let m = Matrix::from([
-            [1., 2., 1., -1.],
-            [3., 8., 1., 4.],
-            [0., 4., 1., 0.],
-            [22., 7., 3., 4.],
-        ]);
+            let m = Matrix::from([[1., 2., 1., -1.], [3., 8., 1., 4.], [0., 4., 1., 0.]]);
 
-        let (p, l, u) = m.plu_decomposition();
+            let expected_m = Matrix::from([
+                [1., 0., 0., 2. / 5.],
+                [0., 1., 0., 7. / 10.],
+                [0., 0., 1., -(14. / 5.)],
+            ]);
 
-        assert!(l.is_lower_triangular() && u.is_upper_triangular());
+            assert!(m.reduce_row_echelon().float_eq(&expected_m));
+        }
+        //test plu decomposition
+        {
+            let m = Matrix::from([
+                [1., 2., 1., -1.],
+                [3., 8., 1., 4.],
+                [0., 4., 1., 0.],
+                [22., 7., 3., 4.],
+            ]);
 
-        assert_eq!(p * m, l * u);
+            let (p, l, u) = m.plu_decomposition();
 
-        let m: Matrix<f32, 3, 3> =
-            Matrix::from([[4., 4., 3.], [-3., -3., -3.], [0., -3., -1.]]);
+            assert!(l.is_lower_triangular() && u.is_upper_triangular());
 
-        let (p, l, u) = m.plu_decomposition();
+            assert_eq!(p * m, l * u);
 
-        assert!(l.is_lower_triangular() && u.is_upper_triangular());
+            let m: Matrix<f32, 3, 3> =
+                Matrix::from([[4., 4., 3.], [-3., -3., -3.], [0., -3., -1.]]);
 
-        assert_eq!(p * m, l * u);
-    }
+            let (p, l, u) = m.plu_decomposition();
 
-    //get det
-    {
-        const EPSILON: f64 = 10e-3;
+            assert!(l.is_lower_triangular() && u.is_upper_triangular());
 
-        let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
+            assert_eq!(p * m, l * u);
+        }
 
-        assert_eq!(m.det(), 0.0);
+        //get det
+        {
+            let m: Matrix<f32, 3, 3> = Matrix::from([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]]);
 
-        let m: Matrix<f32, 5, 5> = Matrix::identity();
+            assert_eq!(m.det(), 0.0);
 
-        assert_eq!(m.det(), 1.0);
+            let m: Matrix<f32, 5, 5> = Matrix::identity();
 
-        let m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5).unwrap();
+            assert_eq!(m.det(), 1.0);
 
-        assert_eq!(m.det(), -1.0);
+            let m: Matrix<f32, 10, 10> = Matrix::permutation(2, 5).unwrap();
 
-        let m = Matrix::from([
-            [6., 5., 3., 4.,],
-            [3., 1., 7., 9.,],
-            [2., 3., 1., 6.,],
-            [7., 1., 7., 2.,],
-        ]);
+            assert_eq!(m.det(), -1.0);
 
-        let det = m.det();
-        println!("det : {det}");
-        let expected_det = -284.;
+            let m = Matrix::from([
+                [6., 5., 3., 4.],
+                [3., 1., 7., 9.],
+                [2., 3., 1., 6.],
+                [7., 1., 7., 2.],
+            ]);
 
-        assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
-    }
+            let det = m.det();
+            let expected_det = -284.;
+            const EPSILON: f64 = 10e-14;
+
+            assert!(det >= expected_det - EPSILON && det <= expected_det + EPSILON);
+        }
 
         //transpose
         {
@@ -269,7 +251,6 @@ mod tests {
             assert_eq!(m.transpose(), expected_m);
         }
 
-
         //inverse
         {
             use crate::my_matrix_lib::prelude::MatrixError;
@@ -277,8 +258,6 @@ mod tests {
             let m: Matrix<f32, 15, 15> = Matrix::identity();
 
             assert_eq!(m, m.inverse().unwrap());
-
-
 
             let m: Matrix<f32, 15, 15> = Matrix::default();
 
@@ -290,31 +269,31 @@ mod tests {
 
             assert_eq!(m.inverse().unwrap(), expected_m);
         }
-/*
-        //pow
-        {
-            let m: Matrix<f64, 3, 3> = Matrix::from([[1., 0., 0.], [2., 3., 0.], [4., 5., 6.]]);
+        /*
+                //pow
+                {
+                    let m: Matrix<f64, 3, 3> = Matrix::from([[1., 0., 0.], [2., 3., 0.], [4., 5., 6.]]);
 
-            assert_eq!(m.get_inverse(), m.pow(-1));
-            assert_eq!(m.pow(-2), m.get_inverse().unwrap().pow(2));
-            assert_eq!(m.pow(2).unwrap(), m * m);
+                    assert_eq!(m.get_inverse(), m.pow(-1));
+                    assert_eq!(m.pow(-2), m.get_inverse().unwrap().pow(2));
+                    assert_eq!(m.pow(2).unwrap(), m * m);
 
-            let mut m_prod = Matrix::identity();
-            for _ in 0..10 {
-                m_prod = m_prod * m;
-            }
-            assert_eq!(m.pow(10).unwrap(), m_prod);
+                    let mut m_prod = Matrix::identity();
+                    for _ in 0..10 {
+                        m_prod = m_prod * m;
+                    }
+                    assert_eq!(m.pow(10).unwrap(), m_prod);
 
-            let m: Matrix<f32, 5, 5> = Matrix::identity();
-            assert_eq!(m, m.pow(20).unwrap());
+                    let m: Matrix<f32, 5, 5> = Matrix::identity();
+                    assert_eq!(m, m.pow(20).unwrap());
 
-            let m: Matrix<f64, 4, 5> = Matrix::identity();
-            assert_eq!(None, m.pow(2));
+                    let m: Matrix<f64, 4, 5> = Matrix::identity();
+                    assert_eq!(None, m.pow(2));
 
-            let m: Matrix<f32, 2, 2> = Matrix::from([[1., 5.], [3., 15.]]);
-            assert_eq!(None, m.pow(-5));
-        }
-*/
+                    let m: Matrix<f32, 2, 2> = Matrix::from([[1., 5.], [3., 15.]]);
+                    assert_eq!(None, m.pow(-5));
+                }
+        */
         //test elem iterator
         {
             let mut m1 = Matrix::from([[1, 2], [3, 4], [5, 6]]).iter_elem(IterateAlong::Column);
@@ -375,7 +354,6 @@ mod tests {
             let ones = Matrix::from([[1., 1., 1.], [1., 1., 1.], [1., 1., 1.]]);
 
             assert_eq!(m2 + ones, m1);
-
         }
 
         let elapsed_time = now.elapsed();
@@ -517,7 +495,10 @@ mod tests {
 
             assert_eq!(vec1.scale(&0.), VectorMath::zero());
 
-            assert_eq!(vec1.scale(&2.), VectorMath::from([16., 18., 90., 126., 92.]));
+            assert_eq!(
+                vec1.scale(&2.),
+                VectorMath::from([16., 18., 90., 126., 92.])
+            );
         }
 
         //zero
@@ -613,8 +594,6 @@ mod tests {
 
     #[test]
     fn usefull_fonctions_test() {
-        
-
         // random
         #[cfg(feature = "random")]
         {
@@ -631,7 +610,5 @@ mod tests {
             let m: Matrix<u8, 3, 3> = rng.gen();
             println!("{}", m);
         }
-
-
     }
 }
