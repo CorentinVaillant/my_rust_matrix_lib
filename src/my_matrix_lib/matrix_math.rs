@@ -591,7 +591,24 @@ where
         Ok(result)
     }
 
-    ///TODO test and doc
+    ///Returns if a square matrix is upper triangulare or not
+    /// ## Examples :
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    /// 
+    ///let m = Matrix::<f32, 3, 3>::identity();
+    ///assert!(m.is_upper_triangular());
+    ///
+    ///let m = Matrix::from([[5., 1., 9.], [0., 45., 0.], [0., 0., 5.]]);
+    ///assert!(m.is_upper_triangular());
+    ///
+    ///let m = Matrix::from([[1., 0., 0.], [5., 1., 0.], [1., 1., 1.]]);
+    ///assert!(!m.is_upper_triangular());
+    ///
+    ///let m = Matrix::from([[1., 34., 7.], [5., 1., 412.], [0., 1., 1.]]);
+    ///assert!(!m.is_upper_triangular());
+    /// ```
     fn is_upper_triangular(&self) -> bool {
         for i in 0..N {
             for j in 0..i {
