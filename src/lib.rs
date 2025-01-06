@@ -2,7 +2,6 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::prelude::VectorSpace;
 
 
 
@@ -397,6 +396,8 @@ mod tests {
 
         {
             use crate::my_matrix_lib::prelude::VectorMath;
+            use crate::my_matrix_lib::prelude::VectorSpace;
+
 
             let tab = [4;4];
             let vec1: &VectorMath<i32, 4> = (&tab).into();
