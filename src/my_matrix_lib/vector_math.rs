@@ -147,7 +147,6 @@ use super::traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace
 use num::{Float, Num};
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
-//TODO test and doc
 where
     T: Num + Copy,
 {
@@ -417,5 +416,15 @@ impl<T, const N: usize> TryInto<VectorMath<T, N>> for UnknownSizeVectorMath<T> {
 
     fn try_into(self) -> Result<VectorMath<T, N>, Self::Error> {
         self.inner.into_vec().try_into_vec_math()
+    }
+}
+
+/********************************************************
+<==================== References =======================>
+********************************************************/
+
+impl<'a,T,const N: usize> Into<&'a [T;N]> for &'a VectorMath<T,N>{
+    fn into(self) -> &'a [T;N] {
+        &self.inner
     }
 }
