@@ -1,4 +1,4 @@
-use std::ops::{AddAssign, Index, IndexMut, MulAssign};
+use std::ops::{Index, IndexMut};
 
 use super::errors::MatrixError;
 
@@ -148,7 +148,7 @@ use num::{Float, Num};
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
 where
-    T: Num + Copy ,
+    T: Num + Copy,
 {
     type Scalar = T;
 
@@ -162,10 +162,12 @@ where
     }
 
     fn add_assign(&mut self, other: &Self)
-        where Self: Sized {
-        self.iter_mut().zip(other.iter()).for_each(|(self_elem,other_elem)|{
-            *self_elem = *self_elem + *other_elem
-        });
+    where
+        Self: Sized,
+    {
+        self.iter_mut()
+            .zip(other.iter())
+            .for_each(|(self_elem, other_elem)| *self_elem = *self_elem + *other_elem);
     }
 
     fn substract(&self, other: &Self) -> Self {
@@ -178,11 +180,13 @@ where
     }
 
     fn substract_assign(&mut self, other: &Self)
-        where Self: Sized {
-        self.iter_mut().zip(other.iter()).for_each(|(self_elem,other_elem)|{
-        *self_elem = *self_elem - *other_elem
-    });
-}
+    where
+        Self: Sized,
+    {
+        self.iter_mut()
+            .zip(other.iter())
+            .for_each(|(self_elem, other_elem)| *self_elem = *self_elem - *other_elem);
+    }
 
     fn scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter()
@@ -192,11 +196,12 @@ where
             .unwrap()
     }
 
-    fn scale_assign(&mut self,scalar: &Self::Scalar)
-        where Self: Sized {
-        self.iter_mut().for_each(|self_elem|{
-            *self_elem = *self_elem * *scalar
-        });
+    fn scale_assign(&mut self, scalar: &Self::Scalar)
+    where
+        Self: Sized,
+    {
+        self.iter_mut()
+            .for_each(|self_elem| *self_elem = *self_elem * *scalar);
     }
 
     #[inline]

@@ -127,7 +127,7 @@ where
     }
 }
 
-impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N,M>
+impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
 where
     T: Copy + Float,
 {

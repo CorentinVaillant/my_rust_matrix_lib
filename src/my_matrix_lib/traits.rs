@@ -27,7 +27,9 @@ pub trait VectorSpace {
     fn add(&self, other: &Self) -> Self;
 
     fn add_assign(&mut self, other: &Self)
-    where Self: Sized{
+    where
+        Self: Sized,
+    {
         *self = self.add(other);
     }
 
@@ -51,7 +53,9 @@ pub trait VectorSpace {
     fn substract(&self, other: &Self) -> Self;
 
     fn substract_assign(&mut self, other: &Self)
-    where Self: Sized{
+    where
+        Self: Sized,
+    {
         *self = self.substract(other);
     }
 
@@ -69,8 +73,10 @@ pub trait VectorSpace {
     /// ```
     fn scale(&self, scalar: &Self::Scalar) -> Self;
 
-    fn scale_assign(&mut self,scalar: &Self::Scalar)
-    where Self: Sized{
+    fn scale_assign(&mut self, scalar: &Self::Scalar)
+    where
+        Self: Sized,
+    {
         *self = self.scale(scalar);
     }
 
