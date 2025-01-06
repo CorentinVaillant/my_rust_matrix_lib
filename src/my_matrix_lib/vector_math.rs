@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{AddAssign, Index, IndexMut, MulAssign};
 
 use super::errors::MatrixError;
 
@@ -148,7 +148,7 @@ use num::{Float, Num};
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
 where
-    T: Num + Copy,
+    T: Num + Copy ,
 {
     type Scalar = T;
 
@@ -161,6 +161,13 @@ where
             .unwrap()
     }
 
+    fn add_assign(&mut self, other: &Self)
+        where Self: Sized {
+        self.iter_mut().zip(other.iter()).for_each(|(self_elem,other_elem)|{
+            *self_elem = *self_elem + *other_elem
+        });
+    }
+
     fn substract(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
@@ -170,12 +177,26 @@ where
             .unwrap()
     }
 
+    fn substract_assign(&mut self, other: &Self)
+        where Self: Sized {
+        self.iter_mut().zip(other.iter()).for_each(|(self_elem,other_elem)|{
+        *self_elem = *self_elem - *other_elem
+    });
+}
+
     fn scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter()
             .map(|self_elem| *self_elem * *scalar)
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
+    }
+
+    fn scale_assign(&mut self,scalar: &Self::Scalar)
+        where Self: Sized {
+        self.iter_mut().for_each(|self_elem|{
+            *self_elem = *self_elem * *scalar
+        });
     }
 
     #[inline]

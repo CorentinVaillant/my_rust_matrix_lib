@@ -36,7 +36,7 @@ where
     Self: VectorSpace,
 {
     fn add_assign(&mut self, rhs: Self) {
-        *self = <Self as VectorSpace>::add(self, &rhs);
+        VectorSpace::add_assign(self, &rhs);
     }
 }
 
@@ -45,7 +45,7 @@ where
     Self: VectorSpace,
 {
     fn add_assign(&mut self, rhs: Self) {
-        *self = <Self as VectorSpace>::add(self, &rhs);
+        VectorSpace::add_assign(self, &rhs);
     }
 }
 
@@ -115,6 +115,24 @@ where
 {
     fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
         self.dot_assign(rhs);
+    }
+}
+
+impl<T, const N: usize> MulAssign<T> for VectorMath<T, N>
+where
+    T: Copy + Float,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        self.scale_assign(&rhs);
+    }
+}
+
+impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N,M>
+where
+    T: Copy + Float,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        self.scale_assign(&rhs);
     }
 }
 
