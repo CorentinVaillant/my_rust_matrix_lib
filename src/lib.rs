@@ -77,13 +77,29 @@ mod tests {
         {
             let p = Matrix::permutation(0, 1).unwrap();
 
-            let m = Matrix::from([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0], [3.0, 3.0, 3.0]]);
-            let expected_m = Matrix::from([[2.0, 2.0, 2.0], [1.0, 1.0, 1.0], [3.0, 3.0, 3.0]]);
+            let m = Matrix::from([
+                [1.0, 1.0, 1.0], 
+                [2.0, 2.0, 2.0], 
+                [3.0, 3.0, 3.0]
+            ]);
+            let expected_m = Matrix::from([
+                [2.0, 2.0, 2.0], 
+                [1.0, 1.0, 1.0], 
+                [3.0, 3.0, 3.0]
+            ]);
 
             assert_eq!(p * m, expected_m);
 
-            let m = Matrix::from([[1., 2., 3.], [1., 2., 3.], [1., 2., 3.]]);
-            let expected_m = Matrix::from([[2., 1., 3.], [2., 1., 3.], [2., 1., 3.]]);
+            let m = Matrix::from([
+                [1., 2., 3.], 
+                [1., 2., 3.], 
+                [1., 2., 3.]
+            ]);
+            let expected_m = Matrix::from([
+                [2., 1., 3.], 
+                [2., 1., 3.], 
+                [2., 1., 3.]
+            ]);
 
             assert_eq!(m * p, expected_m);
         }

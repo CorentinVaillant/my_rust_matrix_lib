@@ -514,7 +514,40 @@ where
             .into()
     }
 
-    //TODO test and doc
+    ///Return a permutation matrix
+    /// ## Examples :
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    /// 
+    ///let p = Matrix::permutation(0, 1).unwrap();
+    ///
+    ///let m = Matrix::from([
+    ///    [1.0, 1.0, 1.0], 
+    ///    [2.0, 2.0, 2.0], 
+    ///    [3.0, 3.0, 3.0]
+    ///]);
+    ///let expected_m = Matrix::from([
+    ///    [2.0, 2.0, 2.0], 
+    ///    [1.0, 1.0, 1.0], 
+    ///    [3.0, 3.0, 3.0]
+    ///]);
+    ///
+    ///assert_eq!(p * m, expected_m);
+    ///
+    ///let m = Matrix::from([
+    ///    [1., 2., 3.], 
+    ///    [1., 2., 3.], 
+    ///    [1., 2., 3.]
+    ///]);
+    ///let expected_m = Matrix::from([
+    ///    [2., 1., 3.], 
+    ///    [2., 1., 3.], 
+    ///    [2., 1., 3.]
+    ///]);
+    ///
+    ///assert_eq!(m * p, expected_m);
+    /// ```
     fn permutation(i: usize, j: usize) -> Result<Matrix<T, N, N>, MatrixError>
     where
         Self: Sized,
