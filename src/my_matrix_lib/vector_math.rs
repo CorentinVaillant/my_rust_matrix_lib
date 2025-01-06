@@ -428,3 +428,11 @@ impl<'a,T,const N: usize> Into<&'a [T;N]> for &'a VectorMath<T,N>{
         &self.inner
     }
 }
+
+impl<'a,T,const N: usize> From<&'a [T;N]> for &'a VectorMath<T,N> { // ! not shure about that, maybe ask someone about that
+    fn from(value: &'a [T;N]) -> Self {
+        unsafe{//Safety : VectorMath is just a wrapper arround [T;N],
+            &*(value as *const [T;N] as *const VectorMath<T,N>)
+        }
+    }
+}

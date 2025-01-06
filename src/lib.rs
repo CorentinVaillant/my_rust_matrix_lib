@@ -2,6 +2,9 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
+    use crate::my_matrix_lib::prelude::VectorSpace;
+
+
 
     #[test]
     fn matrix_test() {
@@ -390,6 +393,25 @@ mod tests {
                 error.to_string(),
                 "The sizes does not matches (3 != 4)".to_string()
             )
+        }
+
+        {
+            use crate::my_matrix_lib::prelude::VectorMath;
+
+            let tab = [4;4];
+            let vec1: &VectorMath<i32, 4> = (&tab).into();
+
+            let vec1 = vec1.add(vec1);
+            let result_vec = VectorMath::from([8;4]);
+            assert_eq!(vec1,result_vec);
+
+            let vec1: &VectorMath<i32, 4> = (&tab).into();
+            let vec2: &VectorMath<i32, 4> = (&tab).into();
+            let vec1 = vec1.add(vec2);
+            let result_vec = VectorMath::from([8;4]);
+            assert_eq!(vec1,result_vec);
+
+
         }
 
         //Into iter
