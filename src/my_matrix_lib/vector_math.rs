@@ -435,3 +435,11 @@ impl<'a, T, const N: usize> From<&'a [T; N]> for &'a VectorMath<T, N> {
         unsafe { std::mem::transmute::<&'a [T; N], &'a VectorMath<T, N>>(value) }
     }
 }
+
+impl<'a, T, const N: usize> From<&'a mut [T; N]> for &'a mut VectorMath<T, N> {
+    // ! not shure about that, maybe ask someone about that
+    fn from(value: &'a mut [T; N]) -> Self {
+        // Directly wrap the slice in a VectorMath reference.
+        unsafe { std::mem::transmute::<&'a mut [T; N], &'a mut VectorMath<T, N>>(value) }
+    }
+}
