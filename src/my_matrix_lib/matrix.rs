@@ -63,7 +63,7 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
         }
     }
 
-    pub fn get_mut<'a>(&'a mut self, index: usize) -> Option<&'a mut VectorMath<T, M>> {
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut VectorMath<T, M>> {
         self.inner.get_mut(index)
     }
 
@@ -368,7 +368,7 @@ pub struct MatrixMutRowIterator<'a, T, const N: usize, const M: usize> {
     inner: VectorMathMutIterator<'a, VectorMath<T, M>, N>,
 }
 
-impl<'a, T, const N: usize, const M: usize> MatrixMutElemIterator<'a, T, N, M> {
+impl<T, const N: usize, const M: usize> MatrixMutElemIterator<'_, T, N, M> {
     pub fn new(m: &mut Matrix<T, N, M>, iter_along: IterateAlong) -> Self {
         Self {
             // SAFETY: m cannot be null

@@ -3,8 +3,6 @@ pub mod my_matrix_lib;
 #[cfg(test)]
 mod tests {
 
-
-
     #[test]
     fn matrix_test() {
         use crate::my_matrix_lib::prelude::*;
@@ -398,21 +396,18 @@ mod tests {
             use crate::my_matrix_lib::prelude::VectorMath;
             use crate::my_matrix_lib::prelude::VectorSpace;
 
-
-            let tab = [4;4];
+            let tab = [4; 4];
             let vec1: &VectorMath<i32, 4> = (&tab).into();
 
             let vec1 = vec1.add(vec1);
-            let result_vec = VectorMath::from([8;4]);
-            assert_eq!(vec1,result_vec);
+            let result_vec = VectorMath::from([8; 4]);
+            assert_eq!(vec1, result_vec);
 
             let vec1: &VectorMath<i32, 4> = (&tab).into();
             let vec2: &VectorMath<i32, 4> = (&tab).into();
             let vec1 = vec1.add(vec2);
-            let result_vec = VectorMath::from([8;4]);
-            assert_eq!(vec1,result_vec);
-
-
+            let result_vec = VectorMath::from([8; 4]);
+            assert_eq!(vec1, result_vec);
         }
 
         //Into iter

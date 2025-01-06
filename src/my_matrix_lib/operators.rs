@@ -1,4 +1,4 @@
-#[allow(uncovered_param_in_projection)] // !removeme
+#![allow(uncovered_param_in_projection)] // ! toremove
 use core::ops::{Add, AddAssign, Mul};
 
 use super::{

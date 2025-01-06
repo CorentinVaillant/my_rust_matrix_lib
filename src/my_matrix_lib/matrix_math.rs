@@ -37,7 +37,7 @@ where
 
     fn scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter_row()
-            .map(|self_row| self_row.scale(&scalar))
+            .map(|self_row| self_row.scale(scalar))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
@@ -511,7 +511,6 @@ where
         self.iter_column()
             .enumerate()
             .fold(T::zero(), |acc, (i, col)| acc + *col[i])
-            .into()
     }
 
     ///Return a permutation matrix

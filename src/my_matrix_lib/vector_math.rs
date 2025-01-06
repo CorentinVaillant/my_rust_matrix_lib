@@ -47,16 +47,18 @@ where
     type Error = <U as TryInto<T>>::Error;
 
     fn try_into_vec_math(self) -> Result<VectorMath<T, N>, Self::Error> {
-        let mut inner: [T; N] = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+        let mut inner_vec = Vec::with_capacity(N);
 
-        for (val, inner_val) in self.into_iter().zip(inner.iter_mut()) {
+        for val in self.into_iter() {
             match val.try_into() {
-                Ok(v) => *inner_val = v,
+                Ok(v) => inner_vec.push(v),
                 Err(e) => return Err(e),
             };
         }
-
-        Ok(VectorMath { inner })
+        match inner_vec.try_into() {
+            Ok(inner) => Ok(VectorMath { inner }),
+            Err(_) => unreachable!(),
+        }
     }
 }
 
@@ -68,14 +70,12 @@ where
 
     fn try_into_vec_math(self) -> Result<VectorMath<T, N>, Self::Error> {
         match <Self as TryInto<[U; N]>>::try_into(self) {
-            Err(e) => {
-                return match e.len() != N {
-                    true => Err(MatrixError::SizeNotMatch(e.len(), N)),
-                    false => Err(MatrixError::Other(
-                        format!("Vector error with vector {:?}", e.as_ptr()).to_string(),
-                    )),
-                }
-            }
+            Err(e) => match e.len() != N {
+                true => Err(MatrixError::SizeNotMatch(e.len(), N)),
+                false => Err(MatrixError::Other(
+                    format!("Vector error with vector {:?}", e.as_ptr()).to_string(),
+                )),
+            },
             Ok(array) => match array.try_into_vec_math() {
                 Ok(val) => Ok(val),
                 Err(_) => Err(MatrixError::ConversionError), //TODO make MatrixError generic, with the convertion error in it
@@ -243,7 +243,7 @@ where
             rhs.iter_column()
                 .map(|col| {
                     self.iter()
-                        .zip(col.into_iter())
+                        .zip(col)
                         .fold(T::zero(), |acc, (el1, el2)| acc + *el1 * *el2)
                 })
                 .collect::<Vec<T>>(),
@@ -346,11 +346,10 @@ impl<T, const N: usize> VectorMath<T, N> {
         }
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> VectorMathMutIterator<'a, T, N> {
+    pub fn iter_mut(&mut self) -> VectorMathMutIterator<T, N> {
         VectorMathMutIterator {
             curpos: 0,
-            // ptr: (N > 0).then_some(NonNull::from(&self.inner[0])),
-            ptr: self.get(0).and_then(|val| Some(NonNull::from(val))),
+            ptr: self.get(0).map(NonNull::from),
             _marker: PhantomData,
         }
     }
@@ -364,7 +363,7 @@ impl<'a, T, const N: usize> Iterator for VectorMathIterator<'a, T, N> {
             None => None,
             Some(val) => {
                 self.curpos += 1;
-                Some(&val)
+                Some(val)
             }
         }
     }
@@ -423,16 +422,16 @@ impl<T, const N: usize> TryInto<VectorMath<T, N>> for UnknownSizeVectorMath<T> {
 <==================== References =======================>
 ********************************************************/
 
-impl<'a,T,const N: usize> Into<&'a [T;N]> for &'a VectorMath<T,N>{
-    fn into(self) -> &'a [T;N] {
-        &self.inner
+impl<'a, T, const N: usize> From<&'a VectorMath<T, N>> for &'a [T; N] {
+    fn from(val: &'a VectorMath<T, N>) -> Self {
+        &val.inner
     }
 }
 
-impl<'a,T,const N: usize> From<&'a [T;N]> for &'a VectorMath<T,N> { // ! not shure about that, maybe ask someone about that
-    fn from(value: &'a [T;N]) -> Self {
-        unsafe{//Safety : VectorMath is just a wrapper arround [T;N],
-            &*(value as *const [T;N] as *const VectorMath<T,N>)
-        }
+impl<'a, T, const N: usize> From<&'a [T; N]> for &'a VectorMath<T, N> {
+    // ! not shure about that, maybe ask someone about that
+    fn from(value: &'a [T; N]) -> Self {
+        // Directly wrap the slice in a VectorMath reference.
+        unsafe { std::mem::transmute::<&'a [T; N], &'a VectorMath<T, N>>(value) }
     }
 }

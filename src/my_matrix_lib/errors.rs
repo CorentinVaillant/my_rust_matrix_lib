@@ -10,9 +10,9 @@ pub enum MatrixError {
     Other(String),
 }
 
-impl Into<String> for &MatrixError {
-    fn into(self) -> String {
-        match self {
+impl From<&MatrixError> for String {
+    fn from(val: &MatrixError) -> Self {
+        match val {
             MatrixError::SizeNotMatch(size1, size2) => {
                 format!("The sizes does not matches ({} != {})", size1, size2)
             }
@@ -27,9 +27,9 @@ impl Into<String> for &MatrixError {
     }
 }
 
-impl Into<String> for MatrixError {
-    fn into(self) -> String {
-        (&self).to_string()
+impl From<MatrixError> for String {
+    fn from(val: MatrixError) -> Self {
+        (val).to_string()
     }
 }
 
