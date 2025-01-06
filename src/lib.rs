@@ -294,6 +294,16 @@ mod tests {
                     assert_eq!(None, m.pow(-5));
                 }
         */
+
+        //Test Trace
+        {
+            let m: Matrix<f32, 5, 5> = Matrix::identity();
+            assert_eq!(m.trace(), 5.);
+
+            let m = Matrix::from([[5., 6., 8.], [5., 6., 8.], [5., 6., 8.]]);
+            assert_eq!(m.trace(), 19.);
+        }
+
         //test elem iterator
         {
             let mut m1 = Matrix::from([[1, 2], [3, 4], [5, 6]]).iter_elem(IterateAlong::Column);

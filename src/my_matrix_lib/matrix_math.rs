@@ -106,7 +106,7 @@ where
     /// ```
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     ///use my_rust_matrix_lib::my_matrix_lib::prelude::MatrixTrait;
-    ///use crate::my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
     ///
     ///let m: Matrix<f32, 3, 3> = Matrix::from([
     ///     [1., 2., 3.],
@@ -204,7 +204,7 @@ where
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::MatrixTrait;
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::FloatEq;
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::FloatEq;
     ///
     ///let m = Matrix::from([
     ///     [1., 2., 3.],
@@ -287,8 +287,8 @@ where
     /// ## Example :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
-    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    ///
     ///let i = Matrix::identity();
     ///let expected_m = Matrix::from([
     ///    [1., 0., 0.],
@@ -311,8 +311,8 @@ where
     /// ## Examples :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
-    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
-    /// 
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    ///
     ///let m = Matrix::from([
     ///    [1., 2., 1., -1.],
     ///    [3., 8., 1., 4.],
@@ -327,8 +327,8 @@ where
     ///assert_eq!(p * m, l * u);
     ///
     ///let m: Matrix<f32, 3, 3> =Matrix::from([
-    ///     [4., 4., 3.], 
-    ///     [-3., -3., -3.], 
+    ///     [4., 4., 3.],
+    ///     [-3., -3., -3.],
     ///     [0., -3., -1.]
     /// ]);
     ///
@@ -392,7 +392,27 @@ where
         (p, l, u)
     }
 
-    //TODO test and doc
+    ///Returns the inverse a square matrix if exist
+    /// ## Examples :
+    /// ```
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    ///use my_rust_matrix_lib::my_matrix_lib::prelude::MatrixError;
+    ///
+    ///let m: Matrix<f32, 15, 15> = Matrix::identity();
+    ///
+    ///assert_eq!(m, m.inverse().unwrap());
+    ///
+    ///let m: Matrix<f32, 15, 15> = Matrix::default();
+    ///
+    ///assert_eq!(MatrixError::NotInversible, m.inverse().unwrap_err());
+    ///
+    ///let m = Matrix::from([[-1., 0., 0.], [0., 2., 1.], [0., 0., 2.]]);
+    ///
+    ///let expected_m = Matrix::from([[-1., 0., 0.], [0., 0.5, -0.25], [0., 0., 0.5]]);
+    ///
+    ///assert_eq!(m.inverse().unwrap(), expected_m);
+    /// ```
     fn inverse(&self) -> Result<Self, super::errors::MatrixError>
     where
         Self: Sized,
@@ -471,7 +491,7 @@ where
         }
     }
 
-    //TODO test and doc
+
     fn trace(&self) -> Self::Scalar {
         self.iter_column()
             .enumerate()
