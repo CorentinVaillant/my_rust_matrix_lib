@@ -283,7 +283,7 @@ impl<T, const N: usize> SquaredMatrixTrait for Matrix<T, N, N>
 where
     T: Copy + Float,
 {
-    ///Return the identity matrix
+    ///Returns the identity matrix
     /// ## Example :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
@@ -306,7 +306,39 @@ where
         result
     }
 
-    //TODO doc and test
+    ///Returns the PLU decomposition of a matrix.  
+    /// For a matrix M : `P*M = L*U`
+    /// ## Examples :
+    /// ```
+    /// use my_rust_matrix_lib::my_matrix_lib::prelude::Matrix;
+    /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::SquaredMatrixTrait;
+    /// 
+    ///let m = Matrix::from([
+    ///    [1., 2., 1., -1.],
+    ///    [3., 8., 1., 4.],
+    ///    [0., 4., 1., 0.],
+    ///    [22., 7., 3., 4.],
+    ///]);
+    ///
+    ///let (p, l, u) = m.plu_decomposition();
+    ///
+    ///assert!(l.is_lower_triangular() && u.is_upper_triangular());
+    ///
+    ///assert_eq!(p * m, l * u);
+    ///
+    ///let m: Matrix<f32, 3, 3> =Matrix::from([
+    ///     [4., 4., 3.], 
+    ///     [-3., -3., -3.], 
+    ///     [0., -3., -1.]
+    /// ]);
+    ///
+    ///let (p, l, u) = m.plu_decomposition();
+    ///
+    ///assert!(l.is_lower_triangular() && u.is_upper_triangular());
+    ///
+    ///assert_eq!(p * m, l * u);
+    ///
+    /// ```
     fn plu_decomposition(&self) -> (Self, Self, Self)
     where
         Self: Sized,
