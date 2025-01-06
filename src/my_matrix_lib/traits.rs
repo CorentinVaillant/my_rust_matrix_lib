@@ -569,6 +569,8 @@ where
     where
         Self: Sized;
 
+    fn trace(&self) -> Self::Scalar;
+
     fn permutation(i: usize, j: usize) -> Result<Self, MatrixError>
     where
         Self: Sized;

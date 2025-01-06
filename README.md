@@ -9,4 +9,5 @@ I will **not** maintain it forever.
 - [x] Iterators
 - [x] Vector maths
 - [ ] rank of a matrix
+- [ ] eigenvalues / eigenvectors
 - [ ] unknow size vector and matrix

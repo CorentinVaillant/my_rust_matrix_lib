@@ -285,6 +285,10 @@ where
         }
     }
 
+    fn trace(&self) -> Self::Scalar {
+        self[0]
+    }
+
     fn permutation(i: usize, j: usize) -> Result<VectorMath<T, 1>, MatrixError> {
         match (i, j) {
             (0, 0) => Ok(Self::from([T::one()])),

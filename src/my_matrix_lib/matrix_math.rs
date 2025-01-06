@@ -2,15 +2,14 @@
 <=================== Mathematics ======================>
 ********************************************************/
 
-use num::{Num, Signed};
+use num::Float;
 
-use super::{errors::MatrixError, matrix::{Matrix, TryIntoMatrix}, prelude::VectorMath, traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace}};
+use super::{errors::MatrixError, matrix::{Matrix, TryIntoMatrix}, prelude::VectorMath, traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace}};
 
 impl<T, const N:usize, const M:usize> VectorSpace for Matrix<T,N,M>
-where VectorMath<T,M> : VectorSpace,
-T: Copy
+where T: Copy + Float
 {
-    type Scalar = <VectorMath<T, M> as VectorSpace>::Scalar;
+    type Scalar = T;
 
     fn add(&self, other: &Self) -> Self {
         self.iter_row()
@@ -40,11 +39,11 @@ T: Copy
     }
 
     fn one() -> Self::Scalar {
-        VectorMath::one()
+        VectorMath::<T,N>::one()
     }
 
     fn scalar_zero() -> Self::Scalar {
-        VectorMath::scalar_zero()
+        VectorMath::<T,N>::scalar_zero()
     }
 
     fn dimension() -> super::additional_structs::Dimension {
@@ -53,10 +52,8 @@ T: Copy
 }
 
 impl<T, const N: usize, const M: usize> MatrixTrait for Matrix<T,N,M>
-where VectorMath<T,M> : EuclidianSpace, 
-VectorMath<T,N> : EuclidianSpace ,
-T: Copy + Num + PartialOrd + Signed + From<<VectorMath<T, N> as VectorSpace>::Scalar>,
-<VectorMath<T, N> as VectorSpace>::Scalar: From<T>
+where T: Copy + Float,
+
 {
     type DotIn<const P: usize> = Matrix<T, M, P>;
     type DotOut<const P: usize> = Matrix<T, N, P>;
@@ -95,43 +92,70 @@ T: Copy + Num + PartialOrd + Signed + From<<VectorMath<T, N> as VectorSpace>::Sc
     }
 
     //TODO doc and test
-    fn det(&self) -> Self::Det {
+    fn det(&self) -> T {
+
         match (N==M,N) {
             (false,_)|(_,0)=> T::zero(),
             (true,1)=> self[0][0],
-            (true,2)=> self[0][0] * self[1][1] - self[1][0] * self[0][1],
+            (true,2)=> self[0][0]*self[1][1] - self[1][0]*self[0][1],
             (true,_)=>{
-                let m: Matrix<T, N, N> = self.try_into_matrix().unwrap();
-                let (p,_l,u) = m.plu_decomposition();
-                
-                //p determinant
-                let mut permutation_nb: u8 = 0;
-                for i in 0..N {
-                    if p[i][i] != T::one() {
-                        permutation_nb += 1;
-                    }
-                    permutation_nb %= 4;
-                }
-                permutation_nb /= 2;
-                let p_det = if permutation_nb == 0 {
-                    T::one()
-                } else {
-                    T::zero() - T::one()
-                };
-
-                // u/l determinant
-                let mut u_det = T::one();
-                
-                for i in 0..N {
-                    u_det = u_det * u[i][i];
-                }
-
-                p_det * u_det
-            },
+                let mut m_self = *self;
+                let mut det = T::one();
+                let mut lead = 0;
             
+                for r in 0..N {
+                    if lead >= N {
+                        return T::zero();
+                    }
+            
+                    // Find a pivot in the current column
+                    let mut i = r;
+                    while m_self[i][lead] == T::zero() {
+                        i += 1;
+                        if i == N {
+                            i = r;
+                            lead += 1;
+                            if lead >= N {
+                                return T::zero();
+                            }
+                        }
+                    }
+            
+                    // Swap rows if necessary
+                    if i != r {
+                        m_self.permute_row(i, r);
+                        det = -det; // Adjust sign for row swap
+                    }
+            
+                    // Normalize the leading row
+                    let lead_value = m_self[r][lead];
+                    if lead_value == T::zero() {
+                        return T::zero();
+                    }
+                    det =det* lead_value;
+                    for j in 0..N {
+                        m_self[r][j] = m_self[r][j] / lead_value;
+                    }
+            
+                    // Eliminate column entries below and above the pivot
+                    for i in 0..N {
+                        if i != r {
+                            let factor = m_self[i][lead];
+                            for j in 0..N {
+                                m_self[i][j] = m_self[i][j] - factor * m_self[r][j];
+                            }
+                        }
+                    }
+                    lead += 1;
+                }
+            
+                det
 
+            }
         }
+        
     }
+    
 
     //TODO doc and test
     fn reduce_row_echelon(&self) -> Self {
@@ -181,10 +205,8 @@ T: Copy + Num + PartialOrd + Signed + From<<VectorMath<T, N> as VectorSpace>::Sc
 
 
 impl<T,const N: usize> SquaredMatrixTrait for Matrix<T,N,N>
-where Matrix<T,N,N> : MatrixTrait + VectorSpace, 
-T : Num + Copy + Signed + PartialOrd ,
-T : From<<Matrix<T, N, N> as VectorSpace>::Scalar> + Into<<Matrix<T,N,N> as VectorSpace>::Scalar> ,
-T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
+where
+    T : Copy + Float
 {
     //TODO doc and test
     fn identity() -> Self {
@@ -249,6 +271,8 @@ T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
             (p, l, u)
         }
 
+    
+    //TODO test and doc
     fn inverse(&self) -> Result<Self, super::errors::MatrixError>
     where
         Self: Sized {
@@ -260,8 +284,9 @@ T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
                     Ok(Matrix::from([[T::one()/self[0][0]]]).try_into_matrix().unwrap()) //try into matrix success, because N = 1 
                 },
                 2 => {
-                    let det = self.det().into();
-                    if T::zero() == det{
+                    let det:T = self.det();
+                    let zero:T = T::zero();
+                    if zero == det{
                         Err(MatrixError::NotInversible)
                     }else{
                         Ok(<Matrix<T, 2, 2> as TryIntoMatrix<T, N, N>>::try_into_matrix(Matrix::from([ //try into matrix success, because N = 2
@@ -269,7 +294,7 @@ T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
                             [-self[1][0], self[0][0]],
                         ]))
                         .unwrap()
-                        .scale(&(T::one()/det).into()))
+                        .scale(&(T::one()/det)))
                     }
                 }
                 _=> { //N case => gausian elimination
@@ -314,6 +339,15 @@ T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
             }
     }
 
+
+    //TODO test and doc
+    fn trace(&self) -> Self::Scalar {
+        self.iter_column().enumerate().fold(T::zero(), |acc,(i,col)|{
+            acc + *col[i]
+        }).into()
+    }
+
+    //TODO test and doc
     fn permutation(i: usize, j: usize) -> Result<Matrix<T, N, N>, MatrixError>
     where
         Self: Sized {
@@ -333,7 +367,7 @@ T : From<<Matrix<T, N, N> as MatrixTrait>::Det>,
                 return Err(MatrixError::IndexOutOfRange);
             }
             let mut result =Self::identity();
-            result[i][i] = value.into();
+            result[i][i] = value;
             Ok(result)
     }
 
