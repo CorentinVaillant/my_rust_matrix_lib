@@ -2,7 +2,7 @@
 use core::ops::{Add, AddAssign, Mul};
 use std::ops::MulAssign;
 
-use num::{Float, Num};
+use num::Float;
 
 use super::{
     matrix::Matrix,
