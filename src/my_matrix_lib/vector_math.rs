@@ -265,13 +265,13 @@ where
     }
 }
 
-impl<T,const N:usize> VectorMath<T,N>
-where T: Copy + Float{
-    pub fn dot_assign(&mut self, dot_in : Matrix<T,N,N>) -> &mut Self{
+impl<T, const N: usize> VectorMath<T, N>
+where
+    T: Copy + Float,
+{
+    pub fn dot_assign(&mut self, dot_in: Matrix<T, N, N>) -> &mut Self {
         *self = MatrixTrait::dot(self, &dot_in);
         self
-
-
     }
 }
 

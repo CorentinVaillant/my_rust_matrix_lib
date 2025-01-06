@@ -109,11 +109,11 @@ where
     }
 }
 
-impl<T, const N:usize> MulAssign<Matrix<T,N,N>> for VectorMath<T,N> 
-where 
-    T : Copy + Float
+impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for VectorMath<T, N>
+where
+    T: Copy + Float,
 {
-    fn mul_assign(&mut self, rhs: Matrix<T,N,N>) {
+    fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
         self.dot_assign(rhs);
     }
 }
