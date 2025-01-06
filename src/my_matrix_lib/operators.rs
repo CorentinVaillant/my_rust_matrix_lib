@@ -1,5 +1,8 @@
 #![allow(uncovered_param_in_projection)] // ! toremove
 use core::ops::{Add, AddAssign, Mul};
+use std::ops::MulAssign;
+
+use num::Float;
 
 use super::{
     matrix::Matrix,
@@ -103,6 +106,15 @@ where
 
     fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
         self.dot::<P>(&rhs)
+    }
+}
+
+impl<T, const N:usize> MulAssign<Matrix<T,N,N>> for VectorMath<T,N> 
+where 
+    T : Copy + Float
+{
+    fn mul_assign(&mut self, rhs: Matrix<T,N,N>) {
+        self.dot_assign(rhs);
     }
 }
 

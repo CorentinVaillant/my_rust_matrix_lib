@@ -249,7 +249,7 @@ where
                 .collect::<Vec<T>>(),
         ) {
             Ok(val) => val,
-            Err(_) => panic!("Unexpected error in dot, please contact me "),
+            Err(_) => unreachable!("Dot product failed"),
         }
     }
 
@@ -262,6 +262,16 @@ where
 
     fn reduce_row_echelon(&self) -> Self {
         *self
+    }
+}
+
+impl<T,const N:usize> VectorMath<T,N>
+where T: Copy + Float{
+    pub fn dot_assign(&mut self, dot_in : Matrix<T,N,N>) -> &mut Self{
+        *self = MatrixTrait::dot(self, &dot_in);
+        self
+
+
     }
 }
 
