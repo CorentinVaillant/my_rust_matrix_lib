@@ -101,6 +101,18 @@ where
     }
 }
 
+impl<T,const N:usize> From<VectorMath<T,N>> for [T;N]{
+    fn from(value: VectorMath<T,N>) -> Self {
+        value.inner
+    }
+}
+
+impl<T,const N:usize> VectorMath<T,N> {
+    pub fn as_array(& self)->&[T;N]{
+        &self.inner
+    }
+}
+
 impl<T: std::default::Default + std::marker::Copy, const N: usize> Default for VectorMath<T, N> {
     fn default() -> Self {
         Self {
