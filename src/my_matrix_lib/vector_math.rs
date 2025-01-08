@@ -165,7 +165,7 @@ impl<T: Display, const N: usize> Display for VectorMath<T, N> {
 ********************************************************/
 
 use super::matrix::Matrix;
-use super::traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
+use super::linear_traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
 use num::{Float, Num};
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>

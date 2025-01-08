@@ -1,6 +1,6 @@
 use super::{additional_structs::Dimension, errors::MatrixError};
 
-pub trait VectorSpace {
+pub trait VectorSpace where Self : PartialEq{
     type Scalar;
 
     ///Add two vector together

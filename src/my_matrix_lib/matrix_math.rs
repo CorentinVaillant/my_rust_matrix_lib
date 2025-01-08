@@ -13,7 +13,7 @@ use super::{
     errors::MatrixError,
     matrix::{Matrix, TryIntoMatrix},
     prelude::VectorMath,
-    traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
+    linear_traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
 };
 
 impl<T, const N: usize, const M: usize> VectorSpace for Matrix<T, N, M>

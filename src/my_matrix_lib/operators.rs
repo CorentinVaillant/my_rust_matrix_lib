@@ -7,7 +7,7 @@ use num::{Float, Num};
 use super::{
     matrix::Matrix,
     prelude::VectorMath,
-    traits::{MatrixTrait, VectorSpace},
+    linear_traits::{MatrixTrait, VectorSpace},
 };
 
 //Add operator
