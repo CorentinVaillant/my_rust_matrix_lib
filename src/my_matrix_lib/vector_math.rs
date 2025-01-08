@@ -1,6 +1,7 @@
 use core::fmt::Display;
 use core::ops::{Index, IndexMut};
 
+use super::algebric_traits::{Field, NthRootTrait, Ring, TrigFunc};
 use super::errors::MatrixError;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -166,18 +167,18 @@ impl<T: Display, const N: usize> Display for VectorMath<T, N> {
 
 use super::matrix::Matrix;
 use super::linear_traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
-use num::{Float, Num};
+use num::Num;
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
 where
-    T: Num + Copy,
+    T: Ring + Copy,
 {
     type Scalar = T;
 
     fn add(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| *self_elem + *other_elem)
+            .map(|(self_elem, other_elem)| <T as VectorSpace>::add(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -189,13 +190,13 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = *self_elem + *other_elem);
+            .for_each(|(self_elem, other_elem)| *self_elem = <T as VectorSpace>::add(self_elem, other_elem));
     }
 
     fn substract(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| *self_elem - *other_elem)
+            .map(|(self_elem, other_elem)| <T as VectorSpace>::substract(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -207,12 +208,12 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = *self_elem - *other_elem);
+            .for_each(|(self_elem, other_elem)| *self_elem = <T as VectorSpace>::substract(self_elem, other_elem));
     }
 
     fn scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter()
-            .map(|self_elem| *self_elem * *scalar)
+            .map(|self_elem| <T as Ring>::r_mult(self_elem, scalar))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -223,22 +224,22 @@ where
         Self: Sized,
     {
         self.iter_mut()
-            .for_each(|self_elem| *self_elem = *self_elem * *scalar);
+            .for_each(|self_elem| *self_elem = <T as Ring>::r_mult(self_elem, scalar));
     }
 
     #[inline]
     fn zero() -> Self {
-        Self::from([T::zero(); N])
+        Self::from([<T as VectorSpace>::zero(); N])
     }
 
     #[inline]
     fn one() -> Self::Scalar {
-        T::one()
+        <T as Ring>::r_one()
     }
 
     #[inline]
     fn scalar_zero() -> Self::Scalar {
-        T::zero()
+        <T as VectorSpace>::zero()
     }
 
     #[inline]
@@ -250,35 +251,35 @@ where
 //TODO find a way to implement for signed integers
 impl<T, const N: usize> EuclidianSpace for VectorMath<T, N>
 where
-    T: Float + Copy,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     fn lenght(&self) -> Self::Scalar {
         self.iter()
-            .fold(Self::scalar_zero(), |acc, elem| acc + elem.powi(2))
+            .fold(Self::scalar_zero(), |acc, elem| acc.r_add(&elem.r_powu(2_u8)))
             .sqrt()
     }
 
     fn dot(&self, other: &Self) -> Self::Scalar {
         self.iter()
             .zip(other.iter())
-            .fold(T::zero(), |acc, (el1, el2)| acc + *el1 * *el2)
+            .fold(T::r_zero(), |acc, (el1, el2)| acc.add(&el1.r_mult( el2)))
     }
 
     fn angle(&self, rhs: &Self) -> Self::Scalar {
         let dot = EuclidianSpace::dot(self, rhs);
-        let denominator = self.lenght() * rhs.lenght();
+        let denominator = self.lenght().r_mult( &rhs.lenght());
 
-        if denominator == T::zero() {
-            return T::zero();
+        if denominator == T::r_zero() {
+            return T::r_zero();
         }
-        (dot / denominator).acos()
+        (dot.f_div(&denominator)).acos()
     }
 }
 
 impl<T, const N: usize> MatrixTrait for VectorMath<T, N>
 //TODO test and doc
 where
-    T: Copy + Float,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     type DotIn<const P: usize> = Matrix<T, N, P>;
 
@@ -292,7 +293,7 @@ where
                 .map(|col| {
                     self.iter()
                         .zip(col)
-                        .fold(T::zero(), |acc, (el1, el2)| acc + *el1 * *el2)
+                        .fold(T::zero(), |acc, (el1, el2)| acc.r_add(&el1.r_mult(el2)))
                 })
                 .collect::<Vec<T>>(),
         ) {
@@ -315,7 +316,7 @@ where
 
 impl<T, const N: usize> VectorMath<T, N>
 where
-    T: Copy + Float,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     pub fn dot_assign(&mut self, dot_in: Matrix<T, N, N>) -> &mut Self {
         *self = MatrixTrait::dot(self, &dot_in);
@@ -326,10 +327,10 @@ where
 impl<T> SquaredMatrixTrait for VectorMath<T, 1>
 //TODO test and doc
 where
-    T: Copy + Float,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     fn identity() -> Self {
-        Self::from([T::one()])
+        [T::r_one()].into()
     }
 
     fn plu_decomposition(&self) -> (Self, Self, Self)
@@ -345,7 +346,7 @@ where
     {
         match self[0] == T::zero() {
             true => Err(MatrixError::NotInversible),
-            false => Ok(Self::from([T::one() / self[0]])),
+            false => Ok(Self::from([self[0].f_mult_inverse()])),
         }
     }
 
@@ -355,7 +356,7 @@ where
 
     fn permutation(i: usize, j: usize) -> Result<VectorMath<T, 1>, MatrixError> {
         match (i, j) {
-            (0, 0) => Ok(Self::from([T::one()])),
+            (0, 0) => Ok(Self::from([T::r_one()])),
             _ => Err(MatrixError::IndexOutOfRange),
         }
     }

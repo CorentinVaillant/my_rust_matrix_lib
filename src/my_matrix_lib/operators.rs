@@ -5,9 +5,7 @@ use std::ops::{Div, MulAssign};
 use num::{Float, Num};
 
 use super::{
-    matrix::Matrix,
-    prelude::VectorMath,
-    linear_traits::{MatrixTrait, VectorSpace},
+    algebric_traits::{Field, NthRootTrait, TrigFunc}, linear_traits::{MatrixTrait, VectorSpace}, matrix::Matrix, prelude::VectorMath
 };
 
 //Add operator
@@ -111,7 +109,7 @@ where
 
 impl<T, const N: usize, const P: usize> Mul<Matrix<T, N, P>> for VectorMath<T, N>
 where
-    T: Float + Copy,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     type Output = VectorMath<T, P>;
     fn mul(self, rhs: Matrix<T, N, P>) -> Self::Output {
@@ -121,7 +119,7 @@ where
 
 impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for VectorMath<T, N>
 where
-    T: Copy + Float,
+    T: NthRootTrait + TrigFunc + Field + Copy,
 {
     fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
         self.dot_assign(rhs);
