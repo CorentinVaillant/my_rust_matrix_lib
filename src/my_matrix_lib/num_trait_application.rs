@@ -1,8 +1,11 @@
 use num::{Float, Num, ToPrimitive};
 
-use super::{algebric_traits::{Field, NthRootTrait, TrigFunc}, prelude::VectorSpace};
+use super::{
+    algebric_traits::{Field, NthRootTrait, TrigFunc},
+    prelude::VectorSpace,
+};
 
-impl<T:Num+Copy> VectorSpace for T{
+impl<T: Num + Copy> VectorSpace for T {
     type Scalar = T;
 
     #[inline]
@@ -35,53 +38,62 @@ impl<T:Num+Copy> VectorSpace for T{
     }
 }
 
-impl<T:Float + Copy> Field for T{
-    fn f_mult_inverse(&self)->Self {
-        T::one()/ *self
+impl<T: Float + Copy> Field for T {
+    fn f_mult_inverse(&self) -> Self {
+        T::one() / *self
     }
 
-    fn f_div(&self,rhs:&Self)->Self where Self: Sized {
+    fn f_div(&self, rhs: &Self) -> Self
+    where
+        Self: Sized,
+    {
         *self / *rhs
     }
 }
 
-impl NthRootTrait for f32{
-    fn nth_root(&self,n:usize)->Self {
-        (self.ln() * (1./n.to_f32().unwrap_or(f32::infinity()))).exp()
+impl NthRootTrait for f32 {
+    fn nth_root(&self, n: usize) -> Self {
+        (self.ln() * (1. / n.to_f32().unwrap_or(f32::infinity()))).exp()
     }
 
-    fn sqrt(&self)->Self where Self: Sized {
+    fn sqrt(&self) -> Self
+    where
+        Self: Sized,
+    {
         f32::sqrt(*self)
     }
 }
 
-impl NthRootTrait for f64{
-    fn nth_root(&self,n:usize)->Self {
-        (self.ln() * (1./n.to_f64().unwrap_or(f64::infinity()))).exp()
+impl NthRootTrait for f64 {
+    fn nth_root(&self, n: usize) -> Self {
+        (self.ln() * (1. / n.to_f64().unwrap_or(f64::infinity()))).exp()
     }
 
-    fn sqrt(&self)->Self where Self: Sized {
+    fn sqrt(&self) -> Self
+    where
+        Self: Sized,
+    {
         f64::sqrt(*self)
     }
 }
 
-impl<T:Float> TrigFunc for T{
-    fn cos(self)->Self {
+impl<T: Float> TrigFunc for T {
+    fn cos(self) -> Self {
         T::cos(self)
     }
-    fn sin(self)->Self {
+    fn sin(self) -> Self {
         T::sin(self)
     }
-    fn tan(self)->Self {
+    fn tan(self) -> Self {
         T::tan(self)
     }
-    fn acos(self)->Self {
+    fn acos(self) -> Self {
         T::acos(self)
     }
-    fn asin(self)->Self {
+    fn asin(self) -> Self {
         T::asin(self)
     }
-    fn atan(self)->Self {
+    fn atan(self) -> Self {
         T::atan(self)
     }
 }

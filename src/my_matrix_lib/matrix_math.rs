@@ -11,9 +11,9 @@ use num::Float;
 
 use super::{
     errors::MatrixError,
+    linear_traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
     matrix::{Matrix, TryIntoMatrix},
     prelude::VectorMath,
-    linear_traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
 };
 
 impl<T, const N: usize, const M: usize> VectorSpace for Matrix<T, N, M>

@@ -5,7 +5,10 @@ use std::ops::{Div, MulAssign};
 use num::{Float, Num};
 
 use super::{
-    algebric_traits::{Field, NthRootTrait, TrigFunc}, linear_traits::{MatrixTrait, VectorSpace}, matrix::Matrix, prelude::VectorMath
+    algebric_traits::{Field, NthRootTrait, TrigFunc},
+    linear_traits::{MatrixTrait, VectorSpace},
+    matrix::Matrix,
+    prelude::VectorMath,
 };
 
 //Add operator

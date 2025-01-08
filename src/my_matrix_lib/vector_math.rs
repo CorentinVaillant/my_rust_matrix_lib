@@ -165,8 +165,8 @@ impl<T: Display, const N: usize> Display for VectorMath<T, N> {
 <=================== Mathematics ======================>
 ********************************************************/
 
-use super::matrix::Matrix;
 use super::linear_traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
+use super::matrix::Matrix;
 use num::Num;
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
@@ -190,7 +190,9 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = <T as VectorSpace>::add(self_elem, other_elem));
+            .for_each(|(self_elem, other_elem)| {
+                *self_elem = <T as VectorSpace>::add(self_elem, other_elem)
+            });
     }
 
     fn substract(&self, other: &Self) -> Self {
@@ -208,7 +210,9 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = <T as VectorSpace>::substract(self_elem, other_elem));
+            .for_each(|(self_elem, other_elem)| {
+                *self_elem = <T as VectorSpace>::substract(self_elem, other_elem)
+            });
     }
 
     fn scale(&self, scalar: &Self::Scalar) -> Self {
@@ -255,19 +259,21 @@ where
 {
     fn lenght(&self) -> Self::Scalar {
         self.iter()
-            .fold(Self::scalar_zero(), |acc, elem| acc.r_add(&elem.r_powu(2_u8)))
+            .fold(Self::scalar_zero(), |acc, elem| {
+                acc.r_add(&elem.r_powu(2_u8))
+            })
             .sqrt()
     }
 
     fn dot(&self, other: &Self) -> Self::Scalar {
         self.iter()
             .zip(other.iter())
-            .fold(T::r_zero(), |acc, (el1, el2)| acc.add(&el1.r_mult( el2)))
+            .fold(T::r_zero(), |acc, (el1, el2)| acc.add(&el1.r_mult(el2)))
     }
 
     fn angle(&self, rhs: &Self) -> Self::Scalar {
         let dot = EuclidianSpace::dot(self, rhs);
-        let denominator = self.lenght().r_mult( &rhs.lenght());
+        let denominator = self.lenght().r_mult(&rhs.lenght());
 
         if denominator == T::r_zero() {
             return T::r_zero();
