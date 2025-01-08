@@ -18,7 +18,7 @@ where
 }
 
 // Quaternion unit structs
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct QuaternionUnitReal<T: Num>(pub T);
 impl<T: Num> From<QuaternionUnitReal<T>> for Quaternion<T> {
     fn from(value: QuaternionUnitReal<T>) -> Self {
@@ -26,7 +26,7 @@ impl<T: Num> From<QuaternionUnitReal<T>> for Quaternion<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct QuaternionUnitI<T: Num>(pub T);
 impl<T: Num> From<QuaternionUnitI<T>> for Quaternion<T> {
     fn from(value: QuaternionUnitI<T>) -> Self {
@@ -34,7 +34,7 @@ impl<T: Num> From<QuaternionUnitI<T>> for Quaternion<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct QuaternionUnitJ<T: Num>(pub T);
 impl<T: Num> From<QuaternionUnitJ<T>> for Quaternion<T> {
     fn from(value: QuaternionUnitJ<T>) -> Self {
@@ -42,7 +42,7 @@ impl<T: Num> From<QuaternionUnitJ<T>> for Quaternion<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct QuaternionUnitK<T: Num>(pub T);
 impl<T: Num> From<QuaternionUnitK<T>> for Quaternion<T> {
     fn from(value: QuaternionUnitK<T>) -> Self {

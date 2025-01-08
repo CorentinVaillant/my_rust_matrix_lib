@@ -15,6 +15,6 @@ pub mod prelude {
     pub use crate::my_matrix_lib::vector_math::*;
 }
 
-pub mod quaternion{
+pub mod quaternion {
     pub use crate::my_matrix_lib::quaternions::*;
 }
