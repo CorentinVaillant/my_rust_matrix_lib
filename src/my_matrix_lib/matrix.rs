@@ -171,7 +171,7 @@ impl<T, const N: usize, const M: usize, const P: usize, const Q: usize> TryIntoM
 }
 
 /*implementation to format*/
-impl<T: std::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
+impl<T: core::fmt::Display, const N: usize, const M: usize> std::fmt::Display for Matrix<T, N, M> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for i in 0..N {
             writeln!(f)?;

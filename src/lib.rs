@@ -621,6 +621,9 @@ mod tests {
     }
 
     #[test]
+    fn quaternions_test() {}
+
+    #[test]
     fn usefull_fonctions_test() {
         // random
         #[cfg(feature = "random")]

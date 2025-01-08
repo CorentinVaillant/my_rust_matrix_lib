@@ -1,8 +1,8 @@
 #![allow(uncovered_param_in_projection)] // ! toremove
 use core::ops::{Add, AddAssign, Mul};
-use std::ops::MulAssign;
+use std::ops::{Div, MulAssign};
 
-use num::Float;
+use num::{Float, Num};
 
 use super::{
     matrix::Matrix,
@@ -109,12 +109,12 @@ where
     }
 }
 
-impl<T, const N:usize, const P:usize> Mul<Matrix<T,N,P>> for VectorMath<T,N>
-where 
-    T : Float + Copy
+impl<T, const N: usize, const P: usize> Mul<Matrix<T, N, P>> for VectorMath<T, N>
+where
+    T: Float + Copy,
 {
-    type Output = VectorMath<T,P>;
-    fn mul(self, rhs: Matrix<T,N,P>) -> Self::Output {
+    type Output = VectorMath<T, P>;
+    fn mul(self, rhs: Matrix<T, N, P>) -> Self::Output {
         self.dot(&rhs)
     }
 }
@@ -155,20 +155,17 @@ where
     }
 }
 
-/*
-impl<T: std::marker::Copy, const N: usize, const M: usize> MulAssign<<Matrix<T, N, M> as LinearAlgebra>::ScalarType> for Matrix<T, N, M>
+impl<T, const N: usize> Div<T> for VectorMath<T, N>
 where
-    Self: LinearAlgebra,
+    T: Num + Copy,
 {
-    fn mul_assign(&mut self, rhs: <Matrix<T, N, M> as LinearAlgebra>::ScalarType) {
-        *self = *self * rhs;
-    }
-}
+    type Output = Self;
 
-impl<const N: usize, const M: usize> Mul<Matrix<f32, N, M>> for f32 {
-    type Output = Matrix<f32, N, M>;
-    fn mul(self, rhs: Matrix<f32, N, M>) -> Self::Output {
-        rhs * self
+    fn div(self, rhs: T) -> Self::Output {
+        let mut vec = self;
+        for elem in vec.iter_mut() {
+            *elem = *elem / rhs;
+        }
+        vec
     }
 }
-*/

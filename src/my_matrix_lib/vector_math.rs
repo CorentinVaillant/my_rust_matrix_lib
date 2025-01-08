@@ -1,4 +1,5 @@
-use std::ops::{Index, IndexMut};
+use core::fmt::Display;
+use core::ops::{Index, IndexMut};
 
 use super::errors::MatrixError;
 
@@ -101,14 +102,14 @@ where
     }
 }
 
-impl<T,const N:usize> From<VectorMath<T,N>> for [T;N]{
-    fn from(value: VectorMath<T,N>) -> Self {
+impl<T, const N: usize> From<VectorMath<T, N>> for [T; N] {
+    fn from(value: VectorMath<T, N>) -> Self {
         value.inner
     }
 }
 
-impl<T,const N:usize> VectorMath<T,N> {
-    pub fn as_array(& self)->&[T;N]{
+impl<T, const N: usize> VectorMath<T, N> {
+    pub fn as_array(&self) -> &[T; N] {
         &self.inner
     }
 }
@@ -147,6 +148,15 @@ impl<T, const N: usize> VectorMath<T, N> {
 impl<T, const N: usize> VectorMath<T, N> {
     pub fn swap(&mut self, i: usize, j: usize) {
         self.inner.swap(i, j);
+    }
+}
+
+impl<T: Display, const N: usize> Display for VectorMath<T, N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in 0..N {
+            write!(f, "{}", self[i])?;
+        }
+        Ok(())
     }
 }
 
@@ -363,6 +373,19 @@ where
 
     fn is_lower_triangular(&self) -> bool {
         true
+    }
+}
+
+impl<T: Num + Copy> VectorMath<T, 3> {
+    #[inline]
+    pub fn cross_product(&self, rhs: Self) -> Self {
+        //TODO test and doc
+        [
+            self[1] * rhs[2] - self[2] * rhs[1],
+            self[2] * rhs[0] - self[0] * rhs[2],
+            self[0] * rhs[1] - self[1] * rhs[0],
+        ]
+        .into()
     }
 }
 
