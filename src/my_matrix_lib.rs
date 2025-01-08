@@ -4,7 +4,6 @@ mod matrix;
 mod matrix_math;
 mod operators;
 mod quaternions;
-mod quaternions_units;
 mod traits;
 mod vector_math;
 
