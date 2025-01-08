@@ -6,6 +6,7 @@ I will **not** maintain it forever.
 
 ## feature to add
 
+- [ ] FINISH quaternions (test and Num trait)
 - [ ] rank of a matrix
 - [ ] eigenvalues / eigenvectors
 - [ ] unknow size vector and matrix
