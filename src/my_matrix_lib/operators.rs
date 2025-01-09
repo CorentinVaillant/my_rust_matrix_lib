@@ -14,96 +14,73 @@ use super::{
 //Add operator
 impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<T>,
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        <Self as VectorSpace>::l_space_add(&self, &rhs)
+        self.l_space_add(&rhs)
     }
 }
 
 impl<T, const N: usize> Add for VectorMath<T, N>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<T>,
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        <Self as VectorSpace>::l_space_add(&self, &rhs)
+        self.l_space_add(&rhs)
     }
 }
 
 impl<T, const N: usize, const M: usize> AddAssign for Matrix<T, N, M>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<T>,
 {
     fn add_assign(&mut self, rhs: Self) {
-        VectorSpace::l_space_add_assign(self, &rhs);
+        self.l_space_add_assign( &rhs);
     }
 }
 
 impl<T, const N: usize> AddAssign for VectorMath<T, N>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<T>,
 {
     fn add_assign(&mut self, rhs: Self) {
-        VectorSpace::l_space_add_assign(self, &rhs);
+        self.l_space_add_assign(&rhs);
     }
 }
 
-//Scaling operator
-impl<T, const N: usize> Mul<VectorMath<T, N>> for <VectorMath<T, N> as VectorSpace>::Scalar
-//TODO fixme
-where
-    VectorMath<T, N>: VectorSpace,
-{
-    type Output = VectorMath<T, N>;
+//
 
-    fn mul(self, rhs: VectorMath<T, N>) -> Self::Output {
-        rhs.l_space_scale(&self)
-    }
-}
-
-impl<T, const N: usize> Mul<<VectorMath<T, N> as VectorSpace>::Scalar> for VectorMath<T, N>
+impl<T, const N: usize> Mul<T> for VectorMath<T, N>
 where
-    VectorMath<T, N>: VectorSpace,
+    VectorMath<T, N>: VectorSpace<T>,
 {
     type Output = Self;
 
-    fn mul(self, rhs: <VectorMath<T, N> as VectorSpace>::Scalar) -> Self::Output {
+    fn mul(self, rhs: T) -> Self::Output {
         self.l_space_scale(&rhs)
     }
 }
 
-impl<T, const N: usize, const M: usize> Mul<Matrix<T, N, M>>
-    for <Matrix<T, N, M> as VectorSpace>::Scalar
-//TODO fixme
-where
-    Matrix<T, N, M>: VectorSpace,
-{
-    type Output = Matrix<T, N, M>;
 
-    fn mul(self, rhs: Matrix<T, N, M>) -> Self::Output {
-        rhs.l_space_scale(&self)
-    }
-}
-
-impl<T, const N: usize, const M: usize> Mul<<Matrix<T, N, M> as VectorSpace>::Scalar>
+impl<T, const N: usize, const M: usize> Mul<T>
     for Matrix<T, N, M>
 where
-    Matrix<T, N, M>: VectorSpace,
+    Matrix<T, N, M>: VectorSpace<T>,
 {
     type Output = Self;
 
-    fn mul(self, rhs: <Matrix<T, N, M> as VectorSpace>::Scalar) -> Self::Output {
+    fn mul(self, rhs: T) -> Self::Output {
         self.l_space_scale(&rhs)
     }
 }
 
 impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
 where
-    Matrix<T, N, M>: MatrixTrait<DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
+    Matrix<T, N, M>: MatrixTrait<T,DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
 {
-    type Output = <Matrix<T, N, M> as MatrixTrait>::DotOut<P>;
+    type Output = <Matrix<T, N, M> as MatrixTrait<T>>::DotOut<P>;
 
     fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
         self.dot::<P>(&rhs)

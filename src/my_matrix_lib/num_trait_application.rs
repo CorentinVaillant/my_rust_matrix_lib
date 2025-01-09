@@ -5,8 +5,7 @@ use super::{
     prelude::VectorSpace,
 };
 
-impl<T: Num + Copy> VectorSpace for T {
-    type Scalar = T;
+impl<T: Num + Copy> VectorSpace<T> for T {
 
     #[inline]
     fn l_space_add(&self, other: &Self) -> Self {
@@ -17,7 +16,7 @@ impl<T: Num + Copy> VectorSpace for T {
         *self - *other
     }
     #[inline]
-    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &T) -> Self {
         *self * *scalar
     }
     #[inline]
@@ -25,11 +24,11 @@ impl<T: Num + Copy> VectorSpace for T {
         Self::zero()
     }
     #[inline]
-    fn l_space_one() -> Self::Scalar {
+    fn l_space_one() -> T {
         Self::one()
     }
     #[inline]
-    fn l_space_scalar_zero() -> Self::Scalar {
+    fn l_space_scalar_zero() -> T {
         Self::zero()
     }
     #[inline]

@@ -6,7 +6,7 @@ use super::linear_traits::VectorSpace;
 
 pub trait Ring
 where
-    Self: VectorSpace,
+    Self: VectorSpace<Self> + Sized,
 {
     fn r_mult(&self, rhs: &Self) -> Self;
     fn r_add(&self, rhs: &Self) -> Self;
@@ -71,7 +71,7 @@ where
 
 impl<T> Ring for T
 where
-    T: VectorSpace<Scalar = T>,
+    T: VectorSpace<T>,
 {
     fn r_mult(&self, rhs: &Self) -> Self {
         self.l_space_scale(rhs)
@@ -82,11 +82,11 @@ where
     }
 
     fn r_one() -> Self {
-        <Self as VectorSpace>::l_space_one()
+        <Self as VectorSpace<Self>>::l_space_one()
     }
 
     fn r_zero() -> Self {
-        <Self as VectorSpace>::l_space_zero()
+        <Self as VectorSpace<Self>>::l_space_zero()
     }
 
     fn r_add_inverse(&self) -> Self {

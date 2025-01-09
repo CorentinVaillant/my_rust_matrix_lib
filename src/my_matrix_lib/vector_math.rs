@@ -169,16 +169,16 @@ use super::linear_traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, Vect
 use super::matrix::Matrix;
 use num::Num;
 
-impl<T, const N: usize> VectorSpace for VectorMath<T, N>
+impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
 where
     T: Ring + Copy,
 {
-    type Scalar = T;
+    
 
     fn l_space_add(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_add(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| <T as VectorSpace<T>>::l_space_add(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -191,14 +191,14 @@ where
         self.iter_mut()
             .zip(other.iter())
             .for_each(|(self_elem, other_elem)| {
-                *self_elem = <T as VectorSpace>::l_space_add(self_elem, other_elem)
+                *self_elem = self_elem.l_space_add(other_elem)
             });
     }
 
     fn l_space_sub(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_sub(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| self_elem.l_space_sub(other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -211,11 +211,11 @@ where
         self.iter_mut()
             .zip(other.iter())
             .for_each(|(self_elem, other_elem)| {
-                *self_elem = <T as VectorSpace>::l_space_sub(self_elem, other_elem)
+                *self_elem = self_elem.l_space_sub(other_elem)
             });
     }
 
-    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &T) -> Self {
         self.iter()
             .map(|self_elem| <T as Ring>::r_mult(self_elem, scalar))
             .collect::<Vec<T>>()
@@ -223,27 +223,27 @@ where
             .unwrap()
     }
 
-    fn l_space_scale_assign(&mut self, scalar: &Self::Scalar)
+    fn l_space_scale_assign(&mut self, scalar: &T)
     where
         Self: Sized,
     {
         self.iter_mut()
-            .for_each(|self_elem| *self_elem = <T as Ring>::r_mult(self_elem, scalar));
+            .for_each(|self_elem| *self_elem = self_elem.r_mult(scalar));
     }
 
     #[inline]
     fn l_space_zero() -> Self {
-        Self::from([<T as VectorSpace>::l_space_zero(); N])
+        Self::from([T::l_space_zero(); N])
     }
 
     #[inline]
-    fn l_space_one() -> Self::Scalar {
-        <T as Ring>::r_one()
+    fn l_space_one() -> T {
+        T::r_one()
     }
 
     #[inline]
-    fn l_space_scalar_zero() -> Self::Scalar {
-        <T as VectorSpace>::l_space_zero()
+    fn l_space_scalar_zero() -> T {
+        T::l_space_zero()
     }
 
     #[inline]
@@ -253,11 +253,11 @@ where
 }
 
 //TODO find a way to implement for signed integers
-impl<T, const N: usize> EuclidianSpace for VectorMath<T, N>
+impl<T, const N: usize> EuclidianSpace<T> for VectorMath<T, N>
 where
     T: NthRootTrait + TrigFunc + Field + Copy,
 {
-    fn lenght(&self) -> Self::Scalar {
+    fn lenght(&self) -> T {
         self.iter()
             .fold(Self::l_space_scalar_zero(), |acc, elem| {
                 acc.r_add(&elem.r_powu(2_u8))
@@ -265,13 +265,13 @@ where
             .sqrt()
     }
 
-    fn dot(&self, other: &Self) -> Self::Scalar {
+    fn dot(&self, other: &Self) -> T {
         self.iter()
             .zip(other.iter())
             .fold(T::r_zero(), |acc, (el1, el2)| acc.l_space_add(&el1.r_mult(el2)))
     }
 
-    fn angle(&self, rhs: &Self) -> Self::Scalar {
+    fn angle(&self, rhs: &Self) -> T {
         let dot = EuclidianSpace::dot(self, rhs);
         let denominator = self.lenght().r_mult(&rhs.lenght());
 
@@ -282,7 +282,7 @@ where
     }
 }
 
-impl<T, const N: usize> MatrixTrait for VectorMath<T, N>
+impl<T, const N: usize> MatrixTrait<T> for VectorMath<T, N>
 //TODO test and doc
 where
     T: NthRootTrait + TrigFunc + Field + Copy,
@@ -308,7 +308,7 @@ where
         }
     }
 
-    fn det(&self) -> Self::Scalar {
+    fn det(&self) -> T {
         match N == 1 {
             true => self[0],
             false => T::l_space_zero(),
@@ -330,7 +330,7 @@ where
     }
 }
 
-impl<T> SquaredMatrixTrait for VectorMath<T, 1>
+impl<T> SquaredMatrixTrait<T> for VectorMath<T, 1>
 //TODO test and doc
 where
     T: NthRootTrait + TrigFunc + Field + Copy,
@@ -356,7 +356,7 @@ where
         }
     }
 
-    fn trace(&self) -> Self::Scalar {
+    fn trace(&self) -> T {
         self[0]
     }
 
@@ -367,7 +367,7 @@ where
         }
     }
 
-    fn inflation(i: usize, value: Self::Scalar) -> Result<VectorMath<T, 1>, MatrixError> {
+    fn inflation(i: usize, value: T) -> Result<VectorMath<T, 1>, MatrixError> {
         match i {
             0 => Ok(Self::from([value])),
             _ => Err(MatrixError::IndexOutOfRange),

@@ -1,4 +1,4 @@
-use super::{algebric_traits::{Field, Ring}, prelude::{VectorMath, VectorSpace}};
+use super::{algebric_traits::Field, prelude::{VectorMath, VectorSpace}};
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
 
@@ -25,8 +25,8 @@ impl<T:Field,U:Into<T>> From<(U,Vec3<T>)> for Quaternion<T>{
 <=================== Mathematics ======================>
 ********************************************************/
 
-impl<T:Field + Copy> VectorSpace for Quaternion<T>{
-    type Scalar = Self;
+impl<T:Field + Copy> VectorSpace<T> for Quaternion<T>{
+
 
     fn l_space_add(&self, other: &Self) -> Self {
         (self.re.r_add(&other.re), self.im.l_space_add(&other.im)).into()
@@ -36,7 +36,7 @@ impl<T:Field + Copy> VectorSpace for Quaternion<T>{
         (self.re.r_add(&other.re), self.im.l_space_sub(&other.im)).into()
     }
 
-    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &T) -> Self {
         todo!()
     }
 
@@ -44,11 +44,11 @@ impl<T:Field + Copy> VectorSpace for Quaternion<T>{
         todo!()
     }
 
-    fn l_space_one() -> Self::Scalar {
+    fn l_space_one() -> T {
         todo!()
     }
 
-    fn l_space_scalar_zero() -> Self::Scalar {
+    fn l_space_scalar_zero() -> T {
         todo!()
     }
 

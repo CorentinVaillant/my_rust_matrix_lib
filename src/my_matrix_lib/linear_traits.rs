@@ -1,10 +1,9 @@
 use super::{additional_structs::Dimension, errors::MatrixError};
 
-pub trait VectorSpace
+pub trait VectorSpace<Scalar>
 where
     Self: PartialEq,
 {
-    type Scalar;
 
     ///Add two vector together
     /// ## Example
@@ -74,9 +73,9 @@ where
     ///
     /// assert_eq!(vec1.scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
     /// ```
-    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self;
+    fn l_space_scale(&self, scalar: &Scalar) -> Self;
 
-    fn l_space_scale_assign(&mut self, scalar: &Self::Scalar)
+    fn l_space_scale_assign(&mut self, scalar: &Scalar)
     where
         Self: Sized,
     {
@@ -105,18 +104,18 @@ where
     ///
     /// assert_eq!(vec.scale(&one), vec);
     /// ```
-    fn l_space_one() -> Self::Scalar;
+    fn l_space_one() -> Scalar;
 
     ///Return the 0 scalar
-    fn l_space_scalar_zero() -> Self::Scalar;
+    fn l_space_scalar_zero() -> Scalar;
 
     ///Return the dimension
     fn dimension() -> Dimension;
 }
 
-pub trait EuclidianSpace
+pub trait EuclidianSpace<Scalar>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<Scalar>,
 {
     ///Return the euclidian lenght
     /// ## Example :
@@ -139,7 +138,7 @@ where
     ///let vec4 = VectorMath::from([8.,7.,9.,15.]);
     ///assert_eq!(vec4.lenght(),20.46948949045872);
     /// ```
-    fn lenght(&self) -> Self::Scalar;
+    fn lenght(&self) -> Scalar;
 
     ///Return the dot product of two vectors
     /// ## Example :
@@ -160,11 +159,11 @@ where
     ///let can2 = VectorMath::from([0.,1.,0.,25.]);
     ///assert_eq!(can1.dot(&can2),0.);
     /// ```
-    fn dot(&self, other: &Self) -> Self::Scalar;
+    fn dot(&self, other: &Self) -> Scalar;
 
-    fn distance(&self, other: &Self) -> Self::Scalar
+    fn distance(&self, other: &Self) -> Scalar
     where
-        Self::Scalar: PartialEq,
+        Scalar: PartialEq,
         Self: Sized,
     {
         self.l_space_sub(other).lenght()
@@ -187,7 +186,7 @@ where
     ///let vec2 = VectorMath::from([1.,2.,2.]);
     ///assert_eq!(vec2.angle(&vec2),0.);
     /// ```
-    fn angle(&self, rhs: &Self) -> Self::Scalar;
+    fn angle(&self, rhs: &Self) -> Scalar;
 
     ///Return true if two vectors are orthogonal
     /// ## Examples :
@@ -202,15 +201,15 @@ where
     /// ```
     fn is_orthogonal_to(&self, other: &Self) -> bool
     where
-        Self::Scalar: PartialEq,
+        Scalar: PartialEq,
     {
         self.dot(other) == Self::l_space_scalar_zero()
     }
 }
 
-pub trait MatrixTrait
+pub trait MatrixTrait<Scalar>
 where
-    Self: VectorSpace,
+    Self: VectorSpace<Scalar>,
 {
     type DotIn<const P: usize>;
     type DotOut<const P: usize>;
@@ -223,9 +222,9 @@ where
     fn reduce_row_echelon(&self) -> Self;
 }
 
-pub trait SquaredMatrixTrait
+pub trait SquaredMatrixTrait<Scalar>
 where
-    Self: MatrixTrait,
+    Self: MatrixTrait<Scalar>,
 {
     fn identity() -> Self;
 
@@ -236,12 +235,12 @@ where
     where
         Self: Sized;
 
-    fn trace(&self) -> Self::Scalar;
+    fn trace(&self) -> Scalar;
 
     fn permutation(i: usize, j: usize) -> Result<Self, MatrixError>
     where
         Self: Sized;
-    fn inflation(i: usize, value: Self::Scalar) -> Result<Self, MatrixError>
+    fn inflation(i: usize, value: Scalar) -> Result<Self, MatrixError>
     where
         Self: Sized;
 

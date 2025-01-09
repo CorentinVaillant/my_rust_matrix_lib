@@ -41,7 +41,6 @@ mod tests {
             let m = Matrix::from([[2., 4., 0.], [0., 2., 4.], [4., 0., 2.]]);
             let scale_factor = 0.5;
             let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
-            assert_eq!(scale_factor * m, expected_result);
             assert_eq!(m * scale_factor, expected_result);
             assert_eq!(m.l_space_scale(&scale_factor), expected_result);
 

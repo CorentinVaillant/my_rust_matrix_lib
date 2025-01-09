@@ -11,11 +11,10 @@ use super::{
     prelude::VectorMath,
 };
 
-impl<T, const N: usize, const M: usize> VectorSpace for Matrix<T, N, M>
+impl<T, const N: usize, const M: usize> VectorSpace<T> for Matrix<T, N, M>
 where
     T: Copy + Float,
 {
-    type Scalar = T;
 
     fn l_space_add(&self, other: &Self) -> Self {
         self.iter_row()
@@ -35,7 +34,7 @@ where
             .unwrap()
     }
 
-    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &T) -> Self {
         self.iter_row()
             .map(|self_row| self_row.l_space_scale(scalar))
             .collect::<Vec<VectorMath<T, M>>>()
@@ -47,11 +46,11 @@ where
         Self::from([VectorMath::l_space_zero(); N])
     }
 
-    fn l_space_one() -> Self::Scalar {
+    fn l_space_one() -> T {
         VectorMath::<T, N>::l_space_one()
     }
 
-    fn l_space_scalar_zero() -> Self::Scalar {
+    fn l_space_scalar_zero() -> T {
         VectorMath::<T, N>::l_space_scalar_zero()
     }
 
@@ -60,7 +59,7 @@ where
     }
 }
 
-impl<T, const N: usize, const M: usize> MatrixTrait for Matrix<T, N, M>
+impl<T, const N: usize, const M: usize> MatrixTrait<T> for Matrix<T, N, M>
 where
     T: Copy + Float,
 {
@@ -279,7 +278,7 @@ where
     }
 }
 
-impl<T, const N: usize> SquaredMatrixTrait for Matrix<T, N, N>
+impl<T, const N: usize> SquaredMatrixTrait<T> for Matrix<T, N, N>
 where
     T: Copy + Float,
 {
@@ -507,7 +506,7 @@ where
     ///]);
     ///assert_eq!(m.trace(),19.);
     /// ```
-    fn trace(&self) -> Self::Scalar {
+    fn trace(&self) -> T {
         self.iter_column()
             .enumerate()
             .fold(T::zero(), |acc, (i, col)| acc + *col[i])
@@ -579,7 +578,7 @@ where
     ///
     ///assert_eq!(m * t, expected_m);
     /// ```
-    fn inflation(i: usize, value: Self::Scalar) -> Result<Matrix<T, N, N>, MatrixError>
+    fn inflation(i: usize, value: T) -> Result<Matrix<T, N, N>, MatrixError>
     where
         Self: Sized,
     {
