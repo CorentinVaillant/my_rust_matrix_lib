@@ -80,19 +80,19 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
     }
 
     fn l_space_zero() -> Self {
-        todo!()
+        (T::r_zero(),Vec3::l_space_zero()).into()
     }
 
     fn l_space_one() -> Self {
-        todo!()
+        (T::r_one(),Vec3::l_space_zero()).into()
     }
 
     fn l_space_scalar_zero() -> Self {
-        todo!()
+        (T::r_zero(),Vec3::l_space_zero()).into()
     }
 
     fn dimension() -> Dimension {
-        todo!()
+        Dimension::Finite(1)
     }
 }
 
