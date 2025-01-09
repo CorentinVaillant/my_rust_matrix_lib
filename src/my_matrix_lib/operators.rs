@@ -18,7 +18,7 @@ where
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        <Self as VectorSpace>::add(&self, &rhs)
+        <Self as VectorSpace>::l_space_add(&self, &rhs)
     }
 }
 
@@ -28,7 +28,7 @@ where
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        <Self as VectorSpace>::add(&self, &rhs)
+        <Self as VectorSpace>::l_space_add(&self, &rhs)
     }
 }
 
@@ -37,7 +37,7 @@ where
     Self: VectorSpace,
 {
     fn add_assign(&mut self, rhs: Self) {
-        VectorSpace::add_assign(self, &rhs);
+        VectorSpace::l_space_add_assign(self, &rhs);
     }
 }
 
@@ -46,7 +46,7 @@ where
     Self: VectorSpace,
 {
     fn add_assign(&mut self, rhs: Self) {
-        VectorSpace::add_assign(self, &rhs);
+        VectorSpace::l_space_add_assign(self, &rhs);
     }
 }
 
@@ -59,7 +59,7 @@ where
     type Output = VectorMath<T, N>;
 
     fn mul(self, rhs: VectorMath<T, N>) -> Self::Output {
-        rhs.scale(&self)
+        rhs.l_space_scale(&self)
     }
 }
 
@@ -70,7 +70,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: <VectorMath<T, N> as VectorSpace>::Scalar) -> Self::Output {
-        self.scale(&rhs)
+        self.l_space_scale(&rhs)
     }
 }
 
@@ -83,7 +83,7 @@ where
     type Output = Matrix<T, N, M>;
 
     fn mul(self, rhs: Matrix<T, N, M>) -> Self::Output {
-        rhs.scale(&self)
+        rhs.l_space_scale(&self)
     }
 }
 
@@ -95,7 +95,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: <Matrix<T, N, M> as VectorSpace>::Scalar) -> Self::Output {
-        self.scale(&rhs)
+        self.l_space_scale(&rhs)
     }
 }
 
@@ -134,7 +134,7 @@ where
     T: Copy + Float,
 {
     fn mul_assign(&mut self, rhs: T) {
-        self.scale_assign(&rhs);
+        self.l_space_scale_assign(&rhs);
     }
 }
 
@@ -143,7 +143,7 @@ where
     T: Copy + Float,
 {
     fn mul_assign(&mut self, rhs: T) {
-        self.scale_assign(&rhs);
+        self.l_space_scale_assign(&rhs);
     }
 }
 

@@ -1,8 +1,3 @@
-/*TODO list
-- OpAsign matrix
-
-*/
-
 /********************************************************
 <=================== Mathematics ======================>
 ********************************************************/
@@ -22,42 +17,42 @@ where
 {
     type Scalar = T;
 
-    fn add(&self, other: &Self) -> Self {
+    fn l_space_add(&self, other: &Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())
-            .map(|(self_row, other_row)| self_row.add(other_row))
+            .map(|(self_row, other_row)| self_row.l_space_add(other_row))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn substract(&self, other: &Self) -> Self {
+    fn l_space_substract(&self, other: &Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())
-            .map(|(self_row, other_row)| self_row.substract(other_row))
+            .map(|(self_row, other_row)| self_row.l_space_substract(other_row))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter_row()
-            .map(|self_row| self_row.scale(scalar))
+            .map(|self_row| self_row.l_space_scale(scalar))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn zero() -> Self {
-        Self::from([VectorMath::zero(); N])
+    fn l_space_zero() -> Self {
+        Self::from([VectorMath::l_space_zero(); N])
     }
 
-    fn one() -> Self::Scalar {
-        VectorMath::<T, N>::one()
+    fn l_space_one() -> Self::Scalar {
+        VectorMath::<T, N>::l_space_one()
     }
 
-    fn scalar_zero() -> Self::Scalar {
-        VectorMath::<T, N>::scalar_zero()
+    fn l_space_scalar_zero() -> Self::Scalar {
+        VectorMath::<T, N>::l_space_scalar_zero()
     }
 
     fn dimension() -> super::additional_structs::Dimension {
@@ -93,7 +88,7 @@ where
     /// ```
     fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
         //naive algorithm
-        let mut result: Matrix<T, N, P> = Matrix::zero();
+        let mut result: Matrix<T, N, P> = Matrix::l_space_zero();
         for i in 0..N {
             for j in 0..P {
                 for k in 0..M {
@@ -303,7 +298,7 @@ where
     ///assert_eq!(i, expected_m);
     /// ```
     fn identity() -> Self {
-        let mut result = Matrix::zero();
+        let mut result = Matrix::l_space_zero();
         for i in 0..N {
             result[i][i] = T::one();
         }
@@ -351,7 +346,7 @@ where
         let self_square = *self;
 
         let mut p = Matrix::identity();
-        let mut l = Matrix::zero();
+        let mut l = Matrix::l_space_zero();
         let mut u = self_square;
 
         for k in 0..N {
@@ -448,7 +443,7 @@ where
                             ],
                         ))
                         .unwrap()
-                        .scale(&(T::one() / det)),
+                        .l_space_scale(&(T::one() / det)),
                     )
                 }
             }

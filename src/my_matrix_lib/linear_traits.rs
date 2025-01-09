@@ -27,13 +27,13 @@ where
     ///let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
     ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
     /// ```
-    fn add(&self, other: &Self) -> Self;
+    fn l_space_add(&self, other: &Self) -> Self;
 
-    fn add_assign(&mut self, other: &Self)
+    fn l_space_add_assign(&mut self, other: &Self)
     where
         Self: Sized,
     {
-        *self = self.add(other);
+        *self = self.l_space_add(other);
     }
 
     ///Substract a vector by another
@@ -53,13 +53,13 @@ where
     ///assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
     ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(&-1.));
     /// ```
-    fn substract(&self, other: &Self) -> Self;
+    fn l_space_substract(&self, other: &Self) -> Self;
 
-    fn substract_assign(&mut self, other: &Self)
+    fn l_space_substract_assign(&mut self, other: &Self)
     where
         Self: Sized,
     {
-        *self = self.substract(other);
+        *self = self.l_space_substract(other);
     }
 
     ///Scale a vector by a scalar
@@ -74,13 +74,13 @@ where
     ///
     /// assert_eq!(vec1.scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
     /// ```
-    fn scale(&self, scalar: &Self::Scalar) -> Self;
+    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self;
 
-    fn scale_assign(&mut self, scalar: &Self::Scalar)
+    fn l_space_scale_assign(&mut self, scalar: &Self::Scalar)
     where
         Self: Sized,
     {
-        *self = self.scale(scalar);
+        *self = self.l_space_scale(scalar);
     }
 
     ///Return the 0 vector
@@ -92,7 +92,7 @@ where
     ///let vec = VectorMath::from([0,0,0]);
     ///assert_eq!(vec,VectorMath::zero())
     /// ```
-    fn zero() -> Self;
+    fn l_space_zero() -> Self;
 
     ///Return the 1 scalar
     /// ## Example
@@ -105,10 +105,10 @@ where
     ///
     /// assert_eq!(vec.scale(&one), vec);
     /// ```
-    fn one() -> Self::Scalar;
+    fn l_space_one() -> Self::Scalar;
 
     ///Return the 0 scalar
-    fn scalar_zero() -> Self::Scalar;
+    fn l_space_scalar_zero() -> Self::Scalar;
 
     ///Return the dimension
     fn dimension() -> Dimension;
@@ -167,7 +167,7 @@ where
         Self::Scalar: PartialEq,
         Self: Sized,
     {
-        self.substract(other).lenght()
+        self.l_space_substract(other).lenght()
     }
 
     ///Return the angle between two vectors
@@ -204,7 +204,7 @@ where
     where
         Self::Scalar: PartialEq,
     {
-        self.dot(other) == Self::scalar_zero()
+        self.dot(other) == Self::l_space_scalar_zero()
     }
 }
 

@@ -9,27 +9,27 @@ impl<T: Num + Copy> VectorSpace for T {
     type Scalar = T;
 
     #[inline]
-    fn add(&self, other: &Self) -> Self {
+    fn l_space_add(&self, other: &Self) -> Self {
         *self + *other
     }
     #[inline]
-    fn substract(&self, other: &Self) -> Self {
+    fn l_space_substract(&self, other: &Self) -> Self {
         *self - *other
     }
     #[inline]
-    fn scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
         *self * *scalar
     }
     #[inline]
-    fn zero() -> Self {
+    fn l_space_zero() -> Self {
         Self::zero()
     }
     #[inline]
-    fn one() -> Self::Scalar {
+    fn l_space_one() -> Self::Scalar {
         Self::one()
     }
     #[inline]
-    fn scalar_zero() -> Self::Scalar {
+    fn l_space_scalar_zero() -> Self::Scalar {
         Self::zero()
     }
     #[inline]

@@ -171,51 +171,51 @@ use num::Num;
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
 where
-    T: Ring + Copy,
+    T: Field + Copy,
 {
     type Scalar = T;
 
-    fn add(&self, other: &Self) -> Self {
+    fn l_space_add(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace>::add(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_add(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn add_assign(&mut self, other: &Self)
+    fn l_space_add_assign(&mut self, other: &Self)
     where
         Self: Sized,
     {
         self.iter_mut()
             .zip(other.iter())
             .for_each(|(self_elem, other_elem)| {
-                *self_elem = <T as VectorSpace>::add(self_elem, other_elem)
+                *self_elem = <T as VectorSpace>::l_space_add(self_elem, other_elem)
             });
     }
 
-    fn substract(&self, other: &Self) -> Self {
+    fn l_space_substract(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace>::substract(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_substract(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn substract_assign(&mut self, other: &Self)
+    fn l_space_substract_assign(&mut self, other: &Self)
     where
         Self: Sized,
     {
         self.iter_mut()
             .zip(other.iter())
             .for_each(|(self_elem, other_elem)| {
-                *self_elem = <T as VectorSpace>::substract(self_elem, other_elem)
+                *self_elem = <T as VectorSpace>::l_space_substract(self_elem, other_elem)
             });
     }
 
-    fn scale(&self, scalar: &Self::Scalar) -> Self {
+    fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {
         self.iter()
             .map(|self_elem| <T as Ring>::r_mult(self_elem, scalar))
             .collect::<Vec<T>>()
@@ -223,7 +223,7 @@ where
             .unwrap()
     }
 
-    fn scale_assign(&mut self, scalar: &Self::Scalar)
+    fn l_space_scale_assign(&mut self, scalar: &Self::Scalar)
     where
         Self: Sized,
     {
@@ -232,18 +232,18 @@ where
     }
 
     #[inline]
-    fn zero() -> Self {
-        Self::from([<T as VectorSpace>::zero(); N])
+    fn l_space_zero() -> Self {
+        Self::from([<T as VectorSpace>::l_space_zero(); N])
     }
 
     #[inline]
-    fn one() -> Self::Scalar {
+    fn l_space_one() -> Self::Scalar {
         <T as Ring>::r_one()
     }
 
     #[inline]
-    fn scalar_zero() -> Self::Scalar {
-        <T as VectorSpace>::zero()
+    fn l_space_scalar_zero() -> Self::Scalar {
+        <T as VectorSpace>::l_space_zero()
     }
 
     #[inline]
@@ -259,7 +259,7 @@ where
 {
     fn lenght(&self) -> Self::Scalar {
         self.iter()
-            .fold(Self::scalar_zero(), |acc, elem| {
+            .fold(Self::l_space_scalar_zero(), |acc, elem| {
                 acc.r_add(&elem.r_powu(2_u8))
             })
             .sqrt()
@@ -268,7 +268,7 @@ where
     fn dot(&self, other: &Self) -> Self::Scalar {
         self.iter()
             .zip(other.iter())
-            .fold(T::r_zero(), |acc, (el1, el2)| acc.add(&el1.r_mult(el2)))
+            .fold(T::r_zero(), |acc, (el1, el2)| acc.l_space_add(&el1.r_mult(el2)))
     }
 
     fn angle(&self, rhs: &Self) -> Self::Scalar {
@@ -299,7 +299,7 @@ where
                 .map(|col| {
                     self.iter()
                         .zip(col)
-                        .fold(T::zero(), |acc, (el1, el2)| acc.r_add(&el1.r_mult(el2)))
+                        .fold(T::l_space_zero(), |acc, (el1, el2)| acc.r_add(&el1.r_mult(el2)))
                 })
                 .collect::<Vec<T>>(),
         ) {
@@ -311,7 +311,7 @@ where
     fn det(&self) -> Self::Scalar {
         match N == 1 {
             true => self[0],
-            false => T::zero(),
+            false => T::l_space_zero(),
         }
     }
 
@@ -350,7 +350,7 @@ where
     where
         Self: Sized,
     {
-        match self[0] == T::zero() {
+        match self[0] == T::l_space_zero() {
             true => Err(MatrixError::NotInversible),
             false => Ok(Self::from([self[0].f_mult_inverse()])),
         }

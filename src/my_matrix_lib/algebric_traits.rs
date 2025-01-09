@@ -74,31 +74,31 @@ where
     T: VectorSpace<Scalar = T>,
 {
     fn r_mult(&self, rhs: &Self) -> Self {
-        self.scale(rhs)
+        self.l_space_scale(rhs)
     }
 
     fn r_add(&self, rhs: &Self) -> Self {
-        self.add(rhs)
+        self.l_space_add(rhs)
     }
 
     fn r_one() -> Self {
-        <Self as VectorSpace>::one()
+        <Self as VectorSpace>::l_space_one()
     }
 
     fn r_zero() -> Self {
-        <Self as VectorSpace>::zero()
+        <Self as VectorSpace>::l_space_zero()
     }
 
     fn r_add_inverse(&self) -> Self {
-        Self::zero().substract(self)
+        Self::l_space_zero().l_space_substract(self)
     }
 
     fn r_add_assign(&mut self, rhs: Self) {
-        self.add_assign(&rhs);
+        self.l_space_add_assign(&rhs);
     }
 
     fn r_mul_assign(&mut self, rhs: Self) {
-        self.scale_assign(&rhs);
+        self.l_space_scale_assign(&rhs);
     }
 }
 
