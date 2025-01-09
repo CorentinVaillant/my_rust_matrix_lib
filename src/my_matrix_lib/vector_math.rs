@@ -383,14 +383,14 @@ where
     }
 }
 
-impl<T: Num + Copy> VectorMath<T, 3> {
+impl<T: Ring + Copy> VectorMath<T, 3> {
     #[inline]
     pub fn cross_product(&self, rhs: Self) -> Self {
         //TODO test and doc
         [
-            self[1] * rhs[2] - self[2] * rhs[1],
-            self[2] * rhs[0] - self[0] * rhs[2],
-            self[0] * rhs[1] - self[1] * rhs[0],
+            self[1].r_mult(&rhs[2]).r_sub(&self[2].r_mult(&rhs[1])),
+            self[2].r_mult(&rhs[0]).r_sub(&self[0].r_mult(&rhs[2])),
+            self[0].r_mult(&rhs[1]).r_sub(&self[1].r_mult(&rhs[0])),
         ]
         .into()
     }

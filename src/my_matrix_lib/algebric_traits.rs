@@ -2,7 +2,7 @@ use std::ops::{DivAssign, SubAssign};
 
 use num::{Integer, Unsigned};
 
-use super::linear_traits::VectorSpace;
+use super::{linear_traits::VectorSpace, prelude::EuclidianSpace};
 
 pub trait Ring
 where
@@ -10,6 +10,10 @@ where
 {
     fn r_mult(&self, rhs: &Self) -> Self;
     fn r_add(&self, rhs: &Self) -> Self;
+
+    fn r_sub(&self,rhs: &Self)->Self{
+        self.r_add(&rhs.r_add_inverse())
+    }
 
     fn r_one() -> Self;
     fn r_zero() -> Self;
@@ -81,6 +85,10 @@ where
         self.l_space_add(rhs)
     }
 
+    fn r_sub(&self,rhs: &Self)->Self {
+        self.l_space_sub(rhs)
+    }
+
     fn r_one() -> Self {
         <Self as VectorSpace<Self>>::l_space_one()
     }
@@ -101,6 +109,7 @@ where
         self.l_space_scale_assign(&rhs);
     }
 }
+
 
 pub trait NthRootTrait
 where

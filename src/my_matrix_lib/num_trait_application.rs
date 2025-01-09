@@ -2,7 +2,7 @@ use num::{Float, Num, ToPrimitive};
 
 use super::{
     algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::VectorSpace,
+    prelude::{EuclidianSpace, VectorSpace},
 };
 
 impl<T: Num + Copy> VectorSpace<T> for T {
@@ -47,6 +47,25 @@ impl<T: Float + Copy> Field for T {
         Self: Sized,
     {
         *self / *rhs
+    }
+}
+
+impl<T:Float + Copy> EuclidianSpace<T> for T {
+    #[inline]
+    fn lenght(&self) -> T {
+        self.abs()
+    }
+
+    #[inline]
+    fn dot(&self, other: &Self) -> T {
+        *self * *other
+    }
+    #[inline]
+    fn angle(&self, rhs: &Self) -> T {
+        match (*self + *rhs).is_sign_positive() {
+            true=> T::zero(),
+            false=>T::from(core::f64::consts::PI).unwrap_or((T::zero() - T::one()).acos()) //if can cast const PI return the const, in the other case compute acos(-1) (wich return PI)
+        }
     }
 }
 
