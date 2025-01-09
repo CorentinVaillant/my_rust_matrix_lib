@@ -65,7 +65,8 @@ impl<T:Field + Copy> VectorSpace<Self> for Quaternion<T>{
     }
 
     fn l_space_sub(&self, other: &Self) -> Self {
-        todo!()
+        (self.re.l_space_sub(&other.re),
+        self.im.l_space_sub(&other.im)).into()
     }
 
     fn l_space_scale(&self, scalar: &Self) -> Self {
