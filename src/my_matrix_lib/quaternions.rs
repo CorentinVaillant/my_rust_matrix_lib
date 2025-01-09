@@ -37,7 +37,7 @@ impl<T:Field + Copy> VectorSpace<T> for Quaternion<T>{
     }
 
     fn l_space_scale(&self, scalar: &T) -> Self {
-        todo!()
+        (self.re.l_space_scale(scalar),self.im.l_space_scale(scalar)).into()
     }
 
     fn l_space_zero() -> Self {
