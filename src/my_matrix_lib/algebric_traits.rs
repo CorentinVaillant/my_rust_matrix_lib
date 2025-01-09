@@ -8,10 +8,10 @@ pub trait Ring
 where
     Self: VectorSpace<Self> + Sized,
 {
-    fn r_mult(&self, rhs: &Self) -> Self;
+    fn r_mul(&self, rhs: &Self) -> Self;
     fn r_add(&self, rhs: &Self) -> Self;
 
-    fn r_sub(&self,rhs: &Self)->Self{
+    fn r_sub(&self, rhs: &Self) -> Self {
         self.r_add(&rhs.r_add_inverse())
     }
 
@@ -51,7 +51,7 @@ where
         } else if result == zero {
             zero
         } else {
-            end_fact.r_mult(&result)
+            end_fact.r_mul(&result)
         }
     }
 
@@ -69,7 +69,7 @@ where
     where
         Self: Sized,
     {
-        self.r_mult(&rhs.f_mult_inverse())
+        self.r_mul(&rhs.f_mult_inverse())
     }
 }
 
@@ -77,7 +77,7 @@ impl<T> Ring for T
 where
     T: VectorSpace<T>,
 {
-    fn r_mult(&self, rhs: &Self) -> Self {
+    fn r_mul(&self, rhs: &Self) -> Self {
         self.l_space_scale(rhs)
     }
 
@@ -85,7 +85,7 @@ where
         self.l_space_add(rhs)
     }
 
-    fn r_sub(&self,rhs: &Self)->Self {
+    fn r_sub(&self, rhs: &Self) -> Self {
         self.l_space_sub(rhs)
     }
 
@@ -109,7 +109,6 @@ where
         self.l_space_scale_assign(&rhs);
     }
 }
-
 
 pub trait NthRootTrait
 where

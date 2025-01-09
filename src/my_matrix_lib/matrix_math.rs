@@ -15,7 +15,6 @@ impl<T, const N: usize, const M: usize> VectorSpace<T> for Matrix<T, N, M>
 where
     T: Copy + Float,
 {
-
     fn l_space_add(&self, other: &Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())

@@ -6,7 +6,6 @@ use super::{
 };
 
 impl<T: Num + Copy> VectorSpace<T> for T {
-
     #[inline]
     fn l_space_add(&self, other: &Self) -> Self {
         *self + *other
@@ -50,7 +49,7 @@ impl<T: Float + Copy> Field for T {
     }
 }
 
-impl<T:Float + Copy> EuclidianSpace<T> for T {
+impl<T: Float + Copy> EuclidianSpace<T> for T {
     #[inline]
     fn lenght(&self) -> T {
         self.abs()
@@ -63,8 +62,8 @@ impl<T:Float + Copy> EuclidianSpace<T> for T {
     #[inline]
     fn angle(&self, rhs: &Self) -> T {
         match (*self + *rhs).is_sign_positive() {
-            true=> T::zero(),
-            false=>T::from(core::f64::consts::PI).unwrap_or((T::zero() - T::one()).acos()) //if can cast const PI return the const, in the other case compute acos(-1) (wich return PI)
+            true => T::zero(),
+            false => T::from(core::f64::consts::PI).unwrap_or((T::zero() - T::one()).acos()), //if can cast const PI return the const, in the other case compute acos(-1) (wich return PI)
         }
     }
 }

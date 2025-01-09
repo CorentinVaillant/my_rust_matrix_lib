@@ -172,12 +172,12 @@ impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
 where
     T: Ring + Copy,
 {
-    
-
     fn l_space_add(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace<T>>::l_space_add(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| {
+                <T as VectorSpace<T>>::l_space_add(self_elem, other_elem)
+            })
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -189,9 +189,7 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| {
-                *self_elem = self_elem.l_space_add(other_elem)
-            });
+            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_add(other_elem));
     }
 
     fn l_space_sub(&self, other: &Self) -> Self {
@@ -209,14 +207,12 @@ where
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| {
-                *self_elem = self_elem.l_space_sub(other_elem)
-            });
+            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_sub(other_elem));
     }
 
     fn l_space_scale(&self, scalar: &T) -> Self {
         self.iter()
-            .map(|self_elem| <T as Ring>::r_mult(self_elem, scalar))
+            .map(|self_elem| <T as Ring>::r_mul(self_elem, scalar))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -227,7 +223,7 @@ where
         Self: Sized,
     {
         self.iter_mut()
-            .for_each(|self_elem| *self_elem = self_elem.r_mult(scalar));
+            .for_each(|self_elem| *self_elem = self_elem.r_mul(scalar));
     }
 
     #[inline]
@@ -267,12 +263,14 @@ where
     fn dot(&self, other: &Self) -> T {
         self.iter()
             .zip(other.iter())
-            .fold(T::r_zero(), |acc, (el1, el2)| acc.l_space_add(&el1.r_mult(el2)))
+            .fold(T::r_zero(), |acc, (el1, el2)| {
+                acc.l_space_add(&el1.r_mul(el2))
+            })
     }
 
     fn angle(&self, rhs: &Self) -> T {
         let dot = EuclidianSpace::dot(self, rhs);
-        let denominator = self.lenght().r_mult(&rhs.lenght());
+        let denominator = self.lenght().r_mul(&rhs.lenght());
 
         if denominator == T::r_zero() {
             return T::r_zero();
@@ -298,7 +296,9 @@ where
                 .map(|col| {
                     self.iter()
                         .zip(col)
-                        .fold(T::l_space_zero(), |acc, (el1, el2)| acc.r_add(&el1.r_mult(el2)))
+                        .fold(T::l_space_zero(), |acc, (el1, el2)| {
+                            acc.r_add(&el1.r_mul(el2))
+                        })
                 })
                 .collect::<Vec<T>>(),
         ) {
@@ -387,9 +387,9 @@ impl<T: Ring + Copy> VectorMath<T, 3> {
     pub fn cross_product(&self, rhs: Self) -> Self {
         //TODO test and doc
         [
-            self[1].r_mult(&rhs[2]).r_sub(&self[2].r_mult(&rhs[1])),
-            self[2].r_mult(&rhs[0]).r_sub(&self[0].r_mult(&rhs[2])),
-            self[0].r_mult(&rhs[1]).r_sub(&self[1].r_mult(&rhs[0])),
+            self[1].r_mul(&rhs[2]).r_sub(&self[2].r_mul(&rhs[1])),
+            self[2].r_mul(&rhs[0]).r_sub(&self[0].r_mul(&rhs[2])),
+            self[0].r_mul(&rhs[1]).r_sub(&self[1].r_mul(&rhs[0])),
         ]
         .into()
     }

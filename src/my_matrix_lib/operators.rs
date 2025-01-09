@@ -37,7 +37,7 @@ where
     Self: VectorSpace<T>,
 {
     fn add_assign(&mut self, rhs: Self) {
-        self.l_space_add_assign( &rhs);
+        self.l_space_add_assign(&rhs);
     }
 }
 
@@ -63,9 +63,7 @@ where
     }
 }
 
-
-impl<T, const N: usize, const M: usize> Mul<T>
-    for Matrix<T, N, M>
+impl<T, const N: usize, const M: usize> Mul<T> for Matrix<T, N, M>
 where
     Matrix<T, N, M>: VectorSpace<T>,
 {
@@ -78,7 +76,7 @@ where
 
 impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
 where
-    Matrix<T, N, M>: MatrixTrait<T,DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
+    Matrix<T, N, M>: MatrixTrait<T, DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
 {
     type Output = <Matrix<T, N, M> as MatrixTrait<T>>::DotOut<P>;
 

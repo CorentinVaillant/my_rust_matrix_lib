@@ -592,7 +592,10 @@ mod tests {
             let can2 = VectorMath::from([0., 1., 0.]);
             let can3 = VectorMath::from([0., 0., 1.]);
             assert_eq!(can1.angle(&can2), core::f64::consts::FRAC_PI_2);
-            assert_eq!(can1.angle(&can3.l_space_scale(&-1.)), core::f64::consts::FRAC_PI_2);
+            assert_eq!(
+                can1.angle(&can3.l_space_scale(&-1.)),
+                core::f64::consts::FRAC_PI_2
+            );
 
             let vec1 = VectorMath::from([1., 1., 0.]);
             assert!(

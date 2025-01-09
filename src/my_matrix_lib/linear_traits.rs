@@ -4,7 +4,6 @@ pub trait VectorSpace<Scalar>
 where
     Self: PartialEq,
 {
-
     ///Add two vector together
     /// ## Example
     /// ```
@@ -248,7 +247,6 @@ where
 
     fn is_lower_triangular(&self) -> bool;
 }
-
 
 /*-----------------------*
  * Basic implementations *
