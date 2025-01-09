@@ -1,4 +1,4 @@
-use super::{algebric_traits::Field, prelude::{VectorMath, VectorSpace}};
+use super::{additional_structs::Dimension, algebric_traits::Field, prelude::{VectorMath, VectorSpace}};
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
 
@@ -41,18 +41,18 @@ impl<T:Field + Copy> VectorSpace<T> for Quaternion<T>{
     }
 
     fn l_space_zero() -> Self {
-        todo!()
+        (T::l_space_zero(),Vec3::l_space_zero()).into()
     }
 
     fn l_space_one() -> T {
-        todo!()
+        T::r_one()
     }
 
     fn l_space_scalar_zero() -> T {
-        todo!()
+        T::r_zero()
     }
 
     fn dimension() -> super::additional_structs::Dimension {
-        todo!()
+        Dimension::Finite(4)
     }
 }
