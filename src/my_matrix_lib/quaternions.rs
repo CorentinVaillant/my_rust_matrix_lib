@@ -56,3 +56,36 @@ impl<T:Field + Copy> VectorSpace<T> for Quaternion<T>{
         Dimension::Finite(4)
     }
 }
+
+/*
+impl<T:Field + Copy> VectorSpace<Self> for Quaternion<T>{
+    fn l_space_add(&self, other: &Self) -> Self {
+        (self.re.l_space_add(&other.re),
+        self.im.l_space_add(&other.im)).into()
+    }
+
+    fn l_space_sub(&self, other: &Self) -> Self {
+        todo!()
+    }
+
+    fn l_space_scale(&self, scalar: &Self) -> Self {
+        todo!()
+    }
+
+    fn l_space_zero() -> Self {
+        todo!()
+    }
+
+    fn l_space_one() -> Self {
+        todo!()
+    }
+
+    fn l_space_scalar_zero() -> Self {
+        todo!()
+    }
+
+    fn dimension() -> Dimension {
+        todo!()
+    }
+}
+ */

@@ -13,18 +13,18 @@ where
     ///
     ///let vec1 = VectorMath::from([1,2,3,4]);
     ///let vec2 = VectorMath::from([4,3,2,1]);
-    ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+    ///assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5,5,5,5]));
     ///
     ///
     ///let vec1 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///let vec2 :VectorMath<f64,5> = (0..5).map(|i|{5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///let vec3 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i) + 5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///
-    ///assert_eq!(vec1.add(&vec2), vec3);
+    ///assert_eq!(vec1.l_space_add(&vec2), vec3);
     ///
     ///let vec1 = VectorMath::from([1_u8,2_u8,3_u8,4_u8]);
     ///let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
-    ///assert_eq!(vec1.add(&vec2), VectorMath::from([5,5,5,5]));
+    ///assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5,5,5,5]));
     /// ```
     fn l_space_add(&self, other: &Self) -> Self;
 
@@ -43,14 +43,14 @@ where
     ///
     ///let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
     ///
-    ///assert_eq!(vec1.substract(&vec1), VectorMath::zero());
+    ///assert_eq!(vec1.l_space_sub(&vec1), VectorMath::l_space_zero());
     ///
     ///
     ///let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
     ///let vec2 = VectorMath::from([1.,1.,1.,1.]);
     ///
-    ///assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
-    ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(&-1.));
+    ///assert_eq!(vec1.l_space_sub(&vec2), VectorMath::from([4.,3.,2.,1.]));
+    ///assert_eq!(vec2.l_space_sub(&vec1), VectorMath::from([4.,3.,2.,1.]).l_space_scale(&-1.));
     /// ```
     fn l_space_sub(&self, other: &Self) -> Self;
 
@@ -69,9 +69,9 @@ where
     ///
     /// let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
     ///
-    /// assert_eq!(vec1.scale(&0.), VectorMath::zero());
+    /// assert_eq!(vec1.l_space_scale(&0.), VectorMath::l_space_zero());
     ///
-    /// assert_eq!(vec1.scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
+    /// assert_eq!(vec1.l_space_scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
     /// ```
     fn l_space_scale(&self, scalar: &Scalar) -> Self;
 
@@ -89,7 +89,7 @@ where
     /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
     ///
     ///let vec = VectorMath::from([0,0,0]);
-    ///assert_eq!(vec,VectorMath::zero())
+    ///assert_eq!(vec,VectorMath::l_space_zero())
     /// ```
     fn l_space_zero() -> Self;
 
@@ -100,9 +100,9 @@ where
     /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
     ///
     /// let vec = VectorMath::from([89,895,9856,956,9856,956]);
-    /// let one = VectorMath::<i32,6>::one();
+    /// let one = VectorMath::<i32,6>::l_space_one();
     ///
-    /// assert_eq!(vec.scale(&one), vec);
+    /// assert_eq!(vec.l_space_scale(&one), vec);
     /// ```
     fn l_space_one() -> Scalar;
 
@@ -127,9 +127,9 @@ where
     ///let vec1 = VectorMath::from([1.,0.]);
     ///assert_eq!(vec1.lenght(), 1.);
     ///
-    ///assert_eq!(vec1.scale(&2.).lenght(), 2.);
+    ///assert_eq!(vec1.l_space_scale(&2.).lenght(), 2.);
     ///
-    ///let vec2 = VectorMath::from([0.,1.]).add(&vec1);
+    ///let vec2 = VectorMath::from([0.,1.]).l_space_add(&vec1);
     ///assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
     ///
     ///let vec3: VectorMath<f32, 0> = VectorMath::from([]);
@@ -178,7 +178,7 @@ where
     ///let can2 = VectorMath::from([0.,1.,0.]);
     ///let can3 = VectorMath::from([0.,0.,1.]);
     ///assert_eq!(can1.angle(&can2),core::f64::consts::FRAC_PI_2);
-    ///assert_eq!(can1.angle(&can3.scale(&-1.)),core::f64::consts::FRAC_PI_2);
+    ///assert_eq!(can1.angle(&can3.l_space_scale(&-1.)),core::f64::consts::FRAC_PI_2);
     ///
     ///let vec1 = VectorMath::from([1.,1.,0.]);
     ///assert!(core::f64::consts::FRAC_PI_4 - f64::EPSILON <vec1.angle(&can1) && vec1.angle(&can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON);
