@@ -57,7 +57,7 @@ impl<T:Field + Copy> VectorSpace<T> for Quaternion<T>{
     }
 }
 
-/*
+
 impl<T:Field + Copy> VectorSpace<Self> for Quaternion<T>{
     fn l_space_add(&self, other: &Self) -> Self {
         (self.re.l_space_add(&other.re),
@@ -88,4 +88,4 @@ impl<T:Field + Copy> VectorSpace<Self> for Quaternion<T>{
         todo!()
     }
 }
- */
+
