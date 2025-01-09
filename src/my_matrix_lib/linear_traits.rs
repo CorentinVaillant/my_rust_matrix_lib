@@ -12,24 +12,22 @@ where
     ///
     ///let vec1 = VectorMath::from([1,2,3,4]);
     ///let vec2 = VectorMath::from([4,3,2,1]);
-    ///assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5,5,5,5]));
+    ///assert_eq!(vec1.v_space_add(vec2), VectorMath::from([5,5,5,5]));
     ///
     ///
     ///let vec1 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///let vec2 :VectorMath<f64,5> = (0..5).map(|i|{5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///let vec3 :VectorMath<f64,5> = (0..5).map(|i|{2.0_f64.powi(i) + 5.0_f64.powi(i)}).collect::<Vec<f64>>().try_into().unwrap();
     ///
-    ///assert_eq!(vec1.l_space_add(&vec2), vec3);
+    ///assert_eq!(vec1.v_space_add(vec2), vec3);
     ///
     ///let vec1 = VectorMath::from([1_u8,2_u8,3_u8,4_u8]);
     ///let vec2 = VectorMath::from([4_u8,3_u8,2_u8,1_u8]);
-    ///assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5,5,5,5]));
+    ///assert_eq!(vec1.v_space_add(vec2), VectorMath::from([5,5,5,5]));
     /// ```
-    fn l_space_add(&self, other: &Self) -> Self;
+    fn v_space_add(self, other: Self) -> Self;
 
-    fn l_space_add_assign(&mut self, other: &Self) {
-        *self = self.l_space_add(other);
-    }
+    fn v_space_add_assign(&mut self, other: Self);
 
     ///Substract a vector by another
     /// ## Example
@@ -39,23 +37,18 @@ where
     ///
     ///let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
     ///
-    ///assert_eq!(vec1.l_space_sub(vec1), VectorMath::l_space_zero());
+    ///assert_eq!(vec1.v_space_sub(vec1), VectorMath::v_space_zero());
     ///
     ///
     ///let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
     ///let vec2 = VectorMath::from([1.,1.,1.,1.]);
     ///
-    ///assert_eq!(vec1.l_space_sub(vec2), VectorMath::from([4.,3.,2.,1.]));
-    ///assert_eq!(vec2.l_space_sub(vec1), VectorMath::from([4.,3.,2.,1.]).l_space_scale(&-1.));
+    ///assert_eq!(vec1.v_space_sub(vec2), VectorMath::from([4.,3.,2.,1.]));
+    ///assert_eq!(vec2.v_space_sub(vec1), VectorMath::from([4.,3.,2.,1.]).v_space_scale(-1.));
     /// ```
-    fn l_space_sub(self, other: Self) -> Self;
+    fn v_space_sub(self, other: Self) -> Self;
 
-    fn l_space_substract_assign(&mut self, other: Self)
-    where
-        Self: Copy,
-    {
-        *self = self.l_space_sub(other);
-    }
+    fn v_space_sub_assign(&mut self, other: Self);
 
     ///Scale a vector by a scalar
     /// ## Example
@@ -65,16 +58,13 @@ where
     ///
     /// let vec1 = VectorMath::from([8.,9.,45.,63.,46.]);
     ///
-    /// assert_eq!(vec1.l_space_scale(&0.), VectorMath::l_space_zero());
+    /// assert_eq!(vec1.v_space_scale(0.), VectorMath::v_space_zero());
     ///
-    /// assert_eq!(vec1.l_space_scale(&2.),VectorMath::from([16.,18.,90.,126.,92.]));
+    /// assert_eq!(vec1.v_space_scale(2.),VectorMath::from([16.,18.,90.,126.,92.]));
     /// ```
-    fn l_space_scale(&self, scalar: &Scalar) -> Self;
+    fn v_space_scale(self, scalar: Scalar) -> Self;
 
-    fn l_space_scale_assign(&mut self, scalar: &Scalar) {
-        *self = self.l_space_scale(scalar);
-    }
-
+    fn v_space_scale_assign(&mut self, scalar: Scalar);
     ///Return the 0 vector
     /// ## Example
     /// ```
@@ -82,9 +72,9 @@ where
     /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
     ///
     ///let vec = VectorMath::from([0,0,0]);
-    ///assert_eq!(vec,VectorMath::l_space_zero())
+    ///assert_eq!(vec,VectorMath::v_space_zero())
     /// ```
-    fn l_space_zero() -> Self;
+    fn v_space_zero() -> Self;
 
     ///Return the 1 scalar
     /// ## Example
@@ -93,19 +83,19 @@ where
     /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
     ///
     /// let vec = VectorMath::from([89,895,9856,956,9856,956]);
-    /// let one = VectorMath::<i32,6>::l_space_one();
+    /// let one = VectorMath::<i32,6>::v_space_one();
     ///
-    /// assert_eq!(vec.l_space_scale(&one), vec);
+    /// assert_eq!(vec.v_space_scale(one), vec);
     /// ```
-    fn l_space_one() -> Scalar;
+    fn v_space_one() -> Scalar;
 
     ///TODO doc and test
-    fn l_space_add_inverse(self) -> Self {
-        Self::l_space_zero().l_space_sub(self)
+    fn v_space_add_inverse(self) -> Self {
+        Self::v_space_zero().v_space_sub(self)
     }
 
     ///Return the 0 scalar
-    fn l_space_scalar_zero() -> Scalar;
+    fn v_space_scalar_zero() -> Scalar;
 
     ///Return the dimension
     fn dimension() -> Dimension;
@@ -125,9 +115,9 @@ where
     ///let vec1 = VectorMath::from([1.,0.]);
     ///assert_eq!(vec1.lenght(), 1.);
     ///
-    ///assert_eq!(vec1.l_space_scale(&2.).lenght(), 2.);
+    ///assert_eq!(vec1.v_space_scale(2.).lenght(), 2.);
     ///
-    ///let vec2 = VectorMath::from([0.,1.]).l_space_add(&vec1);
+    ///let vec2 = VectorMath::from([0.,1.]).v_space_add(vec1);
     ///assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
     ///
     ///let vec3: VectorMath<f32, 0> = VectorMath::from([]);
@@ -164,7 +154,7 @@ where
         Scalar: PartialEq,
         Self: Sized,
     {
-        self.l_space_sub(other).lenght()
+        self.v_space_sub(other).lenght()
     }
 
     ///Return the angle between two vectors
@@ -176,7 +166,7 @@ where
     ///let can2 = VectorMath::from([0.,1.,0.]);
     ///let can3 = VectorMath::from([0.,0.,1.]);
     ///assert_eq!(can1.angle(can2),core::f64::consts::FRAC_PI_2);
-    ///assert_eq!(can1.angle(can3.l_space_scale(&-1.)),core::f64::consts::FRAC_PI_2);
+    ///assert_eq!(can1.angle(can3.v_space_scale(-1.)),core::f64::consts::FRAC_PI_2);
     ///
     ///let vec1 = VectorMath::from([1.,1.,0.]);
     ///assert!(core::f64::consts::FRAC_PI_4 - f64::EPSILON <vec1.angle(can1) && vec1.angle(can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON);
@@ -201,7 +191,7 @@ where
     where
         Scalar: PartialEq,
     {
-        self.dot(other) == Self::l_space_scalar_zero()
+        self.dot(other) == Self::v_space_scalar_zero()
     }
 }
 
@@ -214,10 +204,10 @@ where
 
     type Det;
 
-    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P>;
+    fn dot<const P: usize>(self, rhs: Self::DotIn<P>) -> Self::DotOut<P>;
 
     fn det(&self) -> Self::Det;
-    fn reduce_row_echelon(&self) -> Self;
+    fn reduce_row_echelon(self) -> Self;
 }
 
 pub trait SquaredMatrixTrait<Scalar>

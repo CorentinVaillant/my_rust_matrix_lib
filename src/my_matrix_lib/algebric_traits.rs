@@ -8,11 +8,11 @@ pub trait Ring
 where
     Self: VectorSpace<Self> + Sized,
 {
-    fn r_mul(&self, rhs: &Self) -> Self;
-    fn r_add(&self, rhs: &Self) -> Self;
+    fn r_mul(self, rhs: Self) -> Self;
+    fn r_add(self, rhs: Self) -> Self;
 
     fn r_sub(self, rhs: Self) -> Self {
-        self.r_add(&rhs.r_add_inverse())
+        self.r_add(rhs.r_add_inverse())
     }
 
     fn r_one() -> Self;
@@ -20,22 +20,21 @@ where
 
     fn r_add_inverse(self) -> Self;
 
-    fn r_powu<U: Integer + Unsigned + DivAssign + SubAssign + Copy>(&self, pow: U) -> Self
+    fn r_powu<U: Integer + Unsigned + DivAssign + SubAssign >(self, pow: U) -> Self
     where
         Self: Sized + Copy,
     {
         let mut pow = pow;
-        let mut result = *self;
+        let mut result = self;
         let one = <Self as Ring>::r_one();
         let zero = <Self as Ring>::r_zero();
-        let u_two = U::one() + U::one();
         let mut end_fact = Self::r_one();
 
         if result != one && result != zero {
             while pow > U::one() {
                 match pow.is_even() {
                     true => {
-                        pow /= u_two;
+                        pow /= U::one() + U::one();
                         result.r_mul_assign(result);
                     }
                     false => {
@@ -51,7 +50,7 @@ where
         } else if result == zero {
             zero
         } else {
-            end_fact.r_mul(&result)
+            end_fact.r_mul(result)
         }
     }
 
@@ -63,13 +62,13 @@ pub trait Field
 where
     Self: Ring,
 {
-    fn f_mult_inverse(&self) -> Self;
+    fn f_mult_inverse(self) -> Self;
 
-    fn f_div(&self, rhs: &Self) -> Self
+    fn f_div(self, rhs: Self) -> Self
     where
         Self: Sized,
     {
-        self.r_mul(&rhs.f_mult_inverse())
+        self.r_mul(rhs.f_mult_inverse())
     }
 }
 
@@ -77,36 +76,37 @@ impl<T> Ring for T
 where
     T: VectorSpace<T>,
 {
-    fn r_mul(&self, rhs: &Self) -> Self {
-        self.l_space_scale(rhs)
+    fn r_mul(self, rhs: Self) -> Self {
+        self.v_space_scale(rhs)
     }
 
-    fn r_add(&self, rhs: &Self) -> Self {
-        self.l_space_add(rhs)
+    fn r_add(self, rhs: Self) -> Self {
+        self.v_space_add(rhs)
     }
 
     fn r_sub(self, rhs: Self) -> Self {
-        self.l_space_sub(rhs)
+        self.v_space_sub(rhs)
     }
 
     fn r_one() -> Self {
-        <Self as VectorSpace<Self>>::l_space_one()
+        <Self as VectorSpace<Self>>::v_space_one()
     }
 
     fn r_zero() -> Self {
-        <Self as VectorSpace<Self>>::l_space_zero()
+        <Self as VectorSpace<Self>>::v_space_zero()
     }
 
     fn r_add_inverse(self) -> Self {
-        self.l_space_add_inverse()
+        self.v_space_add_inverse()
     }
 
-    fn r_add_assign(&mut self, rhs: Self) {
-        self.l_space_add_assign(&rhs);
+    fn r_add_assign(&mut self, rhs: Self)
+    {
+        self.v_space_add_assign(rhs);
     }
 
     fn r_mul_assign(&mut self, rhs: Self) {
-        self.l_space_scale_assign(&rhs);
+        self.v_space_scale_assign(rhs);
     }
 }
 

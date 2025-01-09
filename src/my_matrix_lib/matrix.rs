@@ -556,6 +556,7 @@ impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
         }
     }
 
+
     /*-----------&Mut equivalent-----------*/
 
     pub fn iter_mut_elem(&mut self, iter_along: IterateAlong) -> MatrixMutElemIterator<T, N, M> {

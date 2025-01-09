@@ -170,75 +170,76 @@ use super::matrix::Matrix;
 
 impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
 where
-    T: Ring + Copy,
+    T: Ring +Copy,
 {
-    fn l_space_add(&self, other: &Self) -> Self {
-        self.iter()
-            .zip(other.iter())
+    fn v_space_add(self, other: Self) -> Self {
+        self.into_iter()
+            .zip(other.into_iter())
             .map(|(self_elem, other_elem)| {
-                <T as VectorSpace<T>>::l_space_add(self_elem, other_elem)
+                self_elem.v_space_add(other_elem)
+                
             })
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn l_space_add_assign(&mut self, other: &Self)
+    fn v_space_add_assign(&mut self, other: Self)
     where
         Self: Sized,
     {
         self.iter_mut()
-            .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_add(other_elem));
+            .zip(other.into_iter())
+            .for_each(|(self_elem, other_elem)| self_elem.r_add_assign(other_elem));
     }
 
-    fn l_space_sub(self, other: Self) -> Self {
-        self.iter()
-            .zip(other.iter())
-            .map(|(self_elem, other_elem)| self_elem.l_space_sub(*other_elem))
+    fn v_space_sub(self, other: Self) -> Self {
+        self.into_iter()
+            .zip(other.into_iter())
+            .map(|(self_elem, other_elem)| self_elem.v_space_sub(other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn l_space_substract_assign(&mut self, other: Self)
+    fn v_space_sub_assign(&mut self, other: Self)
     where
         Self: Sized,
     {
         self.iter_mut()
-            .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_sub(*other_elem));
+            .zip(other.into_iter())
+            .for_each(|(self_elem, other_elem)| self_elem.v_space_sub_assign(other_elem));
     }
 
-    fn l_space_scale(&self, scalar: &T) -> Self {
-        self.iter()
-            .map(|self_elem| <T as Ring>::r_mul(self_elem, scalar))
+    fn v_space_scale(self, scalar: T) -> Self {
+        self.into_iter()
+            .map(|self_elem| self_elem.r_mul(scalar))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn l_space_scale_assign(&mut self, scalar: &T)
+    fn v_space_scale_assign(&mut self, scalar: T)
     where
         Self: Sized,
     {
         self.iter_mut()
-            .for_each(|self_elem| *self_elem = self_elem.r_mul(scalar));
+            .for_each(|self_elem| self_elem.r_mul_assign(scalar));
     }
 
     #[inline]
-    fn l_space_zero() -> Self {
-        Self::from([T::l_space_zero(); N])
+    fn v_space_zero() -> Self {
+        Self::from([T::v_space_zero(); N])
     }
 
     #[inline]
-    fn l_space_one() -> T {
+    fn v_space_one() -> T {
         T::r_one()
     }
 
     #[inline]
-    fn l_space_scalar_zero() -> T {
-        T::l_space_zero()
+    fn v_space_scalar_zero() -> T {
+        T::v_space_zero()
     }
 
     #[inline]
@@ -254,8 +255,8 @@ where
 {
     fn lenght(&self) -> T {
         self.iter()
-            .fold(Self::l_space_scalar_zero(), |acc, elem| {
-                acc.r_add(&elem.r_powu(2_u8))
+            .fold(Self::v_space_scalar_zero(), |acc, elem| {
+                acc.r_add(elem.r_powu(2_u8))
             })
             .sqrt()
     }
@@ -264,25 +265,25 @@ where
         self.iter()
             .zip(other.iter())
             .fold(T::r_zero(), |acc, (el1, el2)| {
-                acc.l_space_add(&el1.r_mul(el2))
+                acc.v_space_add(el1.r_mul(*el2))
             })
     }
 
     fn angle(self, rhs: Self) -> T {
         let dot = EuclidianSpace::dot(self, rhs);
-        let denominator = self.lenght().r_mul(&rhs.lenght());
+        let denominator = self.lenght().r_mul(rhs.lenght());
 
         if denominator == T::r_zero() {
             return T::r_zero();
         }
-        (dot.f_div(&denominator)).acos()
+        (dot.f_div(denominator)).acos()
     }
 }
 
 impl<T, const N: usize> MatrixTrait<T> for VectorMath<T, N>
 //TODO test and doc
 where
-    T: NthRootTrait + TrigFunc + Field + Copy,
+    T: Field + Copy,
 {
     type DotIn<const P: usize> = Matrix<T, N, P>;
 
@@ -290,14 +291,14 @@ where
 
     type Det = T;
 
-    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
+    fn dot<const P: usize>(self, rhs: Self::DotIn<P>) -> Self::DotOut<P> {
         match <Vec<T> as TryInto<VectorMath<T, P>>>::try_into(
             rhs.iter_column()
                 .map(|col| {
                     self.iter()
                         .zip(col)
-                        .fold(T::l_space_zero(), |acc, (el1, el2)| {
-                            acc.r_add(&el1.r_mul(el2))
+                        .fold(T::v_space_zero(), |acc, (el1, el2)| {
+                            acc.r_add(el1.r_mul(*el2))
                         })
                 })
                 .collect::<Vec<T>>(),
@@ -310,21 +311,21 @@ where
     fn det(&self) -> T {
         match N == 1 {
             true => self[0],
-            false => T::l_space_zero(),
+            false => T::v_space_zero(),
         }
     }
 
-    fn reduce_row_echelon(&self) -> Self {
-        *self
+    fn reduce_row_echelon(self) -> Self {
+        self
     }
 }
 
 impl<T, const N: usize> VectorMath<T, N>
 where
-    T: NthRootTrait + TrigFunc + Field + Copy,
+    T: Field + Copy,
 {
-    pub fn dot_assign(&mut self, dot_in: Matrix<T, N, N>) -> &mut Self {
-        *self = MatrixTrait::dot(self, &dot_in);
+    pub fn dot_assign(&mut self, rhs: Matrix<T, N, N>) -> &mut Self {
+        *self = self.dot(rhs);
         self
     }
 }
@@ -349,7 +350,7 @@ where
     where
         Self: Sized,
     {
-        match self[0] == T::l_space_zero() {
+        match self[0] == T::v_space_zero() {
             true => Err(MatrixError::NotInversible),
             false => Ok(Self::from([self[0].f_mult_inverse()])),
         }
@@ -387,9 +388,9 @@ impl<T: Ring + Copy> VectorMath<T, 3> {
     pub fn cross_product(&self, rhs: Self) -> Self {
         //TODO test and doc
         [
-            self[1].r_mul(&rhs[2]).r_sub(self[2].r_mul(&rhs[1])),
-            self[2].r_mul(&rhs[0]).r_sub(self[0].r_mul(&rhs[2])),
-            self[0].r_mul(&rhs[1]).r_sub(self[1].r_mul(&rhs[0])),
+            self[1].r_mul(rhs[2]).r_sub(self[2].r_mul(rhs[1])),
+            self[2].r_mul(rhs[0]).r_sub(self[0].r_mul(rhs[2])),
+            self[0].r_mul(rhs[1]).r_sub(self[1].r_mul(rhs[0])),
         ]
         .into()
     }

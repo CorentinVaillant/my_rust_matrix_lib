@@ -15,8 +15,8 @@ mod tests {
             let m2 = Matrix::from([[0., 0., 1.], [0., 1., 0.], [1.0, 0.0, 0.0]]);
             let expected_result = Matrix::from([[1., 0., 1.], [0., 2., 0.], [1.0, 0.0, 1.0]]);
             assert_eq!(m1 + m2, expected_result);
-            assert_eq!(m1.l_space_add(&m2), expected_result);
-            assert_eq!(m2.l_space_add(&m1), expected_result);
+            assert_eq!(m1.v_space_add(m2), expected_result);
+            assert_eq!(m2.v_space_add(m1), expected_result);
 
             let m_empty: Matrix<f32, 3, 0> = Matrix::from([[], [], []]);
             assert_eq!(m_empty + m_empty, m_empty);
@@ -31,9 +31,9 @@ mod tests {
             let expected_result_m2_time_m1 =
                 Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
             assert_eq!(m1 * m2, expected_result_m1_time_m2);
-            assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
+            assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
             assert_eq!(m2 * m1, expected_result_m2_time_m1);
-            assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
+            assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
         }
 
         //test scaling
@@ -42,7 +42,7 @@ mod tests {
             let scale_factor = 0.5;
             let expected_result = Matrix::from([[1., 2., 0.], [0., 1., 2.], [2., 0., 1.]]);
             assert_eq!(m * scale_factor, expected_result);
-            assert_eq!(m.l_space_scale(&scale_factor), expected_result);
+            assert_eq!(m.v_space_scale(scale_factor), expected_result);
 
             let empty: [[f64; 15]; 0] = [];
             let m_empty = Matrix::from(empty);
@@ -51,11 +51,11 @@ mod tests {
 
         //test zeroed
         {
-            let m = Matrix::l_space_zero();
+            let m = Matrix::v_space_zero();
             let expected_m = Matrix::from([[0., 0., 0., 0.]]);
             assert_eq!(m, expected_m);
 
-            let m = Matrix::l_space_zero();
+            let m = Matrix::v_space_zero();
             let expected_m = Matrix::from([
                 [0., 0., 0., 0.],
                 [0., 0., 0., 0.],
@@ -398,13 +398,13 @@ mod tests {
             let tab = [4; 4];
             let vec1: &VectorMath<i32, 4> = (&tab).into();
 
-            let vec1 = vec1.l_space_add(vec1);
+            let vec1 = vec1.v_space_add(*vec1);
             let result_vec = VectorMath::from([8; 4]);
             assert_eq!(vec1, result_vec);
 
             let vec1: &VectorMath<i32, 4> = (&tab).into();
             let vec2: &VectorMath<i32, 4> = (&tab).into();
-            let vec1 = vec1.l_space_add(vec2);
+            let vec1 = vec1.v_space_add(*vec2);
             let result_vec = VectorMath::from([8; 4]);
             assert_eq!(vec1, result_vec);
         }
@@ -471,7 +471,7 @@ mod tests {
 
             let vec1 = VectorMath::from([1, 2, 3, 4]);
             let vec2 = VectorMath::from([4, 3, 2, 1]);
-            assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5, 5, 5, 5]));
+            assert_eq!(vec1.v_space_add(vec2), VectorMath::from([5, 5, 5, 5]));
 
             let vec1: VectorMath<f64, 5> = (0..5)
                 .map(|i| 2.0_f64.powi(i))
@@ -489,11 +489,11 @@ mod tests {
                 .try_into()
                 .unwrap();
 
-            assert_eq!(vec1.l_space_add(&vec2), vec3);
+            assert_eq!(vec1.v_space_add(vec2), vec3);
 
             let vec1 = VectorMath::from([1_u8, 2_u8, 3_u8, 4_u8]);
             let vec2 = VectorMath::from([4_u8, 3_u8, 2_u8, 1_u8]);
-            assert_eq!(vec1.l_space_add(&vec2), VectorMath::from([5, 5, 5, 5]));
+            assert_eq!(vec1.v_space_add(vec2), VectorMath::from([5, 5, 5, 5]));
         }
 
         //subtract
@@ -502,15 +502,15 @@ mod tests {
 
             let vec1 = VectorMath::from([7, 6, 8, 8, 64, 9, 5, 9, 44, 9491, 5, 964, 9]);
 
-            assert_eq!(vec1.l_space_sub(vec1), VectorMath::l_space_zero());
+            assert_eq!(vec1.v_space_sub(vec1), VectorMath::v_space_zero());
 
             let vec1 = VectorMath::from([5.0_f64, 4.0_f64, 3.0_f64, 2.0_f64]);
             let vec2 = VectorMath::from([1., 1., 1., 1.]);
 
-            assert_eq!(vec1.l_space_sub(vec2), VectorMath::from([4., 3., 2., 1.]));
+            assert_eq!(vec1.v_space_sub(vec2), VectorMath::from([4., 3., 2., 1.]));
             assert_eq!(
-                vec2.l_space_sub(vec1),
-                VectorMath::from([4., 3., 2., 1.]).l_space_scale(&-1.)
+                vec2.v_space_sub(vec1),
+                VectorMath::from([4., 3., 2., 1.]).v_space_scale(-1.)
             );
         }
 
@@ -520,10 +520,10 @@ mod tests {
 
             let vec1 = VectorMath::from([8., 9., 45., 63., 46.]);
 
-            assert_eq!(vec1.l_space_scale(&0.), VectorMath::l_space_zero());
+            assert_eq!(vec1.v_space_scale(0.), VectorMath::v_space_zero());
 
             assert_eq!(
-                vec1.l_space_scale(&2.),
+                vec1.v_space_scale(2.),
                 VectorMath::from([16., 18., 90., 126., 92.])
             );
         }
@@ -533,7 +533,7 @@ mod tests {
             use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
             let vec = VectorMath::from([0, 0, 0]);
-            assert_eq!(vec, VectorMath::l_space_zero())
+            assert_eq!(vec, VectorMath::v_space_zero())
         }
 
         //one
@@ -541,9 +541,9 @@ mod tests {
             use crate::my_matrix_lib::prelude::{VectorMath, VectorSpace};
 
             let vec = VectorMath::from([89, 895, 9856, 956, 9856, 956]);
-            let one = VectorMath::<i32, 6>::l_space_one();
+            let one = VectorMath::<i32, 6>::v_space_one();
 
-            assert_eq!(vec.l_space_scale(&one), vec);
+            assert_eq!(vec.v_space_scale(one), vec);
         }
 
         /* Euclidian Space */
@@ -555,9 +555,9 @@ mod tests {
             let vec1 = VectorMath::from([-1., 0.]);
             assert_eq!(vec1.lenght(), 1.);
 
-            assert_eq!(vec1.l_space_scale(&2.).lenght(), 2.);
+            assert_eq!(vec1.v_space_scale(2.).lenght(), 2.);
 
-            let vec2 = VectorMath::from([0., 1.]).l_space_add(&vec1);
+            let vec2 = VectorMath::from([0., 1.]).v_space_add(vec1);
             assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
 
             let vec3: VectorMath<f32, 0> = VectorMath::from([]);
@@ -593,7 +593,7 @@ mod tests {
             let can3 = VectorMath::from([0., 0., 1.]);
             assert_eq!(can1.angle(can2), core::f64::consts::FRAC_PI_2);
             assert_eq!(
-                can1.angle(can3.l_space_scale(&-1.)),
+                can1.angle(can3.v_space_scale(-1.)),
                 core::f64::consts::FRAC_PI_2
             );
 

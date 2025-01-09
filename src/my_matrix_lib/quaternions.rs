@@ -1,3 +1,5 @@
+use core::ops::{AddAssign, MulAssign, SubAssign};
+
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, Ring, TrigFunc},
@@ -31,28 +33,47 @@ impl<T: Field, U: Into<T>> From<(U, Vec3<T>)> for Quaternion<T> {
 <=================== Mathematics ======================>
 ********************************************************/
 
-impl<T: Field + Copy> VectorSpace<T> for Quaternion<T> {
-    fn l_space_add(&self, other: &Self) -> Self {
-        (self.re.r_add(&other.re), self.im.l_space_add(&other.im)).into()
+impl<T: Field + AddAssign + MulAssign + SubAssign +Copy> VectorSpace<T> for Quaternion<T> {
+    fn v_space_add(self, other: Self) -> Self {
+        (self.re.r_add(other.re), self.im.v_space_add(other.im)).into()
     }
 
-    fn l_space_sub(self, other: Self) -> Self {
-        (self.re.r_add(&other.re), self.im.l_space_sub(other.im)).into()
+    fn v_space_add_assign(&mut self, other: Self) {
+        self.re.r_add_assign(other.re);
+        self.im.v_space_add_assign(other.im);
     }
 
-    fn l_space_scale(&self, scalar: &T) -> Self {
-        (self.re.l_space_scale(scalar), self.im.l_space_scale(scalar)).into()
+    fn v_space_add_inverse(self) -> Self {
+        (self.re.r_add_inverse(),self.im.v_space_add_inverse()).into()
     }
 
-    fn l_space_zero() -> Self {
-        (T::l_space_zero(), Vec3::l_space_zero()).into()
+    fn v_space_sub(self, other: Self) -> Self {
+        (self.re.r_add(other.re), self.im.v_space_sub(other.im)).into()
     }
 
-    fn l_space_one() -> T {
+    fn v_space_sub_assign(&mut self, other: Self) {
+        self.re.v_space_sub_assign(other.re);
+        self.im.v_space_sub_assign(other.im);
+    }
+
+    fn v_space_scale(self, scalar: T) -> Self {
+        (self.re.v_space_scale(scalar), self.im.v_space_scale(scalar)).into()
+    }
+
+    fn v_space_scale_assign(&mut self, scalar: T) {
+        self.re.r_mul_assign(scalar);
+        self.im.v_space_scale_assign(scalar);
+    }
+
+    fn v_space_zero() -> Self {
+        (T::v_space_zero(), Vec3::v_space_zero()).into()
+    }
+
+    fn v_space_one() -> T {
         T::r_one()
     }
 
-    fn l_space_scalar_zero() -> T {
+    fn v_space_scalar_zero() -> T {
         T::r_zero()
     }
 
@@ -62,41 +83,58 @@ impl<T: Field + Copy> VectorSpace<T> for Quaternion<T> {
 }
 
 impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion<T> {
-    fn l_space_add(&self, other: &Self) -> Self {
+    fn v_space_add(self, other: Self) -> Self {
         (
-            self.re.l_space_add(&other.re),
-            self.im.l_space_add(&other.im),
+            self.re.v_space_add(other.re),
+            self.im.v_space_add(other.im),
         )
             .into()
     }
 
-    fn l_space_sub(self, other: Self) -> Self {
-        (self.re.l_space_sub(other.re), self.im.l_space_sub(other.im)).into()
+    fn v_space_add_assign(&mut self, other: Self) {
+        self.re.v_space_add_assign(other.re);
+        self.im.v_space_add_assign(other.im);
     }
 
-    fn l_space_scale(&self, scalar: &Self) -> Self {
+    fn v_space_add_inverse(self) -> Self {
+        (self.re,self.im.v_space_add_inverse()).into()
+    }
+
+    fn v_space_sub(self, other: Self) -> Self {
+        (self.re.v_space_sub(other.re), self.im.v_space_sub(other.im)).into()
+    }
+
+    fn v_space_sub_assign(&mut self, other: Self) {
+        self.re.v_space_sub_assign(other.re);
+        self.im.v_space_sub_assign(other.im);
+    }
+
+    fn v_space_scale(self, scalar: Self) -> Self {
         let a1 = self.re;
         let a2 = scalar.re;
         let v1 = self.im;
         let v2 = scalar.im;
 
         (
-            a1.l_space_scale(&a2).l_space_sub(v1.dot(v2)),
-            v2.l_space_scale(&a1) + v1.l_space_scale(&a2) + v1.cross_product(v2),
-        )
-            .into()
+            a1.v_space_scale(a2).v_space_sub(v1.dot(v2)),
+            v2.v_space_scale(a1) + v1.v_space_scale(a2) + v1.cross_product(v2),
+        ).into()
     }
 
-    fn l_space_zero() -> Self {
-        (T::r_zero(), Vec3::l_space_zero()).into()
+    fn v_space_scale_assign(&mut self, scalar: Self) {
+        *self = self.v_space_scale(scalar);
     }
 
-    fn l_space_one() -> Self {
-        (T::r_one(), Vec3::l_space_zero()).into()
+    fn v_space_zero() -> Self {
+        (T::r_zero(), Vec3::v_space_zero()).into()
     }
 
-    fn l_space_scalar_zero() -> Self {
-        (T::r_zero(), Vec3::l_space_zero()).into()
+    fn v_space_one() -> Self {
+        (T::r_one(), Vec3::v_space_zero()).into()
+    }
+
+    fn v_space_scalar_zero() -> Self {
+        (T::r_zero(), Vec3::v_space_zero()).into()
     }
 
     fn dimension() -> Dimension {
@@ -106,11 +144,11 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 
 impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
     pub fn squared_length(self) -> T {
-        self.re.r_powu(2_u8).r_mul(&self.im.dot(self.im))
+        self.re.r_powu(2_u8).r_mul(self.im.dot(self.im))
     }
 
     pub fn conjugate(self) -> Self {
-        (self.re, self.im.l_space_add_inverse()).into()
+        (self.re, self.im.v_space_add_inverse()).into()
     }
 }
 
@@ -119,7 +157,7 @@ where
     T: Field,
     Self: Ring,
 {
-    fn f_mult_inverse(&self) -> Self {
+    fn f_mult_inverse(self) -> Self {
         todo!()
     }
 }

@@ -1,3 +1,5 @@
+use std::ops::{AddAssign, MulAssign, SubAssign};
+
 use num::{Float, Num, ToPrimitive};
 
 use super::{
@@ -5,29 +7,47 @@ use super::{
     prelude::{EuclidianSpace, VectorSpace},
 };
 
-impl<T: Num + Copy> VectorSpace<T> for T {
+impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
     #[inline]
-    fn l_space_add(&self, other: &Self) -> Self {
-        *self + *other
+    fn v_space_add(self, other: Self) -> Self {
+        self + other
     }
+
     #[inline]
-    fn l_space_sub(self, other: Self) -> Self {
+    fn v_space_add_assign(&mut self, other: Self) {
+        *self += other;
+    }
+
+    #[inline]
+    fn v_space_sub(self, other: Self) -> Self {
         self - other
     }
+
     #[inline]
-    fn l_space_scale(&self, scalar: &T) -> Self {
-        *self * *scalar
+    fn v_space_sub_assign(&mut self, other: Self) {
+        *self -= other;
     }
+
     #[inline]
-    fn l_space_zero() -> Self {
+    fn v_space_scale(self, scalar: T) -> Self {
+        self * scalar
+    }
+
+    #[inline]
+    fn v_space_scale_assign(&mut self, scalar: T) {
+        *self *= scalar;
+    }
+
+    #[inline]
+    fn v_space_zero() -> Self {
         Self::zero()
     }
     #[inline]
-    fn l_space_one() -> T {
+    fn v_space_one() -> T {
         Self::one()
     }
     #[inline]
-    fn l_space_scalar_zero() -> T {
+    fn v_space_scalar_zero() -> T {
         Self::zero()
     }
     #[inline]
@@ -36,20 +56,20 @@ impl<T: Num + Copy> VectorSpace<T> for T {
     }
 }
 
-impl<T: Float + Copy> Field for T {
-    fn f_mult_inverse(&self) -> Self {
-        T::one() / *self
+impl<T: Float + AddAssign + MulAssign + SubAssign> Field for T {
+    fn f_mult_inverse(self) -> Self {
+        T::one() / self
     }
 
-    fn f_div(&self, rhs: &Self) -> Self
+    fn f_div(self, rhs: Self) -> Self
     where
         Self: Sized,
     {
-        *self / *rhs
+        self / rhs
     }
 }
 
-impl<T: Float + Copy> EuclidianSpace<T> for T {
+impl<T: Float + AddAssign + MulAssign + SubAssign> EuclidianSpace<T> for T {
     #[inline]
     fn lenght(&self) -> T {
         self.abs()
@@ -94,7 +114,7 @@ impl NthRootTrait for f64 {
     }
 }
 
-impl<T: Float> TrigFunc for T {
+impl<T: Float + AddAssign + MulAssign + SubAssign> TrigFunc for T {
     fn cos(self) -> Self {
         T::cos(self)
     }

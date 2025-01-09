@@ -1,6 +1,6 @@
 #![allow(uncovered_param_in_projection)] // ! toremove
 use core::ops::{Add, AddAssign, Mul};
-use std::ops::{Div, MulAssign};
+use std::ops::{Div, MulAssign, SubAssign};
 
 use num::{Float, Num};
 
@@ -18,7 +18,7 @@ where
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        self.l_space_add(&rhs)
+        self.v_space_add(rhs)
     }
 }
 
@@ -28,7 +28,7 @@ where
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        self.l_space_add(&rhs)
+        self.v_space_add(rhs)
     }
 }
 
@@ -37,7 +37,7 @@ where
     Self: VectorSpace<T>,
 {
     fn add_assign(&mut self, rhs: Self) {
-        self.l_space_add_assign(&rhs);
+        self.v_space_add_assign(rhs);
     }
 }
 
@@ -46,7 +46,7 @@ where
     Self: VectorSpace<T>,
 {
     fn add_assign(&mut self, rhs: Self) {
-        self.l_space_add_assign(&rhs);
+        self.v_space_add_assign(rhs);
     }
 }
 
@@ -59,7 +59,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self::Output {
-        self.l_space_scale(&rhs)
+        self.v_space_scale(rhs)
     }
 }
 
@@ -70,7 +70,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self::Output {
-        self.l_space_scale(&rhs)
+        self.v_space_scale(rhs)
     }
 }
 
@@ -81,7 +81,7 @@ where
     type Output = <Matrix<T, N, M> as MatrixTrait<T>>::DotOut<P>;
 
     fn mul(self, rhs: Matrix<T, M, P>) -> Self::Output {
-        self.dot::<P>(&rhs)
+        self.dot::<P>(rhs)
     }
 }
 
@@ -91,7 +91,7 @@ where
 {
     type Output = VectorMath<T, P>;
     fn mul(self, rhs: Matrix<T, N, P>) -> Self::Output {
-        self.dot(&rhs)
+        self.dot(rhs)
     }
 }
 
@@ -106,28 +106,28 @@ where
 
 impl<T, const N: usize> MulAssign<T> for VectorMath<T, N>
 where
-    T: Copy + Float,
+    T: AddAssign + MulAssign + SubAssign + Float,
 {
     fn mul_assign(&mut self, rhs: T) {
-        self.l_space_scale_assign(&rhs);
+        self.v_space_scale_assign(rhs);
     }
 }
 
 impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
 where
-    T: Copy + Float,
+    T: AddAssign + MulAssign + SubAssign + Float,
 {
     fn mul_assign(&mut self, rhs: T) {
-        self.l_space_scale_assign(&rhs);
+        self.v_space_scale_assign(rhs);
     }
 }
 
 impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for Matrix<T, N, N>
 where
-    T: Copy + Float,
+    T: AddAssign + MulAssign + SubAssign + Float,
 {
     fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
-        *self = self.dot(&rhs);
+        *self = self.dot(rhs);
     }
 }
 

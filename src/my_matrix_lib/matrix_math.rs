@@ -2,6 +2,8 @@
 <=================== Mathematics ======================>
 ********************************************************/
 
+use std::ops::{AddAssign, MulAssign, SubAssign};
+
 use num::Float;
 
 use super::{
@@ -13,44 +15,68 @@ use super::{
 
 impl<T, const N: usize, const M: usize> VectorSpace<T> for Matrix<T, N, M>
 where
-    T: Copy + Float,
+    T: Copy + Float + AddAssign + MulAssign + SubAssign,
 {
-    fn l_space_add(&self, other: &Self) -> Self {
+    fn v_space_add(self, other: Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())
-            .map(|(self_row, other_row)| self_row.l_space_add(other_row))
+            .map(|(self_row, other_row)| self_row.v_space_add(*other_row))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn l_space_sub(self, other: Self) -> Self {
+    fn v_space_add_assign(&mut self, other: Self) {
+        self.iter_mut_row()
+            .zip(other.iter_row())
+            .for_each(|(self_row, other_row)| *self_row = self_row.v_space_add(*other_row))
+            
+    }
+
+    fn v_space_add_inverse(self) -> Self {
+        self.v_space_scale(T::zero() - T::one())
+    }
+
+    fn v_space_sub(self, other: Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())
-            .map(|(self_row, other_row)| self_row.l_space_sub(*other_row))
+            .map(|(self_row, other_row)| self_row.v_space_sub(*other_row))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn l_space_scale(&self, scalar: &T) -> Self {
+    fn v_space_sub_assign(&mut self, other: Self) {
+        self.iter_mut_row()
+        .zip(other.iter_row())
+        .for_each(|(self_row, other_row)| *self_row = self_row.v_space_sub(*other_row))
+    }
+
+    
+
+    fn v_space_scale(self, scalar: T) -> Self {
         self.iter_row()
-            .map(|self_row| self_row.l_space_scale(scalar))
+            .map(|self_row| self_row.v_space_scale(scalar))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()
     }
 
-    fn l_space_zero() -> Self {
-        Self::from([VectorMath::l_space_zero(); N])
+    fn v_space_scale_assign(&mut self, scalar: T) {
+        self.iter_mut_row()
+        .for_each(|self_row| self_row.v_space_scale_assign(scalar))
     }
 
-    fn l_space_one() -> T {
-        VectorMath::<T, N>::l_space_one()
+    fn v_space_zero() -> Self {
+        Self::from([VectorMath::v_space_zero(); N])
     }
 
-    fn l_space_scalar_zero() -> T {
-        VectorMath::<T, N>::l_space_scalar_zero()
+    fn v_space_one() -> T {
+        VectorMath::<T, N>::v_space_one()
+    }
+
+    fn v_space_scalar_zero() -> T {
+        VectorMath::<T, N>::v_space_scalar_zero()
     }
 
     fn dimension() -> super::additional_structs::Dimension {
@@ -60,7 +86,7 @@ where
 
 impl<T, const N: usize, const M: usize> MatrixTrait<T> for Matrix<T, N, M>
 where
-    T: Copy + Float,
+    T: Float + AddAssign + MulAssign + SubAssign,
 {
     type DotIn<const P: usize> = Matrix<T, M, P>;
     type DotOut<const P: usize> = Matrix<T, N, P>;
@@ -80,13 +106,13 @@ where
     ///let expected_result_m2_time_m1 = Matrix::from([[9., 12., 15.], [19., 26., 33.], [29., 40., 51.]]);
     ///
     ///assert_eq!(m1 * m2, expected_result_m1_time_m2);
-    ///assert_eq!(m1.dot(&m2), expected_result_m1_time_m2);
+    ///assert_eq!(m1.dot(m2), expected_result_m1_time_m2);
     ///assert_eq!(m2 * m1, expected_result_m2_time_m1);
-    ///assert_eq!(m2.dot(&m1), expected_result_m2_time_m1);
+    ///assert_eq!(m2.dot(m1), expected_result_m2_time_m1);
     /// ```
-    fn dot<const P: usize>(&self, rhs: &Self::DotIn<P>) -> Self::DotOut<P> {
+    fn dot<const P: usize>(self, rhs: Self::DotIn<P>) -> Self::DotOut<P> {
         //naive algorithm
-        let mut result: Matrix<T, N, P> = Matrix::l_space_zero();
+        let mut result: Matrix<T, N, P> = Matrix::v_space_zero();
         for i in 0..N {
             for j in 0..P {
                 for k in 0..M {
@@ -232,8 +258,8 @@ where
     ///
     ///assert!(m.reduce_row_echelon().float_eq(&expected_m));
     /// ```
-    fn reduce_row_echelon(&self) -> Self {
-        let mut result = *self;
+    fn reduce_row_echelon(self) -> Self {
+        let mut result = self;
 
         let mut lead = 0;
 
@@ -279,7 +305,7 @@ where
 
 impl<T, const N: usize> SquaredMatrixTrait<T> for Matrix<T, N, N>
 where
-    T: Copy + Float,
+    T: Float + AddAssign + MulAssign + SubAssign,
 {
     ///Returns the identity matrix
     /// ## Example :
@@ -296,7 +322,7 @@ where
     ///assert_eq!(i, expected_m);
     /// ```
     fn identity() -> Self {
-        let mut result = Matrix::l_space_zero();
+        let mut result = Matrix::v_space_zero();
         for i in 0..N {
             result[i][i] = T::one();
         }
@@ -344,7 +370,7 @@ where
         let self_square = *self;
 
         let mut p = Matrix::identity();
-        let mut l = Matrix::l_space_zero();
+        let mut l = Matrix::v_space_zero();
         let mut u = self_square;
 
         for k in 0..N {
@@ -441,7 +467,7 @@ where
                             ],
                         ))
                         .unwrap()
-                        .l_space_scale(&(T::one() / det)),
+                        .v_space_scale(T::one() / det),
                     )
                 }
             }
