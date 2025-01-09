@@ -1,4 +1,4 @@
-use super::{additional_structs::Dimension, algebric_traits::{Field, NthRootTrait, TrigFunc}, prelude::{VectorMath, VectorSpace}};
+use super::{additional_structs::Dimension, algebric_traits::{Field, NthRootTrait, TrigFunc}, prelude::{EuclidianSpace, VectorMath, VectorSpace}};
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
 
@@ -75,8 +75,8 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
         let v1 = self.im;
         let v2 = scalar.im;
 
-        (a1.l_space_scale(&a2) - v1.dot(&v2), 
-        v2.l_space_scale(&a1) + v1.l_space_scale(&a2) + v1.cross_product(&v2)).into()
+        (a1.l_space_scale(&a2).l_space_sub(&v1.dot(&v2)), 
+        v2.l_space_scale(&a1) + v1.l_space_scale(&a2) + v1.cross_product(v2)).into()
     }
 
     fn l_space_zero() -> Self {

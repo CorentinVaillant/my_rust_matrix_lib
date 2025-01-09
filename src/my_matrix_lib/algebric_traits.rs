@@ -2,7 +2,7 @@ use std::ops::{DivAssign, SubAssign};
 
 use num::{Integer, Unsigned};
 
-use super::{linear_traits::VectorSpace, prelude::EuclidianSpace};
+use super::linear_traits::VectorSpace;
 
 pub trait Ring
 where

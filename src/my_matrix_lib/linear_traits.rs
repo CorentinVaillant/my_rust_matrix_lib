@@ -248,3 +248,8 @@ where
 
     fn is_lower_triangular(&self) -> bool;
 }
+
+
+/*-----------------------*
+ * Basic implementations *
+ *-----------------------*/
