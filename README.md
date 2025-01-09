@@ -6,7 +6,8 @@ I will **not** maintain it forever.
 
 ## feature to add
 
-- [ ] TEST quaternions
+- [ ] DOC && TEST algebra traits
+- [ ] DOC && TEST quaternions
 - [ ] rank of a matrix
 - [ ] eigenvalues / eigenvectors
 - [ ] unknow size vector and matrix
