@@ -20,7 +20,7 @@ where
 
     fn r_add_inverse(self) -> Self;
 
-    fn r_powu<U: Integer + Unsigned + DivAssign + SubAssign >(self, pow: U) -> Self
+    fn r_powu<U: Integer + Unsigned + DivAssign + SubAssign>(self, pow: U) -> Self
     where
         Self: Sized + Copy,
     {
@@ -100,8 +100,7 @@ where
         self.v_space_add_inverse()
     }
 
-    fn r_add_assign(&mut self, rhs: Self)
-    {
+    fn r_add_assign(&mut self, rhs: Self) {
         self.v_space_add_assign(rhs);
     }
 

@@ -170,15 +170,12 @@ use super::matrix::Matrix;
 
 impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
 where
-    T: Ring +Copy,
+    T: Ring + Copy,
 {
     fn v_space_add(self, other: Self) -> Self {
         self.into_iter()
-            .zip(other.into_iter())
-            .map(|(self_elem, other_elem)| {
-                self_elem.v_space_add(other_elem)
-                
-            })
+            .zip(other)
+            .map(|(self_elem, other_elem)| self_elem.v_space_add(other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -189,13 +186,13 @@ where
         Self: Sized,
     {
         self.iter_mut()
-            .zip(other.into_iter())
+            .zip(other)
             .for_each(|(self_elem, other_elem)| self_elem.r_add_assign(other_elem));
     }
 
     fn v_space_sub(self, other: Self) -> Self {
         self.into_iter()
-            .zip(other.into_iter())
+            .zip(other)
             .map(|(self_elem, other_elem)| self_elem.v_space_sub(other_elem))
             .collect::<Vec<T>>()
             .try_into()
@@ -207,7 +204,7 @@ where
         Self: Sized,
     {
         self.iter_mut()
-            .zip(other.into_iter())
+            .zip(other)
             .for_each(|(self_elem, other_elem)| self_elem.v_space_sub_assign(other_elem));
     }
 

@@ -187,9 +187,10 @@ where
     ///assert!(can2.is_orthogonal_to(can3));
     ///assert!(can1.is_orthogonal_to(can3));
     /// ```
-    fn is_orthogonal_to(self, other: Self) -> bool
+    fn is_orthogonal_to(&self, other: Self) -> bool
     where
         Scalar: PartialEq,
+        Self: Copy,
     {
         self.dot(other) == Self::v_space_scalar_zero()
     }

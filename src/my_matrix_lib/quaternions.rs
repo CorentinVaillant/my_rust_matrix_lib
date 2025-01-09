@@ -33,7 +33,7 @@ impl<T: Field, U: Into<T>> From<(U, Vec3<T>)> for Quaternion<T> {
 <=================== Mathematics ======================>
 ********************************************************/
 
-impl<T: Field + AddAssign + MulAssign + SubAssign +Copy> VectorSpace<T> for Quaternion<T> {
+impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Quaternion<T> {
     fn v_space_add(self, other: Self) -> Self {
         (self.re.r_add(other.re), self.im.v_space_add(other.im)).into()
     }
@@ -44,7 +44,7 @@ impl<T: Field + AddAssign + MulAssign + SubAssign +Copy> VectorSpace<T> for Quat
     }
 
     fn v_space_add_inverse(self) -> Self {
-        (self.re.r_add_inverse(),self.im.v_space_add_inverse()).into()
+        (self.re.r_add_inverse(), self.im.v_space_add_inverse()).into()
     }
 
     fn v_space_sub(self, other: Self) -> Self {
@@ -84,11 +84,7 @@ impl<T: Field + AddAssign + MulAssign + SubAssign +Copy> VectorSpace<T> for Quat
 
 impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion<T> {
     fn v_space_add(self, other: Self) -> Self {
-        (
-            self.re.v_space_add(other.re),
-            self.im.v_space_add(other.im),
-        )
-            .into()
+        (self.re.v_space_add(other.re), self.im.v_space_add(other.im)).into()
     }
 
     fn v_space_add_assign(&mut self, other: Self) {
@@ -97,7 +93,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
     }
 
     fn v_space_add_inverse(self) -> Self {
-        (self.re,self.im.v_space_add_inverse()).into()
+        (self.re, self.im.v_space_add_inverse()).into()
     }
 
     fn v_space_sub(self, other: Self) -> Self {
@@ -118,7 +114,8 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
         (
             a1.v_space_scale(a2).v_space_sub(v1.dot(v2)),
             v2.v_space_scale(a1) + v1.v_space_scale(a2) + v1.cross_product(v2),
-        ).into()
+        )
+            .into()
     }
 
     fn v_space_scale_assign(&mut self, scalar: Self) {

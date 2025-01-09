@@ -30,7 +30,6 @@ where
         self.iter_mut_row()
             .zip(other.iter_row())
             .for_each(|(self_row, other_row)| *self_row = self_row.v_space_add(*other_row))
-            
     }
 
     fn v_space_add_inverse(self) -> Self {
@@ -48,11 +47,9 @@ where
 
     fn v_space_sub_assign(&mut self, other: Self) {
         self.iter_mut_row()
-        .zip(other.iter_row())
-        .for_each(|(self_row, other_row)| *self_row = self_row.v_space_sub(*other_row))
+            .zip(other.iter_row())
+            .for_each(|(self_row, other_row)| *self_row = self_row.v_space_sub(*other_row))
     }
-
-    
 
     fn v_space_scale(self, scalar: T) -> Self {
         self.iter_row()
@@ -64,7 +61,7 @@ where
 
     fn v_space_scale_assign(&mut self, scalar: T) {
         self.iter_mut_row()
-        .for_each(|self_row| self_row.v_space_scale_assign(scalar))
+            .for_each(|self_row| self_row.v_space_scale_assign(scalar))
     }
 
     fn v_space_zero() -> Self {
@@ -116,7 +113,7 @@ where
         for i in 0..N {
             for j in 0..P {
                 for k in 0..M {
-                    result[i][j] = result[i][j] + self[i][k] * rhs[k][j];
+                    result[i][j] += self[i][k] * rhs[k][j];
                 }
             }
         }
@@ -200,7 +197,7 @@ where
                     if lead_value == T::zero() {
                         return T::zero();
                     }
-                    det = det * lead_value;
+                    det *= lead_value;
                     for j in 0..N {
                         m_self[r][j] = m_self[r][j] / lead_value;
                     }
