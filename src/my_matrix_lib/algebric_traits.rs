@@ -11,14 +11,14 @@ where
     fn r_mul(&self, rhs: &Self) -> Self;
     fn r_add(&self, rhs: &Self) -> Self;
 
-    fn r_sub(&self, rhs: &Self) -> Self {
+    fn r_sub(self, rhs: Self) -> Self {
         self.r_add(&rhs.r_add_inverse())
     }
 
     fn r_one() -> Self;
     fn r_zero() -> Self;
 
-    fn r_add_inverse(&self) -> Self;
+    fn r_add_inverse(self) -> Self;
 
     fn r_powu<U: Integer + Unsigned + DivAssign + SubAssign + Copy>(&self, pow: U) -> Self
     where
@@ -85,7 +85,7 @@ where
         self.l_space_add(rhs)
     }
 
-    fn r_sub(&self, rhs: &Self) -> Self {
+    fn r_sub(self, rhs: Self) -> Self {
         self.l_space_sub(rhs)
     }
 
@@ -97,8 +97,8 @@ where
         <Self as VectorSpace<Self>>::l_space_zero()
     }
 
-    fn r_add_inverse(&self) -> Self {
-        Self::l_space_zero().l_space_sub(self)
+    fn r_add_inverse(self) -> Self {
+        self.l_space_add_inverse()
     }
 
     fn r_add_assign(&mut self, rhs: Self) {

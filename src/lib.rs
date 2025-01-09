@@ -502,14 +502,14 @@ mod tests {
 
             let vec1 = VectorMath::from([7, 6, 8, 8, 64, 9, 5, 9, 44, 9491, 5, 964, 9]);
 
-            assert_eq!(vec1.l_space_sub(&vec1), VectorMath::l_space_zero());
+            assert_eq!(vec1.l_space_sub(vec1), VectorMath::l_space_zero());
 
             let vec1 = VectorMath::from([5.0_f64, 4.0_f64, 3.0_f64, 2.0_f64]);
             let vec2 = VectorMath::from([1., 1., 1., 1.]);
 
-            assert_eq!(vec1.l_space_sub(&vec2), VectorMath::from([4., 3., 2., 1.]));
+            assert_eq!(vec1.l_space_sub(vec2), VectorMath::from([4., 3., 2., 1.]));
             assert_eq!(
-                vec2.l_space_sub(&vec1),
+                vec2.l_space_sub(vec1),
                 VectorMath::from([4., 3., 2., 1.]).l_space_scale(&-1.)
             );
         }
@@ -573,15 +573,15 @@ mod tests {
 
             let vec1 = VectorMath::from([1., 3., -5.]);
             let vec2 = VectorMath::from([4., -2., -1.]);
-            assert_eq!(vec1.dot(&vec2), 3.);
+            assert_eq!(vec1.dot(vec2), 3.);
 
             let vec1 = VectorMath::from([8., 4.]);
             let vec2 = VectorMath::from([72., 24.]);
-            assert_eq!(vec1.dot(&vec2), 672.);
+            assert_eq!(vec1.dot(vec2), 672.);
 
             let can1 = VectorMath::from([1., 0., 0., 0.]);
             let can2 = VectorMath::from([0., 1., 0., 25.]);
-            assert_eq!(can1.dot(&can2), 0.);
+            assert_eq!(can1.dot(can2), 0.);
         }
 
         //angle
@@ -591,20 +591,20 @@ mod tests {
             let can1 = VectorMath::from([1., 0., 0.]);
             let can2 = VectorMath::from([0., 1., 0.]);
             let can3 = VectorMath::from([0., 0., 1.]);
-            assert_eq!(can1.angle(&can2), core::f64::consts::FRAC_PI_2);
+            assert_eq!(can1.angle(can2), core::f64::consts::FRAC_PI_2);
             assert_eq!(
-                can1.angle(&can3.l_space_scale(&-1.)),
+                can1.angle(can3.l_space_scale(&-1.)),
                 core::f64::consts::FRAC_PI_2
             );
 
             let vec1 = VectorMath::from([1., 1., 0.]);
             assert!(
-                core::f64::consts::FRAC_PI_4 - f64::EPSILON < vec1.angle(&can1)
-                    && vec1.angle(&can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON
+                core::f64::consts::FRAC_PI_4 - f64::EPSILON < vec1.angle(can1)
+                    && vec1.angle(can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON
             );
 
             let vec2 = VectorMath::from([1., 2., 2.]);
-            assert_eq!(vec2.angle(&vec2), 0.);
+            assert_eq!(vec2.angle(vec2), 0.);
         }
 
         //is_orthogonal_to
@@ -613,9 +613,9 @@ mod tests {
             let can1 = VectorMath::from([1., 0., 0.]);
             let can2 = VectorMath::from([0., 1., 0.]);
             let can3 = VectorMath::from([0., 0., 1.]);
-            assert!(can1.is_orthogonal_to(&can2));
-            assert!(can2.is_orthogonal_to(&can3));
-            assert!(can1.is_orthogonal_to(&can3));
+            assert!(can1.is_orthogonal_to(can2));
+            assert!(can2.is_orthogonal_to(can3));
+            assert!(can1.is_orthogonal_to(can3));
         }
 
         let elapsed_time = now.elapsed();

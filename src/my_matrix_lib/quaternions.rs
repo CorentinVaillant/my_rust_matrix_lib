@@ -36,8 +36,8 @@ impl<T: Field + Copy> VectorSpace<T> for Quaternion<T> {
         (self.re.r_add(&other.re), self.im.l_space_add(&other.im)).into()
     }
 
-    fn l_space_sub(&self, other: &Self) -> Self {
-        (self.re.r_add(&other.re), self.im.l_space_sub(&other.im)).into()
+    fn l_space_sub(self, other: Self) -> Self {
+        (self.re.r_add(&other.re), self.im.l_space_sub(other.im)).into()
     }
 
     fn l_space_scale(&self, scalar: &T) -> Self {
@@ -70,12 +70,8 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
             .into()
     }
 
-    fn l_space_sub(&self, other: &Self) -> Self {
-        (
-            self.re.l_space_sub(&other.re),
-            self.im.l_space_sub(&other.im),
-        )
-            .into()
+    fn l_space_sub(self, other: Self) -> Self {
+        (self.re.l_space_sub(other.re), self.im.l_space_sub(other.im)).into()
     }
 
     fn l_space_scale(&self, scalar: &Self) -> Self {
@@ -85,7 +81,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
         let v2 = scalar.im;
 
         (
-            a1.l_space_scale(&a2).l_space_sub(&v1.dot(&v2)),
+            a1.l_space_scale(&a2).l_space_sub(v1.dot(v2)),
             v2.l_space_scale(&a1) + v1.l_space_scale(&a2) + v1.cross_product(v2),
         )
             .into()
@@ -108,17 +104,20 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
     }
 }
 
+impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
+    pub fn squared_length(self) -> T {
+        self.re.r_powu(2_u8).r_mul(&self.im.dot(self.im))
+    }
 
-impl<T : Field + TrigFunc +NthRootTrait+Copy> Quaternion<T> {
-    pub fn squared_length(self)->T{
-        self.re.r_powu(2_u8).r_mul(&self.im.dot(&self.im))
+    pub fn conjugate(self) -> Self {
+        (self.re, self.im.l_space_add_inverse()).into()
     }
 }
 
 impl<T> Field for Quaternion<T>
-where 
-    T : Field,
-    Self : Ring
+where
+    T: Field,
+    Self: Ring,
 {
     fn f_mult_inverse(&self) -> Self {
         todo!()

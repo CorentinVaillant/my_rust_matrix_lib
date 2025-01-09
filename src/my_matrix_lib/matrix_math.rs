@@ -24,10 +24,10 @@ where
             .unwrap()
     }
 
-    fn l_space_sub(&self, other: &Self) -> Self {
+    fn l_space_sub(self, other: Self) -> Self {
         self.iter_row()
             .zip(other.iter_row())
-            .map(|(self_row, other_row)| self_row.l_space_sub(other_row))
+            .map(|(self_row, other_row)| self_row.l_space_sub(*other_row))
             .collect::<Vec<VectorMath<T, M>>>()
             .try_into_matrix()
             .unwrap()

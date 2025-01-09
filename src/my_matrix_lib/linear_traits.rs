@@ -2,7 +2,7 @@ use super::{additional_structs::Dimension, errors::MatrixError};
 
 pub trait VectorSpace<Scalar>
 where
-    Self: PartialEq,
+    Self: PartialEq + Sized,
 {
     ///Add two vector together
     /// ## Example
@@ -27,10 +27,7 @@ where
     /// ```
     fn l_space_add(&self, other: &Self) -> Self;
 
-    fn l_space_add_assign(&mut self, other: &Self)
-    where
-        Self: Sized,
-    {
+    fn l_space_add_assign(&mut self, other: &Self) {
         *self = self.l_space_add(other);
     }
 
@@ -42,20 +39,20 @@ where
     ///
     ///let vec1 = VectorMath::from([7,6,8,8,64,9,5,9,44,9491,5,964,9]);
     ///
-    ///assert_eq!(vec1.l_space_sub(&vec1), VectorMath::l_space_zero());
+    ///assert_eq!(vec1.l_space_sub(vec1), VectorMath::l_space_zero());
     ///
     ///
     ///let vec1 = VectorMath::from([5.0_f64,4.0_f64,3.0_f64, 2.0_f64]);
     ///let vec2 = VectorMath::from([1.,1.,1.,1.]);
     ///
-    ///assert_eq!(vec1.l_space_sub(&vec2), VectorMath::from([4.,3.,2.,1.]));
-    ///assert_eq!(vec2.l_space_sub(&vec1), VectorMath::from([4.,3.,2.,1.]).l_space_scale(&-1.));
+    ///assert_eq!(vec1.l_space_sub(vec2), VectorMath::from([4.,3.,2.,1.]));
+    ///assert_eq!(vec2.l_space_sub(vec1), VectorMath::from([4.,3.,2.,1.]).l_space_scale(&-1.));
     /// ```
-    fn l_space_sub(&self, other: &Self) -> Self;
+    fn l_space_sub(self, other: Self) -> Self;
 
-    fn l_space_substract_assign(&mut self, other: &Self)
+    fn l_space_substract_assign(&mut self, other: Self)
     where
-        Self: Sized,
+        Self: Copy,
     {
         *self = self.l_space_sub(other);
     }
@@ -74,10 +71,7 @@ where
     /// ```
     fn l_space_scale(&self, scalar: &Scalar) -> Self;
 
-    fn l_space_scale_assign(&mut self, scalar: &Scalar)
-    where
-        Self: Sized,
-    {
+    fn l_space_scale_assign(&mut self, scalar: &Scalar) {
         *self = self.l_space_scale(scalar);
     }
 
@@ -104,6 +98,11 @@ where
     /// assert_eq!(vec.l_space_scale(&one), vec);
     /// ```
     fn l_space_one() -> Scalar;
+
+    ///TODO doc and test
+    fn l_space_add_inverse(self) -> Self {
+        Self::l_space_zero().l_space_sub(self)
+    }
 
     ///Return the 0 scalar
     fn l_space_scalar_zero() -> Scalar;
@@ -148,19 +147,19 @@ where
     ///
     ///let vec1 = VectorMath::from([1.,3.,-5.]);
     ///let vec2 = VectorMath::from([4.,-2.,-1.]);
-    ///assert_eq!(vec1.dot(&vec2), 3.);
+    ///assert_eq!(vec1.dot(vec2), 3.);
     ///
     ///let vec1 = VectorMath::from([8.,4.]);
     ///let vec2 = VectorMath::from([72.,24.]);
-    ///assert_eq!(vec1.dot(&vec2), 672.);
+    ///assert_eq!(vec1.dot(vec2), 672.);
     ///
     ///let can1 = VectorMath::from([1.,0.,0.,0.]);
     ///let can2 = VectorMath::from([0.,1.,0.,25.]);
-    ///assert_eq!(can1.dot(&can2),0.);
+    ///assert_eq!(can1.dot(can2),0.);
     /// ```
-    fn dot(&self, other: &Self) -> Scalar;
+    fn dot(self, other: Self) -> Scalar;
 
-    fn distance(&self, other: &Self) -> Scalar
+    fn distance(self, other: Self) -> Scalar
     where
         Scalar: PartialEq,
         Self: Sized,
@@ -176,16 +175,16 @@ where
     ///let can1 = VectorMath::from([1.,0.,0.]);
     ///let can2 = VectorMath::from([0.,1.,0.]);
     ///let can3 = VectorMath::from([0.,0.,1.]);
-    ///assert_eq!(can1.angle(&can2),core::f64::consts::FRAC_PI_2);
-    ///assert_eq!(can1.angle(&can3.l_space_scale(&-1.)),core::f64::consts::FRAC_PI_2);
+    ///assert_eq!(can1.angle(can2),core::f64::consts::FRAC_PI_2);
+    ///assert_eq!(can1.angle(can3.l_space_scale(&-1.)),core::f64::consts::FRAC_PI_2);
     ///
     ///let vec1 = VectorMath::from([1.,1.,0.]);
-    ///assert!(core::f64::consts::FRAC_PI_4 - f64::EPSILON <vec1.angle(&can1) && vec1.angle(&can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON);
+    ///assert!(core::f64::consts::FRAC_PI_4 - f64::EPSILON <vec1.angle(can1) && vec1.angle(can1) < core::f64::consts::FRAC_PI_4 + f64::EPSILON);
     ///
     ///let vec2 = VectorMath::from([1.,2.,2.]);
-    ///assert_eq!(vec2.angle(&vec2),0.);
+    ///assert_eq!(vec2.angle(vec2),0.);
     /// ```
-    fn angle(&self, rhs: &Self) -> Scalar;
+    fn angle(self, rhs: Self) -> Scalar;
 
     ///Return true if two vectors are orthogonal
     /// ## Examples :
@@ -194,11 +193,11 @@ where
     ///let can1 = VectorMath::from([1., 0., 0.]);
     ///let can2 = VectorMath::from([0., 1., 0.]);
     ///let can3 = VectorMath::from([0., 0., 1.]);
-    ///assert!(can1.is_orthogonal_to(&can2));
-    ///assert!(can2.is_orthogonal_to(&can3));
-    ///assert!(can1.is_orthogonal_to(&can3));
+    ///assert!(can1.is_orthogonal_to(can2));
+    ///assert!(can2.is_orthogonal_to(can3));
+    ///assert!(can1.is_orthogonal_to(can3));
     /// ```
-    fn is_orthogonal_to(&self, other: &Self) -> bool
+    fn is_orthogonal_to(self, other: Self) -> bool
     where
         Scalar: PartialEq,
     {

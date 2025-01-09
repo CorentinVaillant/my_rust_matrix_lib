@@ -11,8 +11,8 @@ impl<T: Num + Copy> VectorSpace<T> for T {
         *self + *other
     }
     #[inline]
-    fn l_space_sub(&self, other: &Self) -> Self {
-        *self - *other
+    fn l_space_sub(self, other: Self) -> Self {
+        self - other
     }
     #[inline]
     fn l_space_scale(&self, scalar: &T) -> Self {
@@ -56,12 +56,12 @@ impl<T: Float + Copy> EuclidianSpace<T> for T {
     }
 
     #[inline]
-    fn dot(&self, other: &Self) -> T {
-        *self * *other
+    fn dot(self, other: Self) -> T {
+        self * other
     }
     #[inline]
-    fn angle(&self, rhs: &Self) -> T {
-        match (*self + *rhs).is_sign_positive() {
+    fn angle(self, rhs: Self) -> T {
+        match (self + rhs).is_sign_positive() {
             true => T::zero(),
             false => T::from(core::f64::consts::PI).unwrap_or((T::zero() - T::one()).acos()), //if can cast const PI return the const, in the other case compute acos(-1) (wich return PI)
         }

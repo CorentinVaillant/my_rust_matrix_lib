@@ -192,22 +192,22 @@ where
             .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_add(other_elem));
     }
 
-    fn l_space_sub(&self, other: &Self) -> Self {
+    fn l_space_sub(self, other: Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| self_elem.l_space_sub(other_elem))
+            .map(|(self_elem, other_elem)| self_elem.l_space_sub(*other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
     }
 
-    fn l_space_substract_assign(&mut self, other: &Self)
+    fn l_space_substract_assign(&mut self, other: Self)
     where
         Self: Sized,
     {
         self.iter_mut()
             .zip(other.iter())
-            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_sub(other_elem));
+            .for_each(|(self_elem, other_elem)| *self_elem = self_elem.l_space_sub(*other_elem));
     }
 
     fn l_space_scale(&self, scalar: &T) -> Self {
@@ -260,7 +260,7 @@ where
             .sqrt()
     }
 
-    fn dot(&self, other: &Self) -> T {
+    fn dot(self, other: Self) -> T {
         self.iter()
             .zip(other.iter())
             .fold(T::r_zero(), |acc, (el1, el2)| {
@@ -268,7 +268,7 @@ where
             })
     }
 
-    fn angle(&self, rhs: &Self) -> T {
+    fn angle(self, rhs: Self) -> T {
         let dot = EuclidianSpace::dot(self, rhs);
         let denominator = self.lenght().r_mul(&rhs.lenght());
 
@@ -387,9 +387,9 @@ impl<T: Ring + Copy> VectorMath<T, 3> {
     pub fn cross_product(&self, rhs: Self) -> Self {
         //TODO test and doc
         [
-            self[1].r_mul(&rhs[2]).r_sub(&self[2].r_mul(&rhs[1])),
-            self[2].r_mul(&rhs[0]).r_sub(&self[0].r_mul(&rhs[2])),
-            self[0].r_mul(&rhs[1]).r_sub(&self[1].r_mul(&rhs[0])),
+            self[1].r_mul(&rhs[2]).r_sub(self[2].r_mul(&rhs[1])),
+            self[2].r_mul(&rhs[0]).r_sub(self[0].r_mul(&rhs[2])),
+            self[0].r_mul(&rhs[1]).r_sub(self[1].r_mul(&rhs[0])),
         ]
         .into()
     }
