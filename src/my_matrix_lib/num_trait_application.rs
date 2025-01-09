@@ -13,7 +13,7 @@ impl<T: Num + Copy> VectorSpace for T {
         *self + *other
     }
     #[inline]
-    fn l_space_substract(&self, other: &Self) -> Self {
+    fn l_space_sub(&self, other: &Self) -> Self {
         *self - *other
     }
     #[inline]

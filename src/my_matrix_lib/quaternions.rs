@@ -25,15 +25,15 @@ impl<T:Field,U:Into<T>> From<(U,Vec3<T>)> for Quaternion<T>{
 <=================== Mathematics ======================>
 ********************************************************/
 
-impl<T:Field> VectorSpace for Quaternion<T>{
+impl<T:Field + Copy> VectorSpace for Quaternion<T>{
     type Scalar = Self;
 
     fn l_space_add(&self, other: &Self) -> Self {
-        (self.re.r_add(&other.re), self.im.l_space_add(other.im)).into()
+        (self.re.r_add(&other.re), self.im.l_space_add(&other.im)).into()
     }
 
-    fn l_space_substract(&self, other: &Self) -> Self {
-        todo!()
+    fn l_space_sub(&self, other: &Self) -> Self {
+        (self.re.r_add(&other.re), self.im.l_space_sub(&other.im)).into()
     }
 
     fn l_space_scale(&self, scalar: &Self::Scalar) -> Self {

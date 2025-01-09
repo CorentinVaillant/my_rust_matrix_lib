@@ -53,13 +53,13 @@ where
     ///assert_eq!(vec1.substract(&vec2), VectorMath::from([4.,3.,2.,1.]));
     ///assert_eq!(vec2.substract(&vec1), VectorMath::from([4.,3.,2.,1.]).scale(&-1.));
     /// ```
-    fn l_space_substract(&self, other: &Self) -> Self;
+    fn l_space_sub(&self, other: &Self) -> Self;
 
     fn l_space_substract_assign(&mut self, other: &Self)
     where
         Self: Sized,
     {
-        *self = self.l_space_substract(other);
+        *self = self.l_space_sub(other);
     }
 
     ///Scale a vector by a scalar
@@ -167,7 +167,7 @@ where
         Self::Scalar: PartialEq,
         Self: Sized,
     {
-        self.l_space_substract(other).lenght()
+        self.l_space_sub(other).lenght()
     }
 
     ///Return the angle between two vectors

@@ -90,7 +90,7 @@ where
     }
 
     fn r_add_inverse(&self) -> Self {
-        Self::l_space_zero().l_space_substract(self)
+        Self::l_space_zero().l_space_sub(self)
     }
 
     fn r_add_assign(&mut self, rhs: Self) {

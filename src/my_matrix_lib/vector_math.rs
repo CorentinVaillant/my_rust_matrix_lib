@@ -171,7 +171,7 @@ use num::Num;
 
 impl<T, const N: usize> VectorSpace for VectorMath<T, N>
 where
-    T: Field + Copy,
+    T: Ring + Copy,
 {
     type Scalar = T;
 
@@ -195,10 +195,10 @@ where
             });
     }
 
-    fn l_space_substract(&self, other: &Self) -> Self {
+    fn l_space_sub(&self, other: &Self) -> Self {
         self.iter()
             .zip(other.iter())
-            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_substract(self_elem, other_elem))
+            .map(|(self_elem, other_elem)| <T as VectorSpace>::l_space_sub(self_elem, other_elem))
             .collect::<Vec<T>>()
             .try_into()
             .unwrap()
@@ -211,7 +211,7 @@ where
         self.iter_mut()
             .zip(other.iter())
             .for_each(|(self_elem, other_elem)| {
-                *self_elem = <T as VectorSpace>::l_space_substract(self_elem, other_elem)
+                *self_elem = <T as VectorSpace>::l_space_sub(self_elem, other_elem)
             });
     }
 
