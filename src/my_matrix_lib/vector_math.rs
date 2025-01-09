@@ -468,6 +468,7 @@ impl<T, const N: usize> IntoIterator for VectorMath<T, N> {
 
     type IntoIter = std::array::IntoIter<Self::Item, N>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.inner.into_iter()
     }

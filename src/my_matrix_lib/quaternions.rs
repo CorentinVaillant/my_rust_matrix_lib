@@ -23,9 +23,93 @@ impl<T: Field, U: Into<T> + Copy> From<Vec4<U>> for Quaternion<T> {
     }
 }
 
+impl<T: Field, U: Into<T>> From<[U; 4]> for Quaternion<T> {
+    fn from(vec: [U; 4]) -> Self {
+        let mut iter = vec.into_iter();
+        Self {
+            re: iter.next().unwrap().into(),
+            im: [
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+            ]
+            .into(),
+        }
+    }
+}
+
 impl<T: Field, U: Into<T>> From<(U, Vec3<T>)> for Quaternion<T> {
     fn from((re, im): (U, Vec3<T>)) -> Self {
         Self { re: re.into(), im }
+    }
+}
+
+impl<T: Field, U: Into<T>> From<(U, [T; 3])> for Quaternion<T> {
+    fn from((re, im): (U, [T; 3])) -> Self {
+        Self {
+            re: re.into(),
+            im: im.into(),
+        }
+    }
+}
+
+impl<T: Field, A, B, C, D> From<Quaternion<T>> for (A, B, C, D)
+where
+    T: Into<A> + Into<B> + Into<C> + Into<D>,
+{
+    fn from(value: Quaternion<T>) -> Self {
+        let mut im = value.im.into_iter();
+        (
+            value.re.into(),
+            im.next().unwrap().into(),
+            im.next().unwrap().into(),
+            im.next().unwrap().into(),
+        )
+    }
+}
+
+impl<T: Field, A, B, C, D> From<(A, B, C, D)> for Quaternion<T>
+where
+    T: From<A> + From<B> + From<C> + From<D>,
+{
+    fn from((a, x, y, z): (A, B, C, D)) -> Self {
+        let re: T = a.into();
+        let im = [x.into(), y.into(), z.into()];
+        (re, im).into()
+    }
+}
+
+impl<T: Field, U> From<Quaternion<T>> for Vec4<U>
+where
+    T: Into<U>,
+{
+    fn from(value: Quaternion<T>) -> Self {
+        let mut iter = value.im.into_iter();
+        [
+            value.re.into(),
+            iter.next().unwrap().into(),
+            iter.next().unwrap().into(),
+            iter.next().unwrap().into(),
+        ]
+        .into()
+    }
+}
+
+impl<T: Field, A, B> From<Quaternion<T>> for (A, Vec3<B>)
+where
+    T: Into<A> + Into<B>,
+{
+    fn from(value: Quaternion<T>) -> Self {
+        let mut iter = value.im.into_iter();
+        (
+            value.re.into(),
+            [
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+            ]
+            .into(),
+        )
     }
 }
 

@@ -10,9 +10,9 @@ mod quaternions;
 mod vector_math;
 
 pub mod prelude {
+    pub use crate::my_matrix_lib::algebric_traits::*;
     pub use crate::my_matrix_lib::errors::MatrixError;
     pub use crate::my_matrix_lib::linear_traits::*;
-    pub use crate::my_matrix_lib::algebric_traits::*;
     pub use crate::my_matrix_lib::matrix::*;
     pub use crate::my_matrix_lib::vector_math::*;
 }
