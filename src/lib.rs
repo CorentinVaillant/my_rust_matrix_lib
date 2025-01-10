@@ -2,6 +2,7 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
+    use crate::my_matrix_lib::quaternion::Quaternion;
 
     #[test]
     fn matrix_test() {
@@ -623,7 +624,28 @@ mod tests {
     }
 
     #[test]
-    fn quaternions_test() {}
+    fn quaternions_test() {
+        //add test
+        {
+            let quat1: Quaternion<f32> = Quaternion::from((1., 2., 3., 4.));
+            let quat2 = Quaternion::from((4., [3., 2., 1.]));
+            let result = Quaternion::from([5.; 4]);
+            assert_eq!(quat1 + quat2, result);
+            assert_eq!(quat2 + quat1, result);
+            assert_eq!(quat1 + Quaternion::<f32>::zero(), quat1);
+        }
+
+        //mul test
+        {
+            let quat1: Quaternion<f32> = Quaternion::from((1., 2., 3., 4.));
+            let quat2 = Quaternion::from((4., [3., 2., 1.]));
+            let result1 = Quaternion::from((-12., 6., 24., 12.));
+            let result2 = Quaternion::from((-12., 16., 4., 22.));
+
+            assert_eq!(quat1 * quat2, result1);
+            assert_eq!(quat2 * quat1, result2);
+        }
+    }
 
     #[test]
     fn usefull_fonctions_test() {

@@ -3,7 +3,7 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::{EuclidianSpace, VectorMath, VectorSpace},
+    prelude::{EuclidianSpace, Ring, VectorMath, VectorSpace},
 };
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
@@ -233,12 +233,41 @@ impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
     }
 }
 
-impl<T> Field for Quaternion<T>
+impl<T: Field> Field for Quaternion<T>
 where
-    T: Field + TrigFunc + NthRootTrait + AddAssign + MulAssign + SubAssign + Copy,
-    Self: Field,
+    T: TrigFunc + NthRootTrait + AddAssign + MulAssign + SubAssign + Copy,
 {
     fn f_mult_inverse(self) -> Self {
         <Self as VectorSpace<T>>::v_space_scale(self, self.squared_length().f_mult_inverse())
+    }
+}
+
+impl<T: Field> Quaternion<T>
+where
+    Self: Field + Ring,
+{
+    #[inline]
+    pub fn zero() -> Self {
+        Self::v_space_zero()
+    }
+
+    #[inline]
+    pub fn one() -> Self {
+        Self::r_one()
+    }
+
+    #[inline]
+    pub fn unit_i() -> Self {
+        (T::r_zero(), T::r_one(), T::r_zero(), T::r_zero()).into()
+    }
+
+    #[inline]
+    pub fn unit_j() -> Self {
+        (T::r_zero(), T::r_zero(), T::r_one(), T::r_zero()).into()
+    }
+
+    #[inline]
+    pub fn unit_k() -> Self {
+        (T::r_zero(), T::r_zero(), T::r_zero(), T::r_one()).into()
     }
 }
