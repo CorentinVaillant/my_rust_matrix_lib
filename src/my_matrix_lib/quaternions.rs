@@ -2,7 +2,7 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 
 use super::{
     additional_structs::Dimension,
-    algebric_traits::{Field, NthRootTrait, Ring, TrigFunc},
+    algebric_traits::{Field, NthRootTrait, TrigFunc},
     prelude::{EuclidianSpace, VectorMath, VectorSpace},
 };
 type Vec3<T> = VectorMath<T, 3>;
@@ -235,10 +235,10 @@ impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
 
 impl<T> Field for Quaternion<T>
 where
-    T: Field,
-    Self: Ring,
+    T: Field + TrigFunc + NthRootTrait + AddAssign + MulAssign + SubAssign + Copy,
+    Self: Field,
 {
     fn f_mult_inverse(self) -> Self {
-        todo!()
+        <Self as VectorSpace<T>>::v_space_scale(self, self.squared_length().f_mult_inverse())
     }
 }
