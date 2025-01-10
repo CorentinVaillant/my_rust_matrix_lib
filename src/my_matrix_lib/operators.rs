@@ -1,6 +1,5 @@
-#![allow(uncovered_param_in_projection)] // ! toremove
 use core::ops::{Add, AddAssign, Mul};
-use std::ops::{Div, MulAssign, SubAssign};
+use core::ops::{Div, MulAssign, Sub, SubAssign};
 
 use num::{Float, Num};
 
@@ -8,7 +7,8 @@ use super::{
     algebric_traits::{Field, NthRootTrait, TrigFunc},
     linear_traits::{MatrixTrait, VectorSpace},
     matrix::Matrix,
-    prelude::VectorMath,
+    prelude::{Ring, VectorMath},
+    quaternion::Quaternion,
 };
 
 //Add operator
@@ -143,5 +143,125 @@ where
             *elem = *elem / rhs;
         }
         vec
+    }
+}
+
+impl<T: Field> Mul<T> for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        self.v_space_scale(rhs)
+    }
+}
+
+impl<T: Field> MulAssign<T> for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        self.v_space_scale_assign(rhs);
+    }
+}
+
+impl<T: Field> Mul for Quaternion<T>
+where
+    Self: Field,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.r_mul(rhs)
+    }
+}
+
+impl<T: Field> MulAssign for Quaternion<T>
+where
+    Self: Field,
+{
+    fn mul_assign(&mut self, rhs: Self) {
+        self.r_mul_assign(rhs);
+    }
+}
+
+impl<T: Field + Copy> Add<T> for Quaternion<T>
+where
+    Self: VectorSpace<Self>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        (self.re.r_add(rhs), self.im).into()
+    }
+}
+
+impl<T: Field> AddAssign<T> for Quaternion<T>
+where
+    Self: VectorSpace<Self>,
+{
+    fn add_assign(&mut self, rhs: T) {
+        self.re.r_add_assign(rhs);
+    }
+}
+
+impl<T: Field> Add for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self.v_space_add(rhs)
+    }
+}
+
+impl<T: Field> AddAssign for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        self.v_space_add_assign(rhs);
+    }
+}
+
+impl<T: Field + Copy> Sub<T> for Quaternion<T>
+where
+    Self: VectorSpace<Self>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        (self.re.r_sub(rhs), self.im).into()
+    }
+}
+
+impl<T: Field> SubAssign<T> for Quaternion<T>
+where
+    Self: VectorSpace<Self>,
+{
+    fn sub_assign(&mut self, rhs: T) {
+        self.re.r_sub_assign(rhs);
+    }
+}
+
+impl<T: Field> Sub for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.v_space_sub(rhs)
+    }
+}
+
+impl<T: Field> SubAssign for Quaternion<T>
+where
+    Self: VectorSpace<T>,
+{
+    fn sub_assign(&mut self, rhs: Self) {
+        self.v_space_sub_assign(rhs);
     }
 }

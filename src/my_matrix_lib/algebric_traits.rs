@@ -11,9 +11,7 @@ where
     fn r_mul(self, rhs: Self) -> Self;
     fn r_add(self, rhs: Self) -> Self;
 
-    fn r_sub(self, rhs: Self) -> Self {
-        self.r_add(rhs.r_add_inverse())
-    }
+    fn r_sub(self, rhs: Self) -> Self;
 
     fn r_one() -> Self;
     fn r_zero() -> Self;
@@ -56,6 +54,7 @@ where
 
     fn r_mul_assign(&mut self, rhs: Self);
     fn r_add_assign(&mut self, rhs: Self);
+    fn r_sub_assign(&mut self, rhs: Self);
 }
 
 pub trait Field
@@ -76,36 +75,49 @@ impl<T> Ring for T
 where
     T: VectorSpace<T>,
 {
+    #[inline]
     fn r_mul(self, rhs: Self) -> Self {
         self.v_space_scale(rhs)
     }
 
+    #[inline]
     fn r_add(self, rhs: Self) -> Self {
         self.v_space_add(rhs)
     }
 
+    #[inline]
     fn r_sub(self, rhs: Self) -> Self {
         self.v_space_sub(rhs)
     }
 
+    #[inline]
     fn r_one() -> Self {
         <Self as VectorSpace<Self>>::v_space_one()
     }
 
+    #[inline]
     fn r_zero() -> Self {
         <Self as VectorSpace<Self>>::v_space_zero()
     }
 
+    #[inline]
     fn r_add_inverse(self) -> Self {
         self.v_space_add_inverse()
     }
 
+    #[inline]
     fn r_add_assign(&mut self, rhs: Self) {
         self.v_space_add_assign(rhs);
     }
 
+    #[inline]
     fn r_mul_assign(&mut self, rhs: Self) {
         self.v_space_scale_assign(rhs);
+    }
+
+    #[inline]
+    fn r_sub_assign(&mut self, rhs: Self) {
+        self.v_space_sub_assign(rhs);
     }
 }
 

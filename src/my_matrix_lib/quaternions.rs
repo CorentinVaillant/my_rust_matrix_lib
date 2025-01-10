@@ -10,8 +10,8 @@ type Vec4<T> = VectorMath<T, 4>;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quaternion<T: Field> {
-    re: T,
-    im: Vec3<T>,
+    pub re: T,
+    pub im: Vec3<T>,
 }
 
 impl<T: Field, U: Into<T> + Copy> From<Vec4<U>> for Quaternion<T> {
