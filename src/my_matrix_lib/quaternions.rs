@@ -113,6 +113,23 @@ where
     }
 }
 
+impl<T: Field, A, B> From<Quaternion<T>> for (A, [B;3])
+where
+    T: Into<A> + Into<B>,
+{
+    fn from(value: Quaternion<T>) -> Self {
+        let mut iter = value.im.into_iter();
+        (
+            value.re.into(),
+            [
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+                iter.next().unwrap().into(),
+            ]
+        )
+    }
+}
+
 /********************************************************
 <=================== Mathematics ======================>
 ********************************************************/
