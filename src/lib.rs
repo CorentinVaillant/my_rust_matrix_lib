@@ -2,7 +2,7 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::quaternion::Quaternion;
+    use crate::my_matrix_lib::{prelude::Field, quaternion::Quaternion};
 
     #[test]
     fn matrix_test() {
@@ -644,6 +644,15 @@ mod tests {
 
             assert_eq!(quat1 * quat2, result1);
             assert_eq!(quat2 * quat1, result2);
+        }
+
+        //inverse test
+        {
+            let one = Quaternion::<f32>::one();
+            assert_eq!(one,one.conjugate());
+            assert_eq!(one,(one.squared_length(),[0.;3]).into());
+            assert_eq!(one,one.f_mult_inverse())
+
         }
     }
 

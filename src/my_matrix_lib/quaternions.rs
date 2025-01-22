@@ -3,8 +3,9 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::{EuclidianSpace, Ring, VectorMath, VectorSpace},
+    prelude::{Ring, VectorMath, VectorSpace},
 };
+use crate::my_matrix_lib::linear_traits::EuclidianSpace;
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
 
@@ -130,6 +131,7 @@ where
     }
 }
 
+
 /********************************************************
 <=================== Mathematics ======================>
 ********************************************************/
@@ -242,7 +244,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 
 impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
     pub fn squared_length(self) -> T {
-        self.re.r_powu(2_u8).r_mul(self.im.dot(self.im))
+        self.re.r_mul(self.re).r_add(self.im.dot(self.im))
     }
 
     pub fn conjugate(self) -> Self {
@@ -255,7 +257,7 @@ where
     T: TrigFunc + NthRootTrait + AddAssign + MulAssign + SubAssign + Copy,
 {
     fn f_mult_inverse(self) -> Self {
-        <Self as VectorSpace<T>>::v_space_scale(self, self.squared_length().f_mult_inverse())
+        self.conjugate() * self.squared_length().f_mult_inverse()
     }
 }
 
