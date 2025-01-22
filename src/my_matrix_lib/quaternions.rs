@@ -243,12 +243,21 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 }
 
 impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
+    pub fn lenght(self)->T{
+        self.squared_length().sqrt()
+    }
+
     pub fn squared_length(self) -> T {
         self.re.r_mul(self.re).r_add(self.im.dot(self.im))
     }
 
     pub fn conjugate(self) -> Self {
         (self.re, self.im.v_space_add_inverse()).into()
+    }
+
+    pub fn normalized(self)->Self{
+        let a = (self.lenght().f_mult_inverse(),[T::r_zero();3]).into();
+        self.v_space_scale(a)
     }
 }
 

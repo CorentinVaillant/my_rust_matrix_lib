@@ -2,7 +2,7 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::{prelude::Field, quaternion::Quaternion};
+    use crate::my_matrix_lib::{prelude::{Field, VectorSpace}, quaternion::Quaternion};
 
     #[test]
     fn matrix_test() {
@@ -653,6 +653,17 @@ mod tests {
             assert_eq!(one,(one.squared_length(),[0.;3]).into());
             assert_eq!(one,one.f_mult_inverse())
 
+        }
+
+        //normalized
+        {
+            let one = Quaternion::<f32>::one();
+            assert_eq!(one,one.normalized());
+            let two:Quaternion<f32> = (2.,0.,0.,0.).into();
+            assert_eq!(two.normalized(),one);
+
+            let two_i:Quaternion<f32> = (0.,2.,0.,0.).into();
+            assert_eq!(two_i.normalized(),two_i.v_space_scale(0.5));
         }
     }
 
