@@ -45,7 +45,7 @@ impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
 
     #[inline]
     fn is_zero(&self)->bool {
-        <Self as num::Zero>::is_zero(&self)
+        <Self as num::Zero>::is_zero(self)
     }
 
     #[inline]
@@ -77,7 +77,7 @@ impl<T: Float + AddAssign + MulAssign + SubAssign> Field for T {
 
 impl<T: Float + AddAssign + MulAssign + SubAssign> EuclidianSpace<T> for T {
     #[inline]
-    fn lenght(&self) -> T {
+    fn length(&self) -> T {
         self.abs()
     }
 

@@ -2,7 +2,7 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::{prelude::{Exp, Field, VectorMath, VectorSpace}, quaternion::Quaternion};
+    use crate::my_matrix_lib::{prelude::{Field, VectorSpace}, quaternion::Quaternion};
 
     #[test]
     fn matrix_test() {
@@ -549,23 +549,23 @@ mod tests {
 
         /* Euclidian Space */
 
-        //lenght
+        //length
         {
             use crate::my_matrix_lib::prelude::{EuclidianSpace, VectorMath, VectorSpace};
 
             let vec1 = VectorMath::from([-1., 0.]);
-            assert_eq!(vec1.lenght(), 1.);
+            assert_eq!(vec1.length(), 1.);
 
-            assert_eq!(vec1.v_space_scale(2.).lenght(), 2.);
+            assert_eq!(vec1.v_space_scale(2.).length(), 2.);
 
             let vec2 = VectorMath::from([0., 1.]).v_space_add(vec1);
-            assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
+            assert_eq!(vec2.length(), core::f64::consts::SQRT_2);
 
             let vec3: VectorMath<f32, 0> = VectorMath::from([]);
-            assert_eq!(vec3.lenght(), 0.);
+            assert_eq!(vec3.length(), 0.);
 
             let vec4 = VectorMath::from([8., 7., 9., 15.]);
-            assert_eq!(vec4.lenght(), 20.46948949045872);
+            assert_eq!(vec4.length(), 20.46948949045872);
         }
 
         //dot
@@ -674,18 +674,19 @@ mod tests {
             assert_eq!(two_i.normalized(),two_i.v_space_scale(0.5));
         }
 
-        //pow
+
+        //powf
         {
             let one = Quaternion::<f32>::one();
-            let (e,v):(f32,VectorMath<f32,3>) = one.exp().into();
-            assert_eq!(v,VectorMath::v_space_zero());
-            assert_eq!(e,core::f32::consts::E);
+            let four = Quaternion::<f32>::one() * 4.;
+            let two = four * 0.5;
+            let i = Quaternion::from((0.,1.,0.,0.));
 
-            const EPSILON :f32 = 10e-8;
-            let e :Quaternion<f32> = (e,0.,0.,0.).into();
-            assert!((e.ln()-one).lenght() < EPSILON);
+            assert_eq!(four.powf(0.5),two);
 
-            assert_eq!(one.pow(e),one);
+            const EPSILON: f32 = 10e-8;
+            
+            assert!((i.powf(2.) + one).length() < EPSILON);
 
         }
     }

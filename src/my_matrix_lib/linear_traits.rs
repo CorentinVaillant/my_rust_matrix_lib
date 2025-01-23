@@ -107,7 +107,7 @@ pub trait EuclidianSpace<Scalar>
 where
     Self: VectorSpace<Scalar>,
 {
-    ///Return the euclidian lenght
+    ///Return the euclidian length
     /// ## Example :
     /// ```
     /// use my_rust_matrix_lib::my_matrix_lib::prelude::VectorMath;
@@ -115,20 +115,20 @@ where
     /// use crate::my_rust_matrix_lib::my_matrix_lib::prelude::EuclidianSpace;
     ///
     ///let vec1 = VectorMath::from([1.,0.]);
-    ///assert_eq!(vec1.lenght(), 1.);
+    ///assert_eq!(vec1.length(), 1.);
     ///
-    ///assert_eq!(vec1.v_space_scale(2.).lenght(), 2.);
+    ///assert_eq!(vec1.v_space_scale(2.).length(), 2.);
     ///
     ///let vec2 = VectorMath::from([0.,1.]).v_space_add(vec1);
-    ///assert_eq!(vec2.lenght(), core::f64::consts::SQRT_2);
+    ///assert_eq!(vec2.length(), core::f64::consts::SQRT_2);
     ///
     ///let vec3: VectorMath<f32, 0> = VectorMath::from([]);
-    ///assert_eq!(vec3.lenght(), 0.);
+    ///assert_eq!(vec3.length(), 0.);
     ///
     ///let vec4 = VectorMath::from([8.,7.,9.,15.]);
-    ///assert_eq!(vec4.lenght(),20.46948949045872);
+    ///assert_eq!(vec4.length(),20.46948949045872);
     /// ```
-    fn lenght(&self) -> Scalar;
+    fn length(&self) -> Scalar;
 
     ///Return the dot product of two vectors
     /// ## Example :
@@ -156,7 +156,7 @@ where
         Scalar: PartialEq,
         Self: Sized,
     {
-        self.v_space_sub(other).lenght()
+        self.v_space_sub(other).length()
     }
 
     ///Return the angle between two vectors

@@ -254,7 +254,7 @@ impl<T, const N: usize> EuclidianSpace<T> for VectorMath<T, N>
 where
     T: NthRootTrait + TrigFunc + Field + Copy,
 {
-    fn lenght(&self) -> T {
+    fn length(&self) -> T {
         self.iter()
             .fold(Self::v_space_scalar_zero(), |acc, elem| {
                 acc.r_add(elem.r_powu(2_u8))
@@ -272,7 +272,7 @@ where
 
     fn angle(self, rhs: Self) -> T {
         let dot = EuclidianSpace::dot(self, rhs);
-        let denominator = self.lenght().r_mul(rhs.lenght());
+        let denominator = self.length().r_mul(rhs.length());
 
         if denominator == T::r_zero() {
             return T::r_zero();
@@ -333,8 +333,8 @@ where
 
 impl<T: Field,const N:usize> VectorMath<T,N> where Self : EuclidianSpace<T>{
     pub fn normalized(self)->Self{
-        let lenght = self.lenght();
-        self.v_space_scale(lenght.f_mult_inverse())
+        let length = self.length();
+        self.v_space_scale(length.f_mult_inverse())
     }
 }
 

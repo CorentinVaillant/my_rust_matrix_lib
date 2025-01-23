@@ -1,5 +1,6 @@
 use core::ops::{Add, AddAssign, Mul};
 use core::ops::{Div, MulAssign, Sub, SubAssign};
+use std::ops::Neg;
 
 use num::{Float, Num};
 
@@ -263,5 +264,16 @@ where
 {
     fn sub_assign(&mut self, rhs: Self) {
         self.v_space_sub_assign(rhs);
+    }
+}
+
+
+impl<T:Field> Neg for Quaternion<T> 
+where Self : VectorSpace<T>
+{
+    type Output=Self;
+
+    fn neg(self) -> Self::Output {
+        self.v_space_add_inverse()
     }
 }

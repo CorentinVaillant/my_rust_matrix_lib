@@ -1,6 +1,7 @@
 use core::ops::{AddAssign, MulAssign, SubAssign};
 use std::fmt::{Debug, Display};
 
+
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, TrigFunc},
@@ -147,21 +148,6 @@ impl<T: Field + Display> Display for Quaternion<T> {
     }
 }
 
-impl<T: Field + Display> Quaternion<T> {
-    pub fn to_string(&self) -> String {
-        let mut result = format!("{}", self.re);
-        
-        let labels = ["i", "j", "k"];
-        for (component, label) in self.im.iter().zip(labels.iter()) {
-            if *component != T::r_zero() {
-                result.push_str(&format!(" +{}{}", component, label));
-            }
-        }
-        
-        result
-    }
-}
-
 /********************************************************
 <=================== Mathematics ======================>
 ********************************************************/
@@ -283,7 +269,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 }
 
 impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
-    pub fn lenght(self)->T{
+    pub fn length(self)->T{
         self.squared_length().sqrt()
     }
 
@@ -296,7 +282,7 @@ impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
     }
 
     pub fn normalized(self)->Self{
-        let a = (self.lenght().f_mult_inverse(),[T::r_zero();3]).into();
+        let a = (self.length().f_mult_inverse(),[T::r_zero();3]).into();
         self.v_space_scale(a)
     }
 }
@@ -341,48 +327,25 @@ where
 }
 
 
-impl<T:Field + Exp + TrigFunc + NthRootTrait + Copy + PartialOrd+Debug> Exp for Quaternion<T> 
-where Self: Field + VectorSpace<T>, Vec3<T> : EuclidianSpace<T>
+impl<T: Field + Exp + TrigFunc + NthRootTrait + Copy> Quaternion<T>
+where
+    Self: VectorSpace<T>,
 {
-    fn exp(self)->Self {
-        let (a,v):(T,Vec3<T>) = self.into();
-        let exp_a = T::exp(a);
-        
-        if v.is_zero(){
-            (exp_a,v).into()
-        }else{
-            let v_len = v.lenght();
-            
-            let q:Self = (
-                T::cos(v_len),
-                v.normalized() * T::sin(v_len)
-            ).into();
-            
-            q.v_space_scale(exp_a)
-        }
-    }
+    pub fn powf(self, n: T) -> Self {
+        let (a, v): (T, Vec3<T>) = self.into();
 
-    fn ln(self)->Self {        
-        let (a,v):(T,Vec3<T>) = self.into();
-        let clamp_one = |x|clamp(x, T::r_one().r_add_inverse(), T::r_one());
-        if v != VectorMath::<T,3>::v_space_zero(){
-            let norme = self.lenght();
-            println!("acos :{:?}",T::acos(clamp_one(a.r_mul(norme.f_mult_inverse()))));
-            (
-                T::ln(norme),
-                v.normalized().v_space_scale(T::acos(clamp_one(a.r_mul(norme.f_mult_inverse()))))
-            ).into()
-        }else{
-            println!("this case lol v:{:?}",v);
-            (T::ln(a),v).into()
+        if v.is_zero() {
+            return (a.pow(n), v).into();
         }
-    }    
-}
 
-fn clamp<T:PartialOrd>(src:T,inf:T,sup:T)->T{
-    match (inf<src,src<sup) {
-        (true,true)=>src,
-        (_,false) => sup,
-        (false,_) => inf
+        let length = self.length();
+        let theta = T::acos(self.re.f_div(length));
+        let mag_a = length.pow(n);
+        let theta_a = theta.r_mul(n);
+        (
+            mag_a.r_mul(theta_a.cos()),
+            self.im.normalized().v_space_scale(mag_a.r_mul(theta_a.sin())),
+        )
+        .into()
     }
 }
