@@ -76,6 +76,8 @@ where
     /// ```
     fn v_space_zero() -> Self;
 
+    fn is_zero(&self)->bool;
+
     ///Return the 1 scalar
     /// ## Example
     /// ```

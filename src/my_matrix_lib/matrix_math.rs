@@ -68,6 +68,10 @@ where
         Self::from([VectorMath::v_space_zero(); N])
     }
 
+    fn is_zero(&self)->bool {
+        self.inner.iter().all(VectorMath::<T, M>::is_zero)
+    }
+
     fn v_space_one() -> T {
         VectorMath::<T, N>::v_space_one()
     }

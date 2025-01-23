@@ -154,4 +154,10 @@ pub trait Exp
 
     fn ln(self)->Self;
 
+    fn pow(self,exponent:Self)->Self{
+        if exponent == Self::r_zero(){
+            return Self::r_one();
+        }
+        Self::exp(Self::ln(self).r_mul(exponent))
+    }
 }

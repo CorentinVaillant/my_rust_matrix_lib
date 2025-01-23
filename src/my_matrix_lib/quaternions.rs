@@ -1,4 +1,5 @@
 use core::ops::{AddAssign, MulAssign, SubAssign};
+use std::fmt::{Debug, Display};
 
 use super::{
     additional_structs::Dimension,
@@ -131,6 +132,35 @@ where
     }
 }
 
+impl<T: Field + Display> Display for Quaternion<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.re)?;
+        
+        let labels = ["i", "j", "k"];
+        for (component, label) in self.im.iter().zip(labels.iter()) {
+            if *component != T::r_zero() {
+                write!(f, " +{}{}", component, label)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl<T: Field + Display> Quaternion<T> {
+    pub fn to_string(&self) -> String {
+        let mut result = format!("{}", self.re);
+        
+        let labels = ["i", "j", "k"];
+        for (component, label) in self.im.iter().zip(labels.iter()) {
+            if *component != T::r_zero() {
+                result.push_str(&format!(" +{}{}", component, label));
+            }
+        }
+        
+        result
+    }
+}
 
 /********************************************************
 <=================== Mathematics ======================>
@@ -172,6 +202,10 @@ impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Qua
         (T::v_space_zero(), Vec3::v_space_zero()).into()
     }
 
+    fn is_zero(&self)->bool {
+        self.re.is_zero() && self.im.is_zero()
+    }
+
     fn v_space_one() -> T {
         T::r_one()
     }
@@ -183,6 +217,8 @@ impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Qua
     fn dimension() -> super::additional_structs::Dimension {
         Dimension::Finite(4)
     }
+    
+
 }
 
 impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion<T> {
@@ -227,6 +263,10 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 
     fn v_space_zero() -> Self {
         (T::r_zero(), Vec3::v_space_zero()).into()
+    }
+
+    fn is_zero(&self)->bool {
+        self.re.is_zero() && self.im.is_zero()
     }
 
     fn v_space_one() -> Self {
@@ -301,32 +341,48 @@ where
 }
 
 
-impl<T:Field + Exp + TrigFunc+NthRootTrait+Copy> Exp for Quaternion<T> 
+impl<T:Field + Exp + TrigFunc + NthRootTrait + Copy + PartialOrd+Debug> Exp for Quaternion<T> 
 where Self: Field + VectorSpace<T>, Vec3<T> : EuclidianSpace<T>
 {
     fn exp(self)->Self {
         let (a,v):(T,Vec3<T>) = self.into();
         let exp_a = T::exp(a);
-        let v_len = v.lenght();
-
-        let q:Self = (
-            T::cos(v_len),
-            v.normalized() * T::sin(v_len)
-        ).into();
-
-        q.v_space_scale(exp_a)
+        
+        if v.is_zero(){
+            (exp_a,v).into()
+        }else{
+            let v_len = v.lenght();
+            
+            let q:Self = (
+                T::cos(v_len),
+                v.normalized() * T::sin(v_len)
+            ).into();
+            
+            q.v_space_scale(exp_a)
+        }
     }
 
     fn ln(self)->Self {        
         let (a,v):(T,Vec3<T>) = self.into();
+        let clamp_one = |x|clamp(x, T::r_one().r_add_inverse(), T::r_one());
         if v != VectorMath::<T,3>::v_space_zero(){
             let norme = self.lenght();
-            (T::ln(norme),v.normalized().v_space_scale(T::acos(a.r_mul(norme.f_mult_inverse())))).into()
+            println!("acos :{:?}",T::acos(clamp_one(a.r_mul(norme.f_mult_inverse()))));
+            (
+                T::ln(norme),
+                v.normalized().v_space_scale(T::acos(clamp_one(a.r_mul(norme.f_mult_inverse()))))
+            ).into()
         }else{
+            println!("this case lol v:{:?}",v);
             (T::ln(a),v).into()
         }
+    }    
+}
+
+fn clamp<T:PartialOrd>(src:T,inf:T,sup:T)->T{
+    match (inf<src,src<sup) {
+        (true,true)=>src,
+        (_,false) => sup,
+        (false,_) => inf
     }
-
-
-    
 }

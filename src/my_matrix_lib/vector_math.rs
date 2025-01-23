@@ -6,7 +6,7 @@ use super::errors::MatrixError;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct VectorMath<T, const N: usize> {
-    inner: [T; N],
+    pub(crate) inner: [T; N],
 }
 
 pub trait IntoVecMath<T, const N: usize> {
@@ -227,6 +227,10 @@ where
     #[inline]
     fn v_space_zero() -> Self {
         Self::from([T::v_space_zero(); N])
+    }
+
+    fn is_zero(&self)->bool {
+        self.iter().all(|x|x.is_zero())
     }
 
     #[inline]

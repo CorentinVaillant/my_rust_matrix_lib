@@ -42,6 +42,12 @@ impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
     fn v_space_zero() -> Self {
         Self::zero()
     }
+
+    #[inline]
+    fn is_zero(&self)->bool {
+        <Self as num::Zero>::is_zero(&self)
+    }
+
     #[inline]
     fn v_space_one() -> T {
         Self::one()
@@ -144,5 +150,10 @@ impl<T:Float + Field> Exp for T {
     #[inline]
     fn ln(self)->Self {
         T::ln(self)
+    }
+
+    #[inline]
+    fn pow(self,exponent:Self)->Self {
+        self.powf(exponent)
     }
 }

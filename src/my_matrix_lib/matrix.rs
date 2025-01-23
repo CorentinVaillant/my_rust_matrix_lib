@@ -6,7 +6,7 @@ use std::ops::*;
 //definition of Matrix
 #[derive(Debug, Clone)]
 pub struct Matrix<T, const N: usize, const M: usize> {
-    inner: VectorMath<VectorMath<T, M>, N>,
+    pub(crate)inner: VectorMath<VectorMath<T, M>, N>,
 }
 
 impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {

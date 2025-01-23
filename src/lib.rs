@@ -677,12 +677,15 @@ mod tests {
         //pow
         {
             let one = Quaternion::<f32>::one();
-            let (e,_):(f32,VectorMath<f32,3>) = one.exp().into();
+            let (e,v):(f32,VectorMath<f32,3>) = one.exp().into();
+            assert_eq!(v,VectorMath::v_space_zero());
             assert_eq!(e,core::f32::consts::E);
 
             const EPSILON :f32 = 10e-8;
             let e :Quaternion<f32> = (e,0.,0.,0.).into();
             assert!((e.ln()-one).lenght() < EPSILON);
+
+            assert_eq!(one.pow(e),one);
 
         }
     }
