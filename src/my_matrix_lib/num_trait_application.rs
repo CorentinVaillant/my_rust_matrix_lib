@@ -4,7 +4,7 @@ use num::{Float, Num, ToPrimitive};
 
 use super::{
     algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::{EuclidianSpace, VectorSpace},
+    prelude::{EuclidianSpace, Exp, VectorSpace},
 };
 
 impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
@@ -132,5 +132,17 @@ impl<T: Float + AddAssign + MulAssign + SubAssign> TrigFunc for T {
     }
     fn atan(self) -> Self {
         T::atan(self)
+    }
+}
+
+impl<T:Float + Field> Exp for T {
+    #[inline]
+    fn exp(self)->Self {
+        T::exp(self)
+    }
+
+    #[inline]
+    fn ln(self)->Self {
+        T::ln(self)
     }
 }

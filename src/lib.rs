@@ -2,7 +2,7 @@ pub mod my_matrix_lib;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::{prelude::{Field, VectorSpace}, quaternion::Quaternion};
+    use crate::my_matrix_lib::{prelude::{Exp, Field, VectorMath, VectorSpace}, quaternion::Quaternion};
 
     #[test]
     fn matrix_test() {
@@ -635,6 +635,14 @@ mod tests {
             assert_eq!(quat1 + Quaternion::<f32>::zero(), quat1);
         }
 
+        //sub test
+        {
+            let quat1 = Quaternion::<f32>::from((0.,1.,2.,3.));
+            let quat2 = Quaternion::<f32>::from((1.,1.,1.,1.));
+            let quat3 = Quaternion::<f32>::from((-1.,0.,1.,2.));
+            assert_eq!(quat1-quat2,quat3)
+        }
+
         //mul test
         {
             let quat1: Quaternion<f32> = Quaternion::from((1., 2., 3., 4.));
@@ -664,6 +672,18 @@ mod tests {
 
             let two_i:Quaternion<f32> = (0.,2.,0.,0.).into();
             assert_eq!(two_i.normalized(),two_i.v_space_scale(0.5));
+        }
+
+        //pow
+        {
+            let one = Quaternion::<f32>::one();
+            let (e,_):(f32,VectorMath<f32,3>) = one.exp().into();
+            assert_eq!(e,core::f32::consts::E);
+
+            const EPSILON :f32 = 10e-8;
+            let e :Quaternion<f32> = (e,0.,0.,0.).into();
+            assert!((e.ln()-one).lenght() < EPSILON);
+
         }
     }
 

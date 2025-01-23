@@ -3,7 +3,7 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::{Ring, VectorMath, VectorSpace},
+    prelude::{Exp, Ring, VectorMath, VectorSpace},
 };
 use crate::my_matrix_lib::linear_traits::EuclidianSpace;
 type Vec3<T> = VectorMath<T, 3>;
@@ -151,7 +151,7 @@ impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Qua
     }
 
     fn v_space_sub(self, other: Self) -> Self {
-        (self.re.r_add(other.re), self.im.v_space_sub(other.im)).into()
+        (self.re.r_sub(other.re), self.im.v_space_sub(other.im)).into()
     }
 
     fn v_space_sub_assign(&mut self, other: Self) {
@@ -298,4 +298,35 @@ where
     pub fn unit_k() -> Self {
         (T::r_zero(), T::r_zero(), T::r_zero(), T::r_one()).into()
     }
+}
+
+
+impl<T:Field + Exp + TrigFunc+NthRootTrait+Copy> Exp for Quaternion<T> 
+where Self: Field + VectorSpace<T>, Vec3<T> : EuclidianSpace<T>
+{
+    fn exp(self)->Self {
+        let (a,v):(T,Vec3<T>) = self.into();
+        let exp_a = T::exp(a);
+        let v_len = v.lenght();
+
+        let q:Self = (
+            T::cos(v_len),
+            v.normalized() * T::sin(v_len)
+        ).into();
+
+        q.v_space_scale(exp_a)
+    }
+
+    fn ln(self)->Self {        
+        let (a,v):(T,Vec3<T>) = self.into();
+        if v != VectorMath::<T,3>::v_space_zero(){
+            let norme = self.lenght();
+            (T::ln(norme),v.normalized().v_space_scale(T::acos(a.r_mul(norme.f_mult_inverse())))).into()
+        }else{
+            (T::ln(a),v).into()
+        }
+    }
+
+
+    
 }

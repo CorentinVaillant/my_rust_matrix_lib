@@ -147,3 +147,11 @@ where
     fn asin(self) -> Self;
     fn atan(self) -> Self;
 }
+
+pub trait Exp 
+ where Self:Field{
+    fn exp(self)->Self;
+
+    fn ln(self)->Self;
+
+}

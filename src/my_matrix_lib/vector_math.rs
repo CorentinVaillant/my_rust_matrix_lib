@@ -327,6 +327,13 @@ where
     }
 }
 
+impl<T: Field,const N:usize> VectorMath<T,N> where Self : EuclidianSpace<T>{
+    pub fn normalized(self)->Self{
+        let lenght = self.lenght();
+        self.v_space_scale(lenght.f_mult_inverse())
+    }
+}
+
 impl<T> SquaredMatrixTrait<T> for VectorMath<T, 1>
 //TODO test and doc
 where
