@@ -12,7 +12,12 @@ use super::{
     quaternion::Quaternion,
 };
 
-//Add operator
+/***************\
+*               *
+*-----Matrix----*
+*               *
+\****************/
+
 impl<T, const N: usize, const M: usize> Add for Matrix<T, N, M>
 where
     Self: VectorSpace<T>,
@@ -23,15 +28,6 @@ where
     }
 }
 
-impl<T, const N: usize> Add for VectorMath<T, N>
-where
-    Self: VectorSpace<T>,
-{
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
-        self.v_space_add(rhs)
-    }
-}
 
 impl<T, const N: usize, const M: usize> AddAssign for Matrix<T, N, M>
 where
@@ -42,25 +38,23 @@ where
     }
 }
 
-impl<T, const N: usize> AddAssign for VectorMath<T, N>
+impl<T, const N: usize, const M: usize> Sub for Matrix<T, N, M>
 where
     Self: VectorSpace<T>,
 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.v_space_add_assign(rhs);
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.v_space_sub(rhs)
     }
 }
 
-//
 
-impl<T, const N: usize> Mul<T> for VectorMath<T, N>
+impl<T, const N: usize, const M: usize> SubAssign for Matrix<T, N, M>
 where
-    VectorMath<T, N>: VectorSpace<T>,
+    Self: VectorSpace<T>,
 {
-    type Output = Self;
-
-    fn mul(self, rhs: T) -> Self::Output {
-        self.v_space_scale(rhs)
+    fn sub_assign(&mut self, rhs: Self) {
+        self.v_space_sub_assign(rhs);
     }
 }
 
@@ -75,6 +69,18 @@ where
     }
 }
 
+impl<T, const N: usize, const M: usize> Neg for Matrix<T, N, M>
+where
+    Matrix<T, N, M>: VectorSpace<T>,
+    T: Field + Neg<Output = T>
+{
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        self * -T::r_one()
+    }
+}
+
 impl<T, const N: usize, const M: usize, const P: usize> Mul<Matrix<T, M, P>> for Matrix<T, N, M>
 where
     Matrix<T, N, M>: MatrixTrait<T, DotIn<P> = Matrix<T, M, P>, DotOut<P> = Matrix<T, N, P>>,
@@ -85,6 +91,95 @@ where
         self.dot::<P>(rhs)
     }
 }
+
+impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
+where
+    T: AddAssign + MulAssign + SubAssign + Float,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        self.v_space_scale_assign(rhs);
+    }
+}
+
+impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for Matrix<T, N, N>
+where
+    T: AddAssign + MulAssign + SubAssign + Float,
+{
+    fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
+        *self = self.dot(rhs);
+    }
+}
+
+
+/***************\
+*               *
+*---VectorMath--*
+*               *
+\****************/
+
+impl<T, const N: usize> Add for VectorMath<T, N>
+where
+    Self: VectorSpace<T>,
+{
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        self.v_space_add(rhs)
+    }
+}
+
+
+
+impl<T, const N: usize> AddAssign for VectorMath<T, N>
+where
+    Self: VectorSpace<T>,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        self.v_space_add_assign(rhs);
+    }
+}
+
+impl<T, const N: usize> Sub for VectorMath<T, N>
+where
+    Self: VectorSpace<T>,
+{
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.v_space_sub(rhs)
+    }
+}
+
+impl<T, const N: usize> SubAssign for VectorMath<T, N>
+where
+    Self: VectorSpace<T>,
+{
+    fn sub_assign(&mut self, rhs: Self) {
+        self.v_space_sub_assign(rhs);
+    }
+}
+
+impl<T, const N: usize> Neg for VectorMath<T, N>
+where
+    Self: VectorSpace<T>,
+    T:Neg<Output = T>+Field
+{
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        self * -T::r_one()
+    }
+}
+
+impl<T, const N: usize> Mul<T> for VectorMath<T, N>
+where
+    VectorMath<T, N>: VectorSpace<T>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        self.v_space_scale(rhs)
+    }
+}
+
 
 impl<T, const N: usize, const P: usize> Mul<Matrix<T, N, P>> for VectorMath<T, N>
 where
@@ -114,23 +209,7 @@ where
     }
 }
 
-impl<T, const N: usize, const M: usize> MulAssign<T> for Matrix<T, N, M>
-where
-    T: AddAssign + MulAssign + SubAssign + Float,
-{
-    fn mul_assign(&mut self, rhs: T) {
-        self.v_space_scale_assign(rhs);
-    }
-}
 
-impl<T, const N: usize> MulAssign<Matrix<T, N, N>> for Matrix<T, N, N>
-where
-    T: AddAssign + MulAssign + SubAssign + Float,
-{
-    fn mul_assign(&mut self, rhs: Matrix<T, N, N>) {
-        *self = self.dot(rhs);
-    }
-}
 
 impl<T, const N: usize> Div<T> for VectorMath<T, N>
 where
@@ -146,6 +225,13 @@ where
         vec
     }
 }
+
+
+/***************\
+*               *
+*---Quaternion--*
+*               *
+\****************/
 
 impl<T: Field> Mul<T> for Quaternion<T>
 where
