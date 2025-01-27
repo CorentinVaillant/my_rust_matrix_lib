@@ -2,6 +2,8 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 use std::fmt::{Debug, Display};
 
 
+use num::Float;
+
 use super::{
     additional_structs::Dimension,
     algebric_traits::{Field, NthRootTrait, TrigFunc},
@@ -145,6 +147,12 @@ impl<T: Field + Display> Display for Quaternion<T> {
         }
 
         Ok(())
+    }
+}
+
+impl<T:Field+Copy> Quaternion<T>{
+    pub fn from_reel(reel:T)->Self{
+        (reel,Vec3::<T>::v_space_zero()).into()
     }
 }
 
@@ -327,7 +335,7 @@ where
 }
 
 
-impl<T: Field + Exp + TrigFunc + NthRootTrait + Copy> Quaternion<T>
+impl<T: Field +Float + TrigFunc + NthRootTrait + Copy> Quaternion<T>
 where
     Self: VectorSpace<T>,
 {
@@ -339,12 +347,12 @@ where
         }
 
         let length = self.length();
-        let theta = T::acos(self.re.f_div(length));
+        let theta = <T as Float>::acos(self.re.f_div(length));
         let mag_a = length.pow(n);
         let theta_a = theta.r_mul(n);
         (
-            mag_a.r_mul(theta_a.cos()),
-            self.im.normalized().v_space_scale(mag_a.r_mul(theta_a.sin())),
+            mag_a.r_mul(<T as Float>::cos(theta_a)),
+            self.im.normalized().v_space_scale(mag_a.r_mul(<T as Float>::sin(theta_a))),
         )
         .into()
     }

@@ -659,7 +659,15 @@ mod tests {
             let one = Quaternion::<f32>::one();
             assert_eq!(one,one.conjugate());
             assert_eq!(one,(one.squared_length(),[0.;3]).into());
-            assert_eq!(one,one.f_mult_inverse())
+            assert_eq!(one,one.f_mult_inverse());
+
+            let two = Quaternion::from_reel(2.);
+            assert_eq!(one,two*two.f_mult_inverse());
+            assert_eq!(one,two.f_mult_inverse()*two);
+
+            let two_i = Quaternion::<f32>::from((0.,2.,0.,0.));
+            assert_eq!(one,two_i*two_i.f_mult_inverse());
+            assert_eq!(one,two_i.f_mult_inverse()*two_i);
 
         }
 
