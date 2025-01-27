@@ -1,6 +1,6 @@
 use core::ops::{Add, AddAssign, Mul};
 use core::ops::{Div, MulAssign, Sub, SubAssign};
-use std::ops::Neg;
+use std::ops::{DivAssign, Neg};
 
 use num::{Float, Num};
 
@@ -250,6 +250,26 @@ where
 {
     fn mul_assign(&mut self, rhs: T) {
         self.v_space_scale_assign(rhs);
+    }
+}
+
+impl<T:Field> Div<T> for Quaternion<T>
+where 
+    Self :VectorSpace<T>,
+{
+    type Output = Self;
+    fn div(self, rhs: T) -> Self::Output {
+        self * rhs.f_mult_inverse()
+    }
+
+}
+
+impl<T:Field> DivAssign<T> for Quaternion<T>
+where 
+    Self :VectorSpace<T>
+{
+    fn div_assign(&mut self, rhs: T) {
+        *self *= rhs.f_mult_inverse();
     }
 }
 
