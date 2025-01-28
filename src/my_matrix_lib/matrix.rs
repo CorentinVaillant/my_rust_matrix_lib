@@ -129,6 +129,12 @@ where
     }
 }
 
+impl<T,const N: usize, const M:usize> From<Matrix<T,N,M>> for [[T;M];N]{
+    fn from(value: Matrix<T,N,M>) -> Self {
+        value.inner.into_iter().map(<VectorMath::<T,M> as Into<[T;M]>>::into).collect::<Vec<[T;M]>>().try_into().unwrap_or_else(|_|panic!("something went wrong into From<Matrix<T,N,M>> for [[T;M];N]"))
+    }
+}
+
 pub trait TryIntoMatrix<T, const N: usize, const M: usize> {
     type Error;
 
