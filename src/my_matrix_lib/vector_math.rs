@@ -530,3 +530,13 @@ impl<'a, T, const N: usize> From<&'a mut [T; N]> for &'a mut VectorMath<T, N> {
         unsafe { std::mem::transmute::<&'a mut [T; N], &'a mut VectorMath<T, N>>(value) }
     }
 }
+
+impl<T,const N:usize> VectorMath<T,N> {
+    pub fn as_slice(&self)->&[T]{
+        &self.inner
+    }
+
+    pub fn as_mut_slice(&mut self)->&mut [T]{
+        &mut self.inner
+    }
+}
