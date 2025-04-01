@@ -335,6 +335,28 @@ use std::{marker::PhantomData, ptr::NonNull};
 use super::errors::MatrixError;
 use super::prelude::{TryIntoVecMath, VectorMath, VectorMathMutIterator};
 
+
+impl<T, const N :usize,const M :usize> Matrix<T,N,M>{
+    ///map a matrix
+    /// TODO doc
+    pub fn map<U>(self, f : impl FnMut(T) -> U + Copy)->Matrix<U,N,M>{
+        (self.inner.inner.map(|c|c.inner.map(f))).into()
+        
+    }
+
+    pub fn from_fn<F: FnMut(usize,usize) -> T>(func:F)->Self{
+        let mut func = func;
+        Self { 
+            inner: VectorMath::from_fn(|i|{
+                VectorMath::from_fn(|j|{
+                    func(i,j)
+                })
+            })
+        }
+        
+    }
+}
+
 ///Iterator direction </br>
 /// - Row : Top to bottom before the next column </br>
 /// - Column : Left to right before the next line </br>

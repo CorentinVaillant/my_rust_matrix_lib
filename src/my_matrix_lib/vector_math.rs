@@ -411,6 +411,20 @@ impl<T: Ring + Copy> VectorMath<T, 3> {
 use core::ptr::NonNull;
 use std::marker::PhantomData;
 
+impl<T, const N :usize> VectorMath<T,N>{
+    ///map a vector
+    /// TODO doc
+    pub fn map<U>(self, f : impl FnMut(T) -> U)->VectorMath<U,N>{
+        self.inner.map(f).into()
+    }
+
+    pub fn from_fn<F: FnMut(usize) -> T>(func:F)->Self{
+        Self{
+            inner:core::array::from_fn(func)
+        }
+    }
+}
+
 pub struct VectorMathIterator<'a, T, const N: usize> {
     curpos: usize,
     vec: &'a VectorMath<T, N>,
