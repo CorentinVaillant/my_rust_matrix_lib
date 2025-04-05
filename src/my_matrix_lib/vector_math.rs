@@ -113,6 +113,10 @@ impl<T, const N: usize> VectorMath<T, N> {
     pub fn as_array(&self) -> &[T; N] {
         &self.inner
     }
+
+    pub fn as_mut_array(&mut self)->&mut[T;N]{
+        &mut self.inner
+    }
 }
 
 impl<T: std::default::Default + std::marker::Copy, const N: usize> Default for VectorMath<T, N> {
