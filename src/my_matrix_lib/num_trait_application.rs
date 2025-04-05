@@ -92,6 +92,10 @@ impl<T: Float + AddAssign + MulAssign + SubAssign> EuclidianSpace<T> for T {
             false => T::from(core::f64::consts::PI).unwrap_or((T::zero() - T::one()).acos()), //if can cast const PI return the const, in the other case compute acos(-1) (wich return PI)
         }
     }
+
+    fn distance_sq(self,other: Self)->T {
+        (self - other) * (self - other)
+    }
 }
 
 impl NthRootTrait for f32 {

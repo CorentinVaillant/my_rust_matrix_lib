@@ -283,6 +283,10 @@ where
         }
         (dot.f_div(denominator)).acos()
     }
+
+    fn distance_sq(self,other: Self)->T {
+        self.inner.into_iter().zip(other).fold(T::r_zero(), |init,(x,y)|init.r_add(x.r_sub(y).r_mul(x.r_sub(y))))
+    }
 }
 
 impl<T, const N: usize> MatrixTrait<T> for VectorMath<T, N>

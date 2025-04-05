@@ -159,6 +159,10 @@ where
         self.v_space_sub(other).length()
     }
 
+    ///return the distance squared  
+    /// depending of the application could be less expensive to compute than distance
+    fn distance_sq(self,other: Self)->Scalar;
+
     ///Return the angle between two vectors
     /// ## Examples :
     /// ```
