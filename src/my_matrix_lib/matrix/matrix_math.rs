@@ -6,12 +6,9 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 
 use num::Float;
 
-use super::{
-    errors::MatrixError,
-    linear_traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
-    matrix::{Matrix, TryIntoMatrix},
-    prelude::VectorMath,
-};
+use crate::my_matrix_lib::{additional_structs::Dimension, prelude::VectorMath, traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace}};
+
+use super::{Matrix, MatrixError, TryIntoMatrix};
 
 impl<T, const N: usize, const M: usize> VectorSpace<T> for Matrix<T, N, M>
 where
@@ -80,8 +77,8 @@ where
         VectorMath::<T, N>::v_space_scalar_zero()
     }
 
-    fn dimension() -> super::additional_structs::Dimension {
-        super::additional_structs::Dimension::Finite(N)
+    fn dimension() -> Dimension {
+        Dimension::Finite(N)
     }
 }
 
@@ -438,7 +435,7 @@ where
     ///
     ///assert_eq!(m.inverse().unwrap(), expected_m);
     /// ```
-    fn inverse(&self) -> Result<Self, super::errors::MatrixError>
+    fn inverse(&self) -> Result<Self, MatrixError>
     where
         Self: Sized,
     {

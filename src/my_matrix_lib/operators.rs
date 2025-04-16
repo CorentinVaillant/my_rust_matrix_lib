@@ -4,9 +4,8 @@ use std::ops::{DivAssign, Neg};
 
 use num::{Float, Num};
 
+use super::traits::{Field, MatrixTrait, NthRootTrait, TrigFunc, VectorSpace};
 use super::{
-    algebric_traits::{Field, NthRootTrait, TrigFunc},
-    linear_traits::{MatrixTrait, VectorSpace},
     matrix::Matrix,
     prelude::{Ring, VectorMath},
     quaternion::Quaternion,

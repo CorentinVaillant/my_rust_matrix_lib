@@ -2,9 +2,10 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 
 use num::{Float, Num, ToPrimitive};
 
+use crate::my_matrix_lib::additional_structs;
+
 use super::{
-    algebric_traits::{Field, NthRootTrait, TrigFunc},
-    prelude::{EuclidianSpace, Exp, VectorSpace},
+    algebric_traits::{Field, NthRootTrait, TrigFunc}, EuclidianSpace, Exp, VectorSpace
 };
 
 impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
@@ -57,8 +58,8 @@ impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
         Self::zero()
     }
     #[inline]
-    fn dimension() -> super::additional_structs::Dimension {
-        super::additional_structs::Dimension::Finite(1)
+    fn dimension() -> additional_structs::Dimension {
+        additional_structs::Dimension::Finite(1)
     }
 }
 

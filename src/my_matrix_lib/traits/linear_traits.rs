@@ -1,4 +1,5 @@
-use super::{additional_structs::Dimension, errors::MatrixError};
+use crate::my_matrix_lib::{additional_structs::Dimension, errors::MatrixError};
+
 
 pub trait VectorSpace<Scalar>
 where

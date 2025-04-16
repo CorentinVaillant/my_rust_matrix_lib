@@ -6,10 +6,9 @@ use num::Float;
 
 use super::{
     additional_structs::Dimension,
-    algebric_traits::{Field, NthRootTrait, TrigFunc},
+    traits::{Field, NthRootTrait, TrigFunc,EuclidianSpace},
     prelude::{Exp, Ring, VectorMath, VectorSpace},
 };
-use crate::my_matrix_lib::linear_traits::EuclidianSpace;
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
 

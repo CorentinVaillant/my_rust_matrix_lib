@@ -1,5 +1,8 @@
 #![allow(clippy::uninit_assumed_init)]
 
+mod matrix_math;
+pub use matrix_math::*;
+
 use core::fmt;
 use std::ops::*;
 

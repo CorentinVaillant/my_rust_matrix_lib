@@ -1,7 +1,7 @@
 use core::fmt::Display;
 use core::ops::{Index, IndexMut};
 
-use super::algebric_traits::{Field, NthRootTrait, Ring, TrigFunc};
+use super::traits::{Field, NthRootTrait, Ring, TrigFunc};
 use super::errors::MatrixError;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -169,7 +169,7 @@ impl<T: Display, const N: usize> Display for VectorMath<T, N> {
 <=================== Mathematics ======================>
 ********************************************************/
 
-use super::linear_traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
+use super::traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
 use super::matrix::Matrix;
 
 impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
