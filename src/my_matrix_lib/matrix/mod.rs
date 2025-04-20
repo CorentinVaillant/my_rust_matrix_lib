@@ -1,7 +1,6 @@
 #![allow(clippy::uninit_assumed_init)]
 
 mod matrix_math;
-pub use matrix_math::*;
 
 use core::fmt;
 use std::ops::*;
@@ -175,6 +174,22 @@ impl<T, const N: usize, const M: usize, const P: usize, const Q: usize> TryIntoM
 
             (false, _) => Err(MatrixError::HeigthNotMach),
             (_, false) => Err(MatrixError::WidhtNotMatch),
+        }
+    }
+}
+
+impl<T,const N:usize, const M:usize> Matrix<T,N,M> {
+    fn as_array(&self)->&[[T;M];N]{
+        unsafe {
+            // Directly wrap the Matrix in a slice.
+            std::mem::transmute(self)
+        }
+    }
+
+    fn as_mut_array(&mut self)->&mut [[T;M];N]{
+        unsafe {
+            // Directly wrap the Matrix in a slice
+            std::mem::transmute(self)
         }
     }
 }
