@@ -179,14 +179,14 @@ impl<T, const N: usize, const M: usize, const P: usize, const Q: usize> TryIntoM
 }
 
 impl<T,const N:usize, const M:usize> Matrix<T,N,M> {
-    fn as_array(&self)->&[[T;M];N]{
+    pub fn as_array(&self)->&[[T;M];N]{
         unsafe {
             // Directly wrap the Matrix in a slice.
             std::mem::transmute(self)
         }
     }
 
-    fn as_mut_array(&mut self)->&mut [[T;M];N]{
+    pub fn as_mut_array(&mut self)->&mut [[T;M];N]{
         unsafe {
             // Directly wrap the Matrix in a slice
             std::mem::transmute(self)
