@@ -5,7 +5,8 @@ use num::{Float, Num, ToPrimitive};
 use crate::my_matrix_lib::additional_structs;
 
 use super::{
-    algebric_traits::{Field, NthRootTrait, TrigFunc}, EuclidianSpace, Exp, VectorSpace
+    algebric_traits::{Field, NthRootTrait, TrigFunc},
+    EuclidianSpace, Exp, VectorSpace,
 };
 
 impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
@@ -45,7 +46,7 @@ impl<T: Num + AddAssign + MulAssign + SubAssign> VectorSpace<T> for T {
     }
 
     #[inline]
-    fn is_zero(&self)->bool {
+    fn is_zero(&self) -> bool {
         <Self as num::Zero>::is_zero(self)
     }
 
@@ -94,7 +95,7 @@ impl<T: Float + AddAssign + MulAssign + SubAssign> EuclidianSpace<T> for T {
         }
     }
 
-    fn distance_sq(self,other: Self)->T {
+    fn distance_sq(self, other: Self) -> T {
         (self - other) * (self - other)
     }
 }
@@ -146,19 +147,19 @@ impl<T: Float + AddAssign + MulAssign + SubAssign> TrigFunc for T {
     }
 }
 
-impl<T:Float + Field> Exp for T {
+impl<T: Float + Field> Exp for T {
     #[inline]
-    fn exp(self)->Self {
+    fn exp(self) -> Self {
         T::exp(self)
     }
 
     #[inline]
-    fn ln(self)->Self {
+    fn ln(self) -> Self {
         T::ln(self)
     }
 
     #[inline]
-    fn pow(self,exponent:Self)->Self {
+    fn pow(self, exponent: Self) -> Self {
         self.powf(exponent)
     }
 }

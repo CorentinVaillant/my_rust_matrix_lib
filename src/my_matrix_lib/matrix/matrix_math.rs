@@ -6,7 +6,11 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 
 use num::Float;
 
-use crate::my_matrix_lib::{additional_structs::Dimension, prelude::VectorMath, traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace}};
+use crate::my_matrix_lib::{
+    additional_structs::Dimension,
+    prelude::VectorMath,
+    traits::{MatrixTrait, SquaredMatrixTrait, VectorSpace},
+};
 
 use super::{Matrix, MatrixError, TryIntoMatrix};
 
@@ -65,7 +69,7 @@ where
         Self::from([VectorMath::v_space_zero(); N])
     }
 
-    fn is_zero(&self)->bool {
+    fn is_zero(&self) -> bool {
         self.inner.iter().all(VectorMath::<T, M>::is_zero)
     }
 

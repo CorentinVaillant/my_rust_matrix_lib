@@ -27,7 +27,6 @@ where
     }
 }
 
-
 impl<T, const N: usize, const M: usize> AddAssign for Matrix<T, N, M>
 where
     Self: VectorSpace<T>,
@@ -46,7 +45,6 @@ where
         self.v_space_sub(rhs)
     }
 }
-
 
 impl<T, const N: usize, const M: usize> SubAssign for Matrix<T, N, M>
 where
@@ -71,7 +69,7 @@ where
 impl<T, const N: usize, const M: usize> Neg for Matrix<T, N, M>
 where
     Matrix<T, N, M>: VectorSpace<T>,
-    T: Field + Neg<Output = T>
+    T: Field + Neg<Output = T>,
 {
     type Output = Self;
 
@@ -109,7 +107,6 @@ where
     }
 }
 
-
 /***************\
 *               *
 *---VectorMath--*
@@ -125,8 +122,6 @@ where
         self.v_space_add(rhs)
     }
 }
-
-
 
 impl<T, const N: usize> AddAssign for VectorMath<T, N>
 where
@@ -159,7 +154,7 @@ where
 impl<T, const N: usize> Neg for VectorMath<T, N>
 where
     Self: VectorSpace<T>,
-    T:Neg<Output = T>+Field
+    T: Neg<Output = T> + Field,
 {
     type Output = Self;
 
@@ -178,7 +173,6 @@ where
         self.v_space_scale(rhs)
     }
 }
-
 
 impl<T, const N: usize, const P: usize> Mul<Matrix<T, N, P>> for VectorMath<T, N>
 where
@@ -208,8 +202,6 @@ where
     }
 }
 
-
-
 impl<T, const N: usize> Div<T> for VectorMath<T, N>
 where
     T: Num + Copy,
@@ -224,7 +216,6 @@ where
         vec
     }
 }
-
 
 /***************\
 *               *
@@ -252,20 +243,19 @@ where
     }
 }
 
-impl<T:Field> Div<T> for Quaternion<T>
-where 
-    Self :VectorSpace<T>,
+impl<T: Field> Div<T> for Quaternion<T>
+where
+    Self: VectorSpace<T>,
 {
     type Output = Self;
     fn div(self, rhs: T) -> Self::Output {
         self * rhs.f_mult_inverse()
     }
-
 }
 
-impl<T:Field> DivAssign<T> for Quaternion<T>
-where 
-    Self :VectorSpace<T>
+impl<T: Field> DivAssign<T> for Quaternion<T>
+where
+    Self: VectorSpace<T>,
 {
     fn div_assign(&mut self, rhs: T) {
         *self *= rhs.f_mult_inverse();
@@ -372,11 +362,11 @@ where
     }
 }
 
-
-impl<T:Field> Neg for Quaternion<T> 
-where Self : VectorSpace<T>
+impl<T: Field> Neg for Quaternion<T>
+where
+    Self: VectorSpace<T>,
 {
-    type Output=Self;
+    type Output = Self;
 
     fn neg(self) -> Self::Output {
         self.v_space_add_inverse()

@@ -1,13 +1,12 @@
 use core::ops::{AddAssign, MulAssign, SubAssign};
 use std::fmt::{Debug, Display};
 
-
 use num::Float;
 
 use super::{
     additional_structs::Dimension,
-    traits::{Field, NthRootTrait, TrigFunc,EuclidianSpace},
     prelude::{Exp, Ring, VectorMath, VectorSpace},
+    traits::{EuclidianSpace, Field, NthRootTrait, TrigFunc},
 };
 type Vec3<T> = VectorMath<T, 3>;
 type Vec4<T> = VectorMath<T, 4>;
@@ -117,7 +116,7 @@ where
     }
 }
 
-impl<T: Field, A, B> From<Quaternion<T>> for (A, [B;3])
+impl<T: Field, A, B> From<Quaternion<T>> for (A, [B; 3])
 where
     T: Into<A> + Into<B>,
 {
@@ -129,7 +128,7 @@ where
                 iter.next().unwrap().into(),
                 iter.next().unwrap().into(),
                 iter.next().unwrap().into(),
-            ]
+            ],
         )
     }
 }
@@ -137,7 +136,7 @@ where
 impl<T: Field + Display> Display for Quaternion<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.re)?;
-        
+
         let labels = ["i", "j", "k"];
         for (component, label) in self.im.iter().zip(labels.iter()) {
             if *component != T::r_zero() {
@@ -149,12 +148,11 @@ impl<T: Field + Display> Display for Quaternion<T> {
     }
 }
 
-impl<T:Field+Copy> Quaternion<T>{
-    pub fn from_reel(reel:T)->Self{
-        (reel,Vec3::<T>::v_space_zero()).into()
+impl<T: Field + Copy> Quaternion<T> {
+    pub fn from_reel(reel: T) -> Self {
+        (reel, Vec3::<T>::v_space_zero()).into()
     }
 }
-
 
 /********************************************************
 <=================== Mathematics ======================>
@@ -196,7 +194,7 @@ impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Qua
         (T::v_space_zero(), Vec3::v_space_zero()).into()
     }
 
-    fn is_zero(&self)->bool {
+    fn is_zero(&self) -> bool {
         self.re.is_zero() && self.im.is_zero()
     }
 
@@ -211,8 +209,6 @@ impl<T: Field + AddAssign + MulAssign + SubAssign + Copy> VectorSpace<T> for Qua
     fn dimension() -> super::additional_structs::Dimension {
         Dimension::Finite(4)
     }
-    
-
 }
 
 impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion<T> {
@@ -259,7 +255,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
         (T::r_zero(), Vec3::v_space_zero()).into()
     }
 
-    fn is_zero(&self)->bool {
+    fn is_zero(&self) -> bool {
         self.re.is_zero() && self.im.is_zero()
     }
 
@@ -277,7 +273,7 @@ impl<T: NthRootTrait + TrigFunc + Field + Copy> VectorSpace<Self> for Quaternion
 }
 
 impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
-    pub fn length(self)->T{
+    pub fn length(self) -> T {
         self.squared_length().sqrt()
     }
 
@@ -289,8 +285,8 @@ impl<T: Field + TrigFunc + NthRootTrait + Copy> Quaternion<T> {
         (self.re, self.im.v_space_add_inverse()).into()
     }
 
-    pub fn normalized(self)->Self{
-        let a = (self.length().f_mult_inverse(),[T::r_zero();3]).into();
+    pub fn normalized(self) -> Self {
+        let a = (self.length().f_mult_inverse(), [T::r_zero(); 3]).into();
         self.v_space_scale(a)
     }
 }
@@ -334,8 +330,7 @@ where
     }
 }
 
-
-impl<T: Field +Float + TrigFunc + NthRootTrait + Copy> Quaternion<T>
+impl<T: Field + Float + TrigFunc + NthRootTrait + Copy> Quaternion<T>
 where
     Self: VectorSpace<T>,
 {
@@ -352,8 +347,10 @@ where
         let theta_a = theta.r_mul(n);
         (
             mag_a.r_mul(<T as Float>::cos(theta_a)),
-            self.im.normalized().v_space_scale(mag_a.r_mul(<T as Float>::sin(theta_a))),
+            self.im
+                .normalized()
+                .v_space_scale(mag_a.r_mul(<T as Float>::sin(theta_a))),
         )
-        .into()
+            .into()
     }
 }

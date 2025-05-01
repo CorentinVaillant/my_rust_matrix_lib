@@ -1,6 +1,5 @@
 use crate::my_matrix_lib::{additional_structs::Dimension, errors::MatrixError};
 
-
 pub trait VectorSpace<Scalar>
 where
     Self: PartialEq + Sized,
@@ -77,7 +76,7 @@ where
     /// ```
     fn v_space_zero() -> Self;
 
-    fn is_zero(&self)->bool;
+    fn is_zero(&self) -> bool;
 
     ///Return the 1 scalar
     /// ## Example
@@ -162,7 +161,7 @@ where
 
     ///return the distance squared  
     /// depending of the application could be less expensive to compute than distance
-    fn distance_sq(self,other: Self)->Scalar;
+    fn distance_sq(self, other: Self) -> Scalar;
 
     ///Return the angle between two vectors
     /// ## Examples :

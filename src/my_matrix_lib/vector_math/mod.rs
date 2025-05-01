@@ -1,8 +1,8 @@
 use core::fmt::Display;
 use core::ops::{Index, IndexMut};
 
-use super::traits::{Field, NthRootTrait, Ring, TrigFunc};
 use super::errors::MatrixError;
+use super::traits::{Field, NthRootTrait, Ring, TrigFunc};
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct VectorMath<T, const N: usize> {
@@ -114,7 +114,7 @@ impl<T, const N: usize> VectorMath<T, N> {
         &self.inner
     }
 
-    pub fn as_mut_array(&mut self)->&mut[T;N]{
+    pub fn as_mut_array(&mut self) -> &mut [T; N] {
         &mut self.inner
     }
 }
@@ -169,8 +169,8 @@ impl<T: Display, const N: usize> Display for VectorMath<T, N> {
 <=================== Mathematics ======================>
 ********************************************************/
 
-use super::traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
 use super::matrix::Matrix;
+use super::traits::{EuclidianSpace, MatrixTrait, SquaredMatrixTrait, VectorSpace};
 
 impl<T, const N: usize> VectorSpace<T> for VectorMath<T, N>
 where
@@ -233,8 +233,8 @@ where
         Self::from([T::v_space_zero(); N])
     }
 
-    fn is_zero(&self)->bool {
-        self.iter().all(|x|x.is_zero())
+    fn is_zero(&self) -> bool {
+        self.iter().all(|x| x.is_zero())
     }
 
     #[inline]
@@ -284,8 +284,13 @@ where
         (dot.f_div(denominator)).acos()
     }
 
-    fn distance_sq(self,other: Self)->T {
-        self.inner.into_iter().zip(other).fold(T::r_zero(), |init,(x,y)|init.r_add(x.r_sub(y).r_mul(x.r_sub(y))))
+    fn distance_sq(self, other: Self) -> T {
+        self.inner
+            .into_iter()
+            .zip(other)
+            .fold(T::r_zero(), |init, (x, y)| {
+                init.r_add(x.r_sub(y).r_mul(x.r_sub(y)))
+            })
     }
 }
 
@@ -339,8 +344,11 @@ where
     }
 }
 
-impl<T: Field,const N:usize> VectorMath<T,N> where Self : EuclidianSpace<T>{
-    pub fn normalized(self)->Self{
+impl<T: Field, const N: usize> VectorMath<T, N>
+where
+    Self: EuclidianSpace<T>,
+{
+    pub fn normalized(self) -> Self {
         let length = self.length();
         self.v_space_scale(length.f_mult_inverse())
     }
@@ -419,16 +427,16 @@ impl<T: Ring + Copy> VectorMath<T, 3> {
 use core::ptr::NonNull;
 use std::marker::PhantomData;
 
-impl<T, const N :usize> VectorMath<T,N>{
+impl<T, const N: usize> VectorMath<T, N> {
     ///map a vector
     /// TODO doc
-    pub fn map<U>(self, f : impl FnMut(T) -> U)->VectorMath<U,N>{
+    pub fn map<U>(self, f: impl FnMut(T) -> U) -> VectorMath<U, N> {
         self.inner.map(f).into()
     }
 
-    pub fn from_fn<F: FnMut(usize) -> T>(func:F)->Self{
-        Self{
-            inner:core::array::from_fn(func)
+    pub fn from_fn<F: FnMut(usize) -> T>(func: F) -> Self {
+        Self {
+            inner: core::array::from_fn(func),
         }
     }
 }
@@ -553,12 +561,12 @@ impl<'a, T, const N: usize> From<&'a mut [T; N]> for &'a mut VectorMath<T, N> {
     }
 }
 
-impl<T,const N:usize> VectorMath<T,N> {
-    pub fn as_slice(&self)->&[T]{
+impl<T, const N: usize> VectorMath<T, N> {
+    pub fn as_slice(&self) -> &[T] {
         &self.inner
     }
 
-    pub fn as_mut_slice(&mut self)->&mut [T]{
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
         &mut self.inner
     }
 }

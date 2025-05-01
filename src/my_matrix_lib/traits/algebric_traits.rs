@@ -148,14 +148,16 @@ where
     fn atan(self) -> Self;
 }
 
-pub trait Exp 
- where Self:Field{
-    fn exp(self)->Self;
+pub trait Exp
+where
+    Self: Field,
+{
+    fn exp(self) -> Self;
 
-    fn ln(self)->Self;
+    fn ln(self) -> Self;
 
-    fn pow(self,exponent:Self)->Self{
-        if exponent == Self::r_zero(){
+    fn pow(self, exponent: Self) -> Self {
+        if exponent == Self::r_zero() {
             return Self::r_one();
         }
         Self::exp(Self::ln(self).r_mul(exponent))

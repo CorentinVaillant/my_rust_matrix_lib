@@ -1,8 +1,12 @@
 pub mod my_matrix_lib;
+pub mod simd;
 
 #[cfg(test)]
 mod tests {
-    use crate::my_matrix_lib::{prelude::{Field, VectorSpace}, quaternion::Quaternion};
+    use crate::my_matrix_lib::{
+        prelude::{Field, VectorSpace},
+        quaternion::Quaternion,
+    };
 
     #[test]
     fn matrix_test() {
@@ -637,10 +641,10 @@ mod tests {
 
         //sub test
         {
-            let quat1 = Quaternion::<f32>::from((0.,1.,2.,3.));
-            let quat2 = Quaternion::<f32>::from((1.,1.,1.,1.));
-            let quat3 = Quaternion::<f32>::from((-1.,0.,1.,2.));
-            assert_eq!(quat1-quat2,quat3)
+            let quat1 = Quaternion::<f32>::from((0., 1., 2., 3.));
+            let quat2 = Quaternion::<f32>::from((1., 1., 1., 1.));
+            let quat3 = Quaternion::<f32>::from((-1., 0., 1., 2.));
+            assert_eq!(quat1 - quat2, quat3)
         }
 
         //mul test
@@ -657,45 +661,42 @@ mod tests {
         //inverse test
         {
             let one = Quaternion::<f32>::one();
-            assert_eq!(one,one.conjugate());
-            assert_eq!(one,(one.squared_length(),[0.;3]).into());
-            assert_eq!(one,one.f_mult_inverse());
+            assert_eq!(one, one.conjugate());
+            assert_eq!(one, (one.squared_length(), [0.; 3]).into());
+            assert_eq!(one, one.f_mult_inverse());
 
             let two = Quaternion::from_reel(2.);
-            assert_eq!(one,two*two.f_mult_inverse());
-            assert_eq!(one,two.f_mult_inverse()*two);
+            assert_eq!(one, two * two.f_mult_inverse());
+            assert_eq!(one, two.f_mult_inverse() * two);
 
-            let two_i = Quaternion::<f32>::from((0.,2.,0.,0.));
-            assert_eq!(one,two_i*two_i.f_mult_inverse());
-            assert_eq!(one,two_i.f_mult_inverse()*two_i);
-
+            let two_i = Quaternion::<f32>::from((0., 2., 0., 0.));
+            assert_eq!(one, two_i * two_i.f_mult_inverse());
+            assert_eq!(one, two_i.f_mult_inverse() * two_i);
         }
 
         //normalized
         {
             let one = Quaternion::<f32>::one();
-            assert_eq!(one,one.normalized());
-            let two:Quaternion<f32> = (2.,0.,0.,0.).into();
-            assert_eq!(two.normalized(),one);
+            assert_eq!(one, one.normalized());
+            let two: Quaternion<f32> = (2., 0., 0., 0.).into();
+            assert_eq!(two.normalized(), one);
 
-            let two_i:Quaternion<f32> = (0.,2.,0.,0.).into();
-            assert_eq!(two_i.normalized(),two_i.v_space_scale(0.5));
+            let two_i: Quaternion<f32> = (0., 2., 0., 0.).into();
+            assert_eq!(two_i.normalized(), two_i.v_space_scale(0.5));
         }
-
 
         //powf
         {
             let one = Quaternion::<f32>::one();
             let four = Quaternion::<f32>::one() * 4.;
             let two = four * 0.5;
-            let i = Quaternion::from((0.,1.,0.,0.));
+            let i = Quaternion::from((0., 1., 0., 0.));
 
-            assert_eq!(four.powf(0.5),two);
+            assert_eq!(four.powf(0.5), two);
 
             const EPSILON: f32 = 10e-8;
-            
-            assert!((i.powf(2.) + one).length() < EPSILON);
 
+            assert!((i.powf(2.) + one).length() < EPSILON);
         }
     }
 

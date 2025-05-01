@@ -8,7 +8,7 @@ use std::ops::*;
 //definition of Matrix
 #[derive(Debug, Clone)]
 pub struct Matrix<T, const N: usize, const M: usize> {
-    pub(crate)inner: VectorMath<VectorMath<T, M>, N>,
+    pub(crate) inner: VectorMath<VectorMath<T, M>, N>,
 }
 
 impl<T, const N: usize, const M: usize> Index<usize> for Matrix<T, N, M> {
@@ -131,9 +131,17 @@ where
     }
 }
 
-impl<T,const N: usize, const M:usize> From<Matrix<T,N,M>> for [[T;M];N]{
-    fn from(value: Matrix<T,N,M>) -> Self {
-        value.inner.into_iter().map(<VectorMath::<T,M> as Into<[T;M]>>::into).collect::<Vec<[T;M]>>().try_into().unwrap_or_else(|_|panic!("something went wrong into From<Matrix<T,N,M>> for [[T;M];N]"))
+impl<T, const N: usize, const M: usize> From<Matrix<T, N, M>> for [[T; M]; N] {
+    fn from(value: Matrix<T, N, M>) -> Self {
+        value
+            .inner
+            .into_iter()
+            .map(<VectorMath<T, M> as Into<[T; M]>>::into)
+            .collect::<Vec<[T; M]>>()
+            .try_into()
+            .unwrap_or_else(|_| {
+                panic!("something went wrong into From<Matrix<T,N,M>> for [[T;M];N]")
+            })
     }
 }
 
@@ -174,22 +182,6 @@ impl<T, const N: usize, const M: usize, const P: usize, const Q: usize> TryIntoM
 
             (false, _) => Err(MatrixError::HeigthNotMach),
             (_, false) => Err(MatrixError::WidhtNotMatch),
-        }
-    }
-}
-
-impl<T,const N:usize, const M:usize> Matrix<T,N,M> {
-    pub fn as_array(&self)->&[[T;M];N]{
-        unsafe {
-            // Directly wrap the Matrix in a slice.
-            std::mem::transmute(self)
-        }
-    }
-
-    pub fn as_mut_array(&mut self)->&mut [[T;M];N]{
-        unsafe {
-            // Directly wrap the Matrix in a slice
-            std::mem::transmute(self)
         }
     }
 }
@@ -353,25 +345,18 @@ use std::{marker::PhantomData, ptr::NonNull};
 use super::errors::MatrixError;
 use super::prelude::{TryIntoVecMath, VectorMath, VectorMathMutIterator};
 
-
-impl<T, const N :usize,const M :usize> Matrix<T,N,M>{
+impl<T, const N: usize, const M: usize> Matrix<T, N, M> {
     ///map a matrix
     /// TODO doc
-    pub fn map<U>(self, f : impl FnMut(T) -> U + Copy)->Matrix<U,N,M>{
-        (self.inner.inner.map(|c|c.inner.map(f))).into()
-        
+    pub fn map<U>(self, f: impl FnMut(T) -> U + Copy) -> Matrix<U, N, M> {
+        (self.inner.inner.map(|c| c.inner.map(f))).into()
     }
 
-    pub fn from_fn<F: FnMut(usize,usize) -> T>(func:F)->Self{
+    pub fn from_fn<F: FnMut(usize, usize) -> T>(func: F) -> Self {
         let mut func = func;
-        Self { 
-            inner: VectorMath::from_fn(|i|{
-                VectorMath::from_fn(|j|{
-                    func(i,j)
-                })
-            })
+        Self {
+            inner: VectorMath::from_fn(|i| VectorMath::from_fn(|j| func(i, j))),
         }
-        
     }
 }
 
